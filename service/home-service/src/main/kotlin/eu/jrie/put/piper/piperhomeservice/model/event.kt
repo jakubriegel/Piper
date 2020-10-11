@@ -11,7 +11,7 @@ data class PastEvent (
         val houseId: String,
         override val trigger: String,
         override val action: String,
-        val time: String
+        val time: Instant
 ) : Event
 
 data class RoutineEvent (

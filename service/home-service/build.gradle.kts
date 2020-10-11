@@ -24,11 +24,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
     // spring
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 //    implementation("org.springframework.boot:spring-boot-starter-data-cassandra-reactive")
     implementation("org.springframework.boot:spring-boot-starter-hateoas") {
         exclude("org.springframework.boot", "spring-boot-starter-web")
     }
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
