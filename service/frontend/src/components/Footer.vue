@@ -16,7 +16,7 @@
       <v-row>
         <v-col cols="12" md="9" class="px-5">
           <v-card-text class="white--text pt-0 text-left">
-            Team Project Description
+            Diploma Project Description
           </v-card-text>
           <v-card-text class="white--text pt-0 text-left">
             Made with 💖 using
@@ -46,7 +46,7 @@
           >
             Wojciech Kasperski
           </a>
-          , Jakub Riegel, Gracjan Trawiński, Łukasz Wełnic
+          , Jakub Riegel, Rafał Ewiak, Michał Kalinowski
         </strong>
       </v-card-text>
     </v-card>

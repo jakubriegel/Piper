@@ -4,8 +4,7 @@
     <v-toolbar-title class="headline text-uppercase">
       <span class="accent--text">PIPER</span>
       <span class="font-weight-light"> - </span>
-      <span class="accent--text">HOME</span>
-      <span class="font-weight-light">AUTOMATION</span>
+      <span class="font-weight-light">HOME AUTOMATION</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items class="hidden-sm-and-down">

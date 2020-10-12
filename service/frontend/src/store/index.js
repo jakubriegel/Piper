@@ -5,14 +5,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    drawer: false,
     routes: [
       {
-        text: "Dashboard",
+        text: "Home",
         to: "/"
-      },
-      {
-        text: "Search",
-        to: "/search"
       },
       {
         text: "About",
