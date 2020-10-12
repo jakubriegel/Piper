@@ -59,8 +59,8 @@ export default {
   data: () => ({
     socialMedia: [
       {
-        icon: "mdi-github-circle",
-        link: "https://github.com/SuddenlyPineapple"
+        icon: "mdi-github",
+        link: "https://github.com/jakubriegel/Piper"
       },
       {
         icon: "mdi-vuejs",
