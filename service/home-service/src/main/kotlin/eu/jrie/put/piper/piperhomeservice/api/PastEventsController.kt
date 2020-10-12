@@ -1,10 +1,8 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV_VALUE
-import eu.jrie.put.piper.piperhomeservice.model.PastEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,9 +19,15 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.security.Principal
 import java.time.Instant
+import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
+import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
+import kotlinx.coroutines.flow.map
+import java.util.*
 
 @RestController
-class PastEventsController {
+class PastEventsController (
+        private val service: PastEventService
+) {
 
     @PostMapping("/house/events", consumes = [TEXT_CSV_VALUE])
     suspend fun postEvents(
@@ -31,8 +35,9 @@ class PastEventsController {
             auth: Authentication
     ): ResponseEntity<Mono<Unit>> {
         val houseId = auth.name
-        events.map { PastEvent(houseId, it.trigger!!, it.action!!, Instant.ofEpochSecond(it.time!!)) }
-                .collect { logger.info(it.toString()) }
+        events.map {
+            PastEvent(UUID.randomUUID(), it.trigger!!, it.action!!, Instant.ofEpochSecond(it.time!!))
+        }.let { service.add(it) }
         return ok(Mono.empty())
     }
 
