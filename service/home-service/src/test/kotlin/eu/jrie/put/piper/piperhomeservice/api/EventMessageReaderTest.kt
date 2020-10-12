@@ -1,12 +1,9 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV
 import eu.jrie.put.piper.piperhomeservice.config.MapperConfig
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertIterableEquals
@@ -14,14 +11,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferFactory
-import org.springframework.core.io.buffer.DefaultDataBuffer
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ReactiveHttpInputMessage
 import org.springframework.http.codec.HttpMessageReader
-import org.springframework.http.converter.HttpMessageConverter
 import reactor.core.publisher.Flux
 
 internal class EventMessageReaderTest {
@@ -67,7 +61,7 @@ internal class EventMessageReaderTest {
         val result = converter.read(type, message, emptyMap())
 
         // then
-        assertEquals(EventMessage("trigger_1", "action_1", 123456), result.awaitSingle())
+        assertEquals(EventMessage("trigger_1", "action_1", "123456"), result.awaitSingle())
     }
 
     @Test
@@ -81,7 +75,7 @@ internal class EventMessageReaderTest {
         val result = converter.readMono(type, message, emptyMap())
 
         // then
-        assertEquals(EventMessage("trigger_1", "action_1", 123456), result.awaitSingle())
+        assertEquals(EventMessage("trigger_1", "action_1", "123456"), result.awaitSingle())
     }
 
     @Test
@@ -108,10 +102,10 @@ internal class EventMessageReaderTest {
 
         // then
         val expectedEvents = listOf(
-                EventMessage("kitchen_light_1_switch", "light_on", 1589054854),
-                EventMessage("kitchen_light_3_switch", "light_on", 1589055809),
-                EventMessage("kitchen_blind_1_switch", "blind_up", 1589056736),
-                EventMessage("kitchen_light_2_switch", "light_on", 1589057233)
+                EventMessage("kitchen_light_1_switch", "light_on", "1589054854"),
+                EventMessage("kitchen_light_3_switch", "light_on", "1589055809"),
+                EventMessage("kitchen_blind_1_switch", "blind_up", "1589056736"),
+                EventMessage("kitchen_light_2_switch", "light_on", "1589057233")
         )
         assertEquals(expectedEvents, result.collectList().awaitSingle())
     }

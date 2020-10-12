@@ -46,7 +46,7 @@ CREATE TABLE house_event (
 DROP TABLE IF EXISTS piper_user;
 CREATE TABLE piper_user (
      login text,
-     password text,
+     secret text,
      houses set<uuid>,
      roles set<text>,
 

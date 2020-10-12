@@ -53,7 +53,7 @@ class EventMessageReader(
         const val NEW_LINE = '\n'.toByte()
 
         val schema: CsvSchema = builder()
-                .addNumberColumn("time")
+                .addColumn("time")
                 .addColumn("trigger")
                 .addColumn("action")
                 .setLineSeparator(',')

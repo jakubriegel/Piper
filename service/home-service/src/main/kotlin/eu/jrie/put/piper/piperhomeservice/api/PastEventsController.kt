@@ -1,27 +1,21 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV_VALUE
+import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
+import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
+import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.reactive.awaitFirst
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.withIndex
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.http.ResponseEntity.unprocessableEntity
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Mono
-import java.security.Principal
 import java.time.Instant
-import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
-import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
-import kotlinx.coroutines.flow.map
 import java.util.*
 
 @RestController
@@ -33,21 +27,46 @@ class PastEventsController (
     suspend fun postEvents(
             @RequestBody events: Flow<EventMessage>,
             auth: Authentication
-    ): ResponseEntity<Mono<Unit>> {
-        val houseId = auth.name
-        events.map {
-            PastEvent(UUID.randomUUID(), it.trigger!!, it.action!!, Instant.ofEpochSecond(it.time!!))
-        }.let { service.add(it) }
-        return ok(Mono.empty())
-    }
+    ): ResponseEntity<PastEventsResponse> {
+        val houseId = auth.asUser().houses.first()
+        val invalid = mutableListOf<InvalidEventMessage>()
 
-    private companion object {
-        val logger: Logger = LoggerFactory.getLogger(PastEventsController::class.java)
+        events.withIndex()
+                .filter { (i, event) ->
+                    event.validData().also { if (!it) invalid.add(InvalidEventMessage(i+1, event)) }
+                }
+                .map { (_, event) -> event.asPastEvent(houseId) }
+                .let { service.add(it) }
+
+        return if (invalid.isEmpty()) ok().build()
+        else PastEventsErrorsResponse(invalid)
+                .let { unprocessableEntity().body(it) }
     }
 }
+
+interface PastEventsResponse
+
+data class PastEventsErrorsResponse (
+        val invalidEvents: List<InvalidEventMessage>
+) : PastEventsResponse
+
+data class InvalidEventMessage (
+        val line: Int,
+        val event: EventMessage
+)
 
 data class EventMessage (
         val trigger: String?,
         val action: String?,
-        val time: Long?
-)
+        val time: String?
+) {
+    fun validData(): Boolean {
+        val validTrigger = !trigger.isNullOrBlank()
+        val validAction = !action.isNullOrBlank()
+        val validTime = time != null && runCatching { time!!.toInt() }.getOrNull() ?: -1 > 0
+        return validTrigger and validAction and validTime
+    }
+    fun asPastEvent(houseId: UUID) = PastEvent(
+            houseId, trigger!!, action!!, Instant.ofEpochSecond(time?.toLong()!!)
+    )
+}
