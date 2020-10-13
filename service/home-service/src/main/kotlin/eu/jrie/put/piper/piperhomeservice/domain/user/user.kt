@@ -14,7 +14,7 @@ data class User (
         val id: String,
         val login: String,
         val secret: String,
-        val houses: Set<String>,
+        val house: String,
         val roles: Set<String>
 ) : UserDetails {
     override fun getPassword() = secret

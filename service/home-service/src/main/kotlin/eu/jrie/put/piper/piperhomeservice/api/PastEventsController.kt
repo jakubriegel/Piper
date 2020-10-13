@@ -28,7 +28,7 @@ class PastEventsController (
             @RequestBody events: Flow<EventMessage>,
             auth: Authentication
     ): ResponseEntity<PastEventsResponse> {
-        val houseId = auth.asUser().houses.first()
+        val houseId = auth.asUser().house
         val invalid = mutableListOf<InvalidEventMessage>()
 
         events.withIndex()

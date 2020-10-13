@@ -23,7 +23,7 @@ class RoutinesController (
     fun getRoutines(
             auth: Authentication
     ): Flow<Routine> {
-        val houseId = auth.asUser().houses.first()
+        val houseId = auth.asUser().house
         return service.routinesForHouse(houseId)
     }
 

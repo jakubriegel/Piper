@@ -11,14 +11,14 @@ user.remove({})
 user.insert({
     "login":"house-1-server",
     "secret":"{noop}secret",
-    "houses":["house-1"],
+    "house": "house-1",
     "roles":["HOUSE"]
 })
 user.insert({
     "login":"owner-1",
     "secret":"{noop}secret",
-    "houses":["house-1"],
-    "roles":["OWNER"]
+    "house": "house-1",
+    "roles":["USER"]
 })
 
 const routine = db.getCollection("routine")
