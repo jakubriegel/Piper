@@ -4,6 +4,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.Routine
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping

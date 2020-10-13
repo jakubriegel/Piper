@@ -1,6 +1,7 @@
 #logging.level.root: TRACE
 
-spring.data.cassandra:
-  keyspace-name: piper
-  port: 9042
-  local-datacenter: datacenter1
+spring:
+  data:
+    mongodb:
+      database: piper
+

@@ -66,7 +66,7 @@ data class EventMessage (
         val validTime = time != null && runCatching { time!!.toInt() }.getOrNull() ?: -1 > 0
         return validTrigger and validAction and validTime
     }
-    fun asPastEvent(houseId: UUID) = PastEvent(
+    fun asPastEvent(houseId: String) = PastEvent(
             houseId, trigger!!, action!!, Instant.ofEpochSecond(time?.toLong()!!)
     )
 }

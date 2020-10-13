@@ -1,17 +1,16 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
 import eu.jrie.put.piper.piperhomeservice.domain.event.Event
-import org.springframework.data.cassandra.core.mapping.PrimaryKey
-import org.springframework.data.cassandra.core.mapping.Table
-import java.util.*
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 
-@Table("routine")
+@Document
 data class Routine (
-        @PrimaryKey
-        val id: UUID,
-        val houseId: UUID,
+        @Id
+        val id: String,
+        val houseId: String,
         val events: List<Map<String, String>>,
-        val modelId: UUID
+        val modelId: String
 )
 
 data class RoutineEvent (

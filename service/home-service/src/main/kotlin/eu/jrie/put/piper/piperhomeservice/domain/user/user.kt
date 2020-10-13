@@ -1,20 +1,20 @@
 package eu.jrie.put.piper.piperhomeservice.domain.user
 
-import org.springframework.data.cassandra.core.mapping.PrimaryKey
-import org.springframework.data.cassandra.core.mapping.Table
-import org.springframework.data.cassandra.repository.ReactiveCassandraRepository
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import reactor.core.publisher.Mono
-import java.util.*
 
-@Table("piper_user")
+@Document
 data class User (
-        @PrimaryKey
+        @Id
+        val id: String,
         val login: String,
         val secret: String,
-        val houses: Set<UUID>,
+        val houses: Set<String>,
         val roles: Set<String>
 ) : UserDetails {
     override fun getPassword() = secret
@@ -23,12 +23,12 @@ data class User (
     override fun isAccountNonLocked() = true
     override fun isCredentialsNonExpired() = true
     override fun isEnabled() = true
-    override fun getAuthorities(): Set<SimpleGrantedAuthority> = roles.map { "ROLE_$it"}
+    override fun getAuthorities() = roles.map { "ROLE_$it"}
             .map { SimpleGrantedAuthority(it) }
             .toSet()
 }
 
-interface UserRepository : ReactiveCassandraRepository<User, UUID> {
+interface UserRepository : ReactiveMongoRepository<User, String> {
     fun findByLogin(login: String): Mono<User>
 }
 
