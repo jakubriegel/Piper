@@ -18,6 +18,7 @@ CREATE TABLE routine (
     id uuid,
     houseId uuid,
     events list<frozen<map<text, text>>>,
+    modelId uuid,
 
     PRIMARY KEY (id, houseId)
 );
