@@ -1,6 +1,10 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV_VALUE
+import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
+import eu.jrie.put.piper.piperhomeservice.api.message.InvalidEventMessage
+import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsErrorsResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsResponse
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
@@ -18,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
 import java.util.*
 
-@RestController
+@RestController("house")
 class PastEventsController (
         private val service: PastEventService
 ) {
 
-    @PostMapping("/house/events", consumes = [TEXT_CSV_VALUE])
+    @PostMapping("events", consumes = [TEXT_CSV_VALUE])
     suspend fun postEvents(
             @RequestBody events: Flow<EventMessage>,
             auth: Authentication
@@ -42,31 +46,4 @@ class PastEventsController (
         else PastEventsErrorsResponse(invalid)
                 .let { unprocessableEntity().body(it) }
     }
-}
-
-interface PastEventsResponse
-
-data class PastEventsErrorsResponse (
-        val invalidEvents: List<InvalidEventMessage>
-) : PastEventsResponse
-
-data class InvalidEventMessage (
-        val line: Int,
-        val event: EventMessage
-)
-
-data class EventMessage (
-        val trigger: String?,
-        val action: String?,
-        val time: String?
-) {
-    fun validData(): Boolean {
-        val validTrigger = !trigger.isNullOrBlank()
-        val validAction = !action.isNullOrBlank()
-        val validTime = time != null && runCatching { time!!.toInt() }.getOrNull() ?: -1 > 0
-        return validTrigger and validAction and validTime
-    }
-    fun asPastEvent(houseId: String) = PastEvent(
-            houseId, trigger!!, action!!, Instant.ofEpochSecond(time?.toLong()!!)
-    )
 }
