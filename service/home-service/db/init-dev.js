@@ -23,6 +23,45 @@ user.insert({
 
 const routine = db.getCollection("routine")
 routine.remove({})
+routine.insert({
+    "houseId": "house-1",
+    "modelId": "924aa692-b16a-4887-ad01-52026d711cd2",
+    "enabled": true,
+    "events": [],
+    "configuration": {
+        "days": [],
+        "start": null,
+        "end": null
+    }
+})
+routine.insert({
+    "houseId": "house-1",
+    "modelId": "924aa692-b16a-4887-ad01-52026d711cd2",
+    "enabled": false,
+    "events": [],
+    "configuration": {
+        "days": [],
+        "start": null,
+        "end": null
+    }
+})
+routine.insert({
+    "houseId": "house-1",
+    "modelId": null,
+    "enabled": true,
+    "events": [],
+    "configuration": {
+        "days": [
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY"
+        ],
+        "start": null,
+        "end": null
+    }
+})
 
 const pastEvent = db.getCollection("pastEvent")
 pastEvent.remove({})
