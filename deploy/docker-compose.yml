@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  frontend:
+    build:
+      context: ../service/frontend
+      target: ${TARGET}
+      dockerfile: docker/${ARCHITECTURE}/Dockerfile
+    ports:
+      - "30002:80"
+    volumes:
+      - ../service/frontend/:/frontend/
