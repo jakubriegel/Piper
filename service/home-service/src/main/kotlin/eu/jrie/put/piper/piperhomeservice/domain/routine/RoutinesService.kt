@@ -14,4 +14,6 @@ class RoutinesService (
     fun routinesForHouse(houseId: String): Flow<RoutinePreview> = repository.findRoutinesPreview(houseId)
     fun routineById(id: String, user: User): Mono<Routine> = repository.findById(id)
                 .map { authService.checkForHouseAccess(user, it.houseId); it }
+
+    fun createRoutine(routine: Routine) = repository.save(routine)
 }

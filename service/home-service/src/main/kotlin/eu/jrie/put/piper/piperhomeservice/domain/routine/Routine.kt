@@ -12,18 +12,24 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository
 import java.time.DayOfWeek
 import java.time.OffsetTime
+import java.util.UUID.randomUUID
 
 @Document
 data class Routine (
         @Id
-        val id: String,
+        val id: String?,
         val name: String,
         val houseId: String,
         val modelId: String?,
         val enabled: Boolean,
         val events: List<RoutineEvent>,
         val configuration: RoutineConfiguration?
-)
+) {
+        constructor(
+                name: String, houseId: String, modelId: String?, enabled: Boolean,
+                events: List<RoutineEvent>, configuration: RoutineConfiguration?
+        ) : this(randomUUID().toString(), name, houseId, modelId, enabled, events, configuration)
+}
 
 data class RoutineConfiguration (
         val days: List<DayOfWeek> = emptyList(),

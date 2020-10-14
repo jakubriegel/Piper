@@ -44,11 +44,15 @@ data class RoutineMessage (
         val configuration: RoutineConfiguration
 )
 
-fun Routine.asMessage() = RoutineMessage(id, name, modelId, enabled, events, configuration ?: RoutineConfiguration())
+fun Routine.asMessage() = RoutineMessage(id!!, name, modelId, enabled, events, configuration ?: RoutineConfiguration())
 
 data class RoutineRequest (
         val name: String,
         val enabled: Boolean,
         val events: List<RoutineEvent>,
         val configuration: RoutineConfiguration?
-) : ApiRequest
+) : ApiRequest {
+    fun toRoutine(houseId: String) = Routine(
+            name, houseId, null, enabled, events, configuration ?: RoutineConfiguration()
+    )
+}
