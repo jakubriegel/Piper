@@ -5,7 +5,6 @@ import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.InvalidEventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsErrorsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsResponse
-import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.flow.Flow
@@ -18,11 +17,11 @@ import org.springframework.http.ResponseEntity.unprocessableEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
-import java.util.*
 
-@RestController("house")
+@RestController
+@RequestMapping("house")
 class PastEventsController (
         private val service: PastEventService
 ) {
