@@ -4,11 +4,11 @@ WORKDIR /frontend
 
 COPY package*.json /frontend/
 RUN npm install
-RUN npm install -g @vue/cli@4.3.1
-RUN npm install -g @vue/cli-service@4.3.0
-RUN npm install -g @vue/cli-plugin-babel@4.3.0
-RUN npm install -g @vue/cli-plugin-eslint@4.3.0
-RUN npm install -g vue-cli-plugin-vuetify@2.0.5
+RUN npm install -g @vue/cli@4.5.7
+RUN npm install -g @vue/cli-service@4.5.0
+RUN npm install -g @vue/cli-plugin-babel@4.5.0
+RUN npm install -g @vue/cli-plugin-eslint@4.5.0
+RUN npm install -g vue-cli-plugin-vuetify@2.0.7
 RUN npm install -g vue-template-compiler@2.6.11
 RUN npm install -g vuetify-loader@1.4.2
 RUN npm install -g webpack@4.43.0
