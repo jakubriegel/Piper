@@ -15,13 +15,12 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 
 data class RoutinesResponse (
-        val houseId: String,
         val routines: List<RoutinePreview>
 ) : RepresentationModel<RoutinesResponse>(), ApiResponse {
     init {
         add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel())
         add(linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST))
-        add(linkTo(HousesController::class.java).slash(houseId).withRel(DESCRIBES))
+        add(linkTo(HousesController::class.java).withRel(DESCRIBES))
     }
 }
 

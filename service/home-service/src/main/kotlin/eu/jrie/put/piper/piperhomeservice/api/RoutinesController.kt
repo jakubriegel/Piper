@@ -41,7 +41,7 @@ class RoutinesController(
         return service.routinesForHouse(houseId)
                 .asFlux()
                 .collectList()
-                .map { RoutinesResponse(houseId, it) }
+                .map { RoutinesResponse(it) }
     }
 
     @GetMapping("{id}", produces = [APPLICATION_JSON_VALUE])
