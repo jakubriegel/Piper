@@ -27,7 +27,6 @@ routine.insert({
     "_id": "782797fd-bdac-4801-8a0f-f7f0f215eca0",
     "name": "Morning",
     "houseId": "house-1",
-    "modelId": "924aa692-b16a-4887-ad01-52026d711cd2",
     "enabled": true,
     "events": [],
     "configuration": {
@@ -40,7 +39,6 @@ routine.insert({
     "_id": "3624fbe8-054a-4ff4-a826-4fd6b25f19e2",
     "name": "Evening",
     "houseId": "house-1",
-    "modelId": "924aa692-b16a-4887-ad01-52026d711cd2",
     "enabled": false,
     "events": [],
     "configuration": {
@@ -53,7 +51,6 @@ routine.insert({
     "_id": "922278eb-0d8b-40cc-ab85-afe85fc67339",
     "name": "Week",
     "houseId": "house-1",
-    "modelId": null,
     "enabled": true,
     "events": [],
     "configuration": {

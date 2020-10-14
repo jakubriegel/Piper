@@ -20,15 +20,14 @@ data class Routine (
         val id: String?,
         val name: String,
         val houseId: String,
-        val modelId: String?,
         val enabled: Boolean,
         val events: List<RoutineEvent>,
         val configuration: RoutineConfiguration?
 ) {
         constructor(
-                name: String, houseId: String, modelId: String?, enabled: Boolean,
+                name: String, houseId: String, enabled: Boolean,
                 events: List<RoutineEvent>, configuration: RoutineConfiguration?
-        ) : this(randomUUID().toString(), name, houseId, modelId, enabled, events, configuration)
+        ) : this(randomUUID().toString(), name, houseId, enabled, events, configuration)
 }
 
 data class RoutineConfiguration (
