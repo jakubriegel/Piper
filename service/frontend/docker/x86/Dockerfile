@@ -28,5 +28,5 @@ RUN npm run build
 FROM nginx:1.15.7-alpine as production-stage
 COPY --from=install-stage /frontend/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/conf.d
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
