@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3549d5e4-ce67-4aec-95fe-578d4c29e72c",
+		"_postman_id": "914ee5e8-0ce7-4f2f-86fe-82a8deb9232e",
 		"name": "home-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "18807273-2113-4b89-bcdd-be7c969ec090",
+								"id": "49df4c8e-d3f5-495a-b199-3c7ea97f3d97",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -38,13 +38,13 @@
 							"type": "basic",
 							"basic": [
 								{
-									"key": "password",
-									"value": "{{password}}",
+									"key": "username",
+									"value": "house-1-server",
 									"type": "string"
 								},
 								{
-									"key": "username",
-									"value": "our-home-server",
+									"key": "password",
+									"value": "{{password}}",
 									"type": "string"
 								}
 							]
@@ -85,7 +85,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5e33749f-91df-4da8-a65d-fe1b59de8be9",
+								"id": "2459cec4-6669-4943-ba38-9c140f4d95d1",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -111,7 +111,7 @@
 							"basic": [
 								{
 									"key": "username",
-									"value": "our-home-server",
+									"value": "house-1-server",
 									"type": "string"
 								},
 								{
@@ -160,6 +160,24 @@
 			"item": [
 				{
 					"name": "routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4173ae52-eddc-4048-b470-939cf37fcae0",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Contains routines\", function () {\r",
+									"    let json = pm.response.json();\r",
+									"    pm.globals.set(\"routineId\", json.routines[0].id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {
 							"accept": true
@@ -190,6 +208,167 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "routine",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/routines/{{routineId}}",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"routines",
+								"{{routineId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "304d1165-a1da-4dc5-b086-4fc83aaf93b6",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"pm.test(\"Routine created\", function () {\r",
+									"    let json = pm.response.json();\r",
+									"    pm.globals.set(\"routineId\", json.routine.id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"name\": \"custom {{$timestamp}}\",\r\n        \"enabled\": null,\r\n        \"events\": [\r\n            {\r\n                \"trigger\": \"kitchen_lamp_1\",\r\n                \"action\": \"light_on\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{home-service}}/routines",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"routines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2d70cec4-7cb9-4540-915b-48045b8893d3",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"name\": \"COOL {{$timestamp}}\",\r\n        \"enabled\": true,\r\n        \"events\": [\r\n            {\r\n                \"trigger\": \"kitchen_lamp_1\",\r\n                \"action\": \"light_on\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{home-service}}/routines/{{routineId}}",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"routines",
+								"{{routineId}}"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"auth": {
@@ -211,7 +390,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "dccb3feb-cfd6-4c2d-a099-53cec7719b0e",
+						"id": "0424f3db-19f2-46d7-b5a4-9520039a2c2f",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -221,7 +400,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ec194d70-e59f-4d7a-90e3-61d907b94a20",
+						"id": "743d38aa-53e9-41cb-99f9-01c67416b742",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"CORS: Access-Control-Allow-Origin is present\", () => {",
@@ -256,7 +435,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "c938028b-57a1-48dc-adb8-d9e999dbcb6f",
+				"id": "c75d70d6-3c90-4490-abce-743a94c7bf67",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -266,7 +445,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "d2088d81-291c-4631-90eb-9ed56f2fcdd2",
+				"id": "64222fb3-a752-4f97-bc7c-8ae1da6b4414",
 				"type": "text/javascript",
 				"exec": [
 					""
