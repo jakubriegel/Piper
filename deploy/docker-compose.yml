@@ -6,6 +6,6 @@ services:
       target: ${TARGET}
       dockerfile: docker/${ARCHITECTURE}/Dockerfile
     ports:
-      - "30002:80"
+      - "8080:8080"
     volumes:
       - ../service/frontend/:/frontend/
