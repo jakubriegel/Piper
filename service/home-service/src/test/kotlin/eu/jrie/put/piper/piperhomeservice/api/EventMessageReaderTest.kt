@@ -1,7 +1,8 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
-import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV
-import eu.jrie.put.piper.piperhomeservice.api.message.EventMessageReader
+import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
+import eu.jrie.put.piper.piperhomeservice.api.message.reader.EventMessageReader
+import eu.jrie.put.piper.piperhomeservice.api.message.util.PiperMediaType.TEXT_CSV
 import eu.jrie.put.piper.piperhomeservice.config.MapperConfig
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking

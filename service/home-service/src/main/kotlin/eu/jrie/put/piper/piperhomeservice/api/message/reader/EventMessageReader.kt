@@ -1,10 +1,11 @@
-package eu.jrie.put.piper.piperhomeservice.api.message
+package eu.jrie.put.piper.piperhomeservice.api.message.reader
 
 import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.builder
-import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV
+import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
+import eu.jrie.put.piper.piperhomeservice.api.message.util.PiperMediaType.TEXT_CSV
 import org.slf4j.LoggerFactory
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer

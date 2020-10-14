@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvParser.Feature.SKIP_EMPTY_LINES
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import eu.jrie.put.piper.piperhomeservice.api.message.EventMessageReader
+import eu.jrie.put.piper.piperhomeservice.api.message.reader.EventMessageReader
 import org.springframework.boot.web.codec.CodecCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

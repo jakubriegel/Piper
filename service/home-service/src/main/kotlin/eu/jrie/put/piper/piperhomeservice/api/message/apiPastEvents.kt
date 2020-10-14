@@ -3,7 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
 import java.time.Instant
 
-interface PastEventsResponse
+interface PastEventsResponse : ApiResponse
 
 data class PastEventsErrorsResponse (
         val invalidEvents: List<InvalidEventMessage>
@@ -18,7 +18,7 @@ data class EventMessage (
         val trigger: String?,
         val action: String?,
         val time: String?
-) {
+) : ApiResponse {
     fun validData(): Boolean {
         val validTrigger = !trigger.isNullOrBlank()
         val validAction = !action.isNullOrBlank()

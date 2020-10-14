@@ -1,10 +1,10 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
-import eu.jrie.put.piper.piperhomeservice.api.PiperMediaType.TEXT_CSV_VALUE
 import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.InvalidEventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsErrorsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.PastEventsResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.util.PiperMediaType.TEXT_CSV_VALUE
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.flow.Flow
