@@ -6,17 +6,14 @@ import eu.jrie.put.piper.piperhomeservice.api.message.RoutineResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutinesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
-import eu.jrie.put.piper.piperhomeservice.domain.routine.Routine
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.reactor.asFlux
-import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.created
 import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
-import org.springframework.http.ResponseEntity.status
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -70,9 +67,15 @@ class RoutinesController(
                 .handleErrors()
     }
 
-    @PutMapping(consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PutMapping("{id}", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     fun putRoutine(
-            @RequestBody routine: Mono<Routine>,
+            @PathVariable id: String,
+            @RequestBody routine: Mono<RoutineRequest>,
             auth: Authentication
-    ): Mono<ResponseEntity<Unit>> = Mono.just(status(SERVICE_UNAVAILABLE).build())
+    ): Mono<ResponseEntity<ApiResponse>> {
+        val user = auth.asUser()
+        return routine.flatMap { service.updateRoutine(it.toRoutine(id, user.house), user) }
+                .map { ok(RoutineResponse(it.asMessage()) as ApiResponse) }
+                .handleErrors()
+    }
 }

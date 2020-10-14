@@ -17,7 +17,7 @@ import java.util.UUID.randomUUID
 @Document
 data class Routine (
         @Id
-        val id: String?,
+        val id: String,
         val name: String,
         val houseId: String,
         val enabled: Boolean,

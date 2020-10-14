@@ -9,6 +9,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinePreview
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
+import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
@@ -29,6 +30,7 @@ data class RoutineResponse (
 ) : RepresentationModel<RoutineResponse>(), ApiResponse {
     init {
         add(linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel())
+        add(linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT))
         add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
         add(linkTo(HousesController::class.java).withRel(DESCRIBES))
     }
@@ -42,7 +44,7 @@ data class RoutineMessage (
         val configuration: RoutineConfiguration
 )
 
-fun Routine.asMessage() = RoutineMessage(id!!, name, enabled, events, configuration ?: RoutineConfiguration())
+fun Routine.asMessage() = RoutineMessage(id, name, enabled, events, configuration ?: RoutineConfiguration())
 
 data class RoutineRequest (
         val name: String,
@@ -52,5 +54,8 @@ data class RoutineRequest (
 ) : ApiRequest {
     fun toRoutine(houseId: String) = Routine(
             name, houseId, enabled, events, configuration ?: RoutineConfiguration()
+    )
+    fun toRoutine(id: String, houseId: String) = Routine(
+            id, name, houseId, enabled, events, configuration ?: RoutineConfiguration()
     )
 }
