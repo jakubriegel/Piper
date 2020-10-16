@@ -104,5 +104,5 @@ class ServeModel:
 
 if __name__ == '__main__':
     serveModel = ServeModel()
-    print(serveModel.getCategory(1))
+    print("Category_id: ", serveModel.getCategory(1))
     print(serveModel.generate_sequences(start_sequence_event_id=1,num_generate=10))

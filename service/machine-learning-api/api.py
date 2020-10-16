@@ -25,7 +25,7 @@ def getPredictions():
         print(prediction)
         return Response(response=json.dumps(prediction), status=200, mimetype='application/json')
     except:
-        return Response(status=404)
+        return Response(status=422)
 
 
 if __name__ == '__main__':
