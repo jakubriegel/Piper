@@ -1,10 +1,9 @@
-from tensorflow import keras
 import tensorflow as tf
 
 
 class ServeModel:
     def __init__(self):
-        self.model = keras.models.load_model('model', compile=True)
+        self.model = tf.keras.models.load_model('model', compile=True)
         self.categories_dict = {0: 'bathroom_light_1_switch_light_off',
                                 1: 'bathroom_light_1_switch_light_on',
                                 2: 'bathroom_light_2_switch_light_off',
@@ -101,3 +100,9 @@ class ServeModel:
 
         generated_sequences.insert(0, self.getCategory(start_sequence_event_id))
         return generated_sequences
+
+
+if __name__ == '__main__':
+    serveModel = ServeModel()
+    print(serveModel.getCategory(1))
+    print(serveModel.generate_sequences(start_sequence_event_id=1,num_generate=10))
