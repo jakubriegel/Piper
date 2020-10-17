@@ -455,9 +455,9 @@
 	],
 	"variable": [
 		{
-			"id": "7eb6f712-d35f-49e0-aeba-f645a669bb8d",
+			"id": "6cf2b803-391c-4bb9-807e-f7cf6b1a411e",
 			"key": "home-service",
-			"value": "{{HOST}}:8080"
+			"value": "{{HOST}}:{{PORT}}"
 		}
 	],
 	"protocolProfileBehavior": {}
