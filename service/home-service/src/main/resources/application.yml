@@ -1,7 +1,9 @@
-#logging.level.root: TRACE
+server:
+  port: 80
 
 spring:
   data:
     mongodb:
       database: piper
-
+  main:
+    web-application-type: reactive

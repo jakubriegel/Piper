@@ -1,4 +1,4 @@
-package eu.jrie.put.piper.piperhomeservice.config
+package eu.jrie.put.piper.piperhomeservice.infra.mapper
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper

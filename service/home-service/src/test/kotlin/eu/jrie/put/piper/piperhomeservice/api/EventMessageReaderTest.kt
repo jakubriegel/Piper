@@ -3,7 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.api
 import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.reader.EventMessageReader
 import eu.jrie.put.piper.piperhomeservice.api.message.util.PiperMediaType.TEXT_CSV
-import eu.jrie.put.piper.piperhomeservice.config.MapperConfig
+import eu.jrie.put.piper.piperhomeservice.infra.mapper.MapperConfig
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals

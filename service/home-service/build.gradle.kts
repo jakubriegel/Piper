@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id("org.springframework.boot") version "2.3.4.RELEASE"
@@ -28,7 +29,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-hateoas") {
-        exclude("org.springframework.boot", "spring-boot-starter-web")
+        exclude("org.springframework.boot", "spring-boot-starter")
+        exclude("org.springframework.boot", "spring-boot-starter-json")
+        exclude("org.springframework.boot", "spring-boot-starter-tomcat")
+        exclude("org.springframework", "spring-aop")
+        exclude("org.springframework", "spring-beans")
+        exclude("org.springframework", "spring-context")
+        exclude("org.springframework", "spring-core")
+        exclude("org.springframework", "spring-expression")
     }
 
     // jackson
@@ -63,4 +71,8 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
+}
+
+tasks.withType<BootJar> {
+    archiveFileName.set("piper-home-service.jar")
 }

@@ -1,8 +1,8 @@
-package eu.jrie.put.piper.piperhomeservice.config
+package eu.jrie.put.piper.piperhomeservice.infra.security
 
-import eu.jrie.put.piper.piperhomeservice.config.SecurityConfig.UserRole.ADMIN
-import eu.jrie.put.piper.piperhomeservice.config.SecurityConfig.UserRole.HOUSE
-import eu.jrie.put.piper.piperhomeservice.config.SecurityConfig.UserRole.USER
+import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.ADMIN
+import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.HOUSE
+import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.USER
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.DELETE
