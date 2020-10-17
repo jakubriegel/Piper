@@ -16,14 +16,14 @@ def getStatus():
         return Response(status=404)
 
 
-@app.route('/get-predictions', methods=['GET'])
+@app.route('/get-sequence', methods=['GET'])
 def getPredictions():
     try:
-        start_sequence_event_id = request.args.get('start_sequence_event_id')
-        num_generate = request.args.get('num_generate')
-        prediction = controller.predict(start_sequence_event_id, num_generate)
-        print(prediction)
-        return Response(response=json.dumps(prediction), status=200, mimetype='application/json')
+        modelId = int(request.args.get('modelId'))
+        event = request.args.get('event')
+        limit = int(request.args.get('limit'))
+        prediction = controller.predict(modelId, event, limit)
+        return Response(response=json.dumps({"sequence": prediction}), status=200, mimetype='application/json')
     except:
         return Response(status=422)
 

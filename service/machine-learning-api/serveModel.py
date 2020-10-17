@@ -3,7 +3,9 @@ import tensorflow as tf
 
 class ServeModel:
     def __init__(self):
-        self.model = tf.keras.models.load_model('model', compile=True)
+        self.models = {
+            0: tf.keras.models.load_model('model', compile=True)
+        }
         self.categories_dict = {0: 'bathroom_light_1_switch_light_off',
                                 1: 'bathroom_light_1_switch_light_on',
                                 2: 'bathroom_light_2_switch_light_off',
@@ -64,10 +66,17 @@ class ServeModel:
                                 57: 'outdoor_light_2_sensor_light_off',
                                 58: 'outdoor_light_2_sensor_light_on'}
 
-    def getCategory(self, category_id):
+    def getCategoryById(self, category_id):
         return self.categories_dict[category_id]
 
-    def generate_sequences(self, start_sequence_event_id, num_generate=10):
+    def getCategoryByName(self, category_name):
+        key_list = list(self.categories_dict.keys())
+        val_list = list(self.categories_dict.values())
+        return key_list[val_list.index(category_name)]
+
+    def generate_sequences(self, model_id, initial_event_name, num_generate=10):
+        model = self.models[model_id]
+        start_sequence_event_id = self.getCategoryByName(initial_event_name)
 
         # Converting our start frame to vector of numbers (vectorizing)
         input_eval = [start_sequence_event_id]
@@ -82,9 +91,9 @@ class ServeModel:
         temperature = 1.0
 
         # Here batch size == 1
-        self.model.reset_states()
+        model.reset_states()
         for i in range(num_generate):
-            predictions = self.model(input_eval)
+            predictions = model(input_eval)
             # remove the batch dimension
             predictions = tf.squeeze(predictions, 0)
 
@@ -96,13 +105,7 @@ class ServeModel:
             # along with the previous hidden state
             input_eval = tf.expand_dims([predicted_id], 0)
 
-            generated_sequences.append(self.getCategory(predicted_id))
+            generated_sequences.append(self.getCategoryById(predicted_id))
 
-        generated_sequences.insert(0, self.getCategory(start_sequence_event_id))
+        generated_sequences.insert(0, self.getCategoryById(start_sequence_event_id))
         return generated_sequences
-
-
-if __name__ == '__main__':
-    serveModel = ServeModel()
-    print("Category_id: ", serveModel.getCategory(1))
-    print(serveModel.generate_sequences(start_sequence_event_id=1,num_generate=10))
