@@ -1,9 +1,50 @@
 const house = db.getCollection("house")
 house.remove({})
 house.insert({
-    "_id": "house-1",
-    "name": "Our Home",
-    "pin": "1234"
+    "_id":"house-1",
+    "name":"Our Home",
+    "models": {
+        "current": {
+            "id": "up-to-date-model-id",
+            "createdAt": "2020-10-18T16:02:33.882Z"
+        },
+        "past": [
+            {
+                "id": "past-model-id",
+                "createdAt": "2020-09-18T16:02:33.882Z"
+            },
+            {
+                "id": "past-model-model-id",
+                "createdAt": "2020-08-18T16:02:33.882Z"
+            }
+        ]
+    },
+    "consents": {
+        "behaviourBasedLearning": true
+    }
+})
+house.insert({
+    "_id": "house-2",
+    "name": "Our Home 2",
+    "models": {
+        "current": {
+            "id": "up-to-date-model-id-II",
+            "createdAt": "2020-10-18T16:02:33.882Z"
+        },
+        "past": [
+            {
+                "id": "past-model-id-II",
+                "createdAt": "2020-09-18T16:02:33.882Z"
+            },
+            {
+                "id": "past-model-model-id-II",
+                "createdAt": "2020-08-18T16:02:33.882Z"
+            },
+        ]
+    },
+    "consents": {
+        "behaviourBasedLearning": true
+    }
 })
 
 const user = db.getCollection("user")
@@ -18,6 +59,12 @@ user.insert({
     "login":"owner-1",
     "secret":"{noop}secret",
     "house": "house-1",
+    "roles":["USER"]
+})
+user.insert({
+    "login":"owner-2",
+    "secret":"{noop}secret",
+    "house": "house-2",
     "roles":["USER"]
 })
 
