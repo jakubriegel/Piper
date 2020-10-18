@@ -12,14 +12,14 @@ import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
 import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.RepresentationModel
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
 data class RoutinesResponse (
         val routines: List<RoutinePreview>
 ) : RepresentationModel<RoutinesResponse>(), ApiResponse {
     init {
-        add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel())
+        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel())
         add(linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST))
         add(linkTo(HousesController::class.java).withRel(DESCRIBES))
     }
@@ -31,7 +31,7 @@ data class RoutineResponse (
     init {
         add(linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel())
         add(linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT))
-        add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
+        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
         add(linkTo(HousesController::class.java).withRel(DESCRIBES))
     }
 }
@@ -58,4 +58,15 @@ data class RoutineRequest (
     fun toRoutine(id: String, houseId: String) = Routine(
             id, name, houseId, enabled, events, configuration ?: RoutineConfiguration()
     )
+}
+
+data class RoutineSuggestionsResponse (
+        val start: RoutineEvent,
+        val suggestions: List<RoutineEvent>,
+        val n: Int
+) : RepresentationModel<RoutineSuggestionsResponse>(), ApiResponse {
+    init {
+        add(linkTo(RoutinesController::class.java).slash("suggestions?trigger=${start.trigger}&trigger=${start.action}&limit=$n").withSelfRel())
+        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
+    }
 }

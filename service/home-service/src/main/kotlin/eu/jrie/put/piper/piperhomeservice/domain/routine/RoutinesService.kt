@@ -3,6 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.domain.routine
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -21,6 +22,11 @@ class RoutinesService (
     fun updateRoutine(updated: Routine, user: User) = routineById(updated.id, user)
             .map { it.updateWith(updated) }
             .flatMap { repository.save(it) }
+
+    fun getContinuationSuggestions(start: RoutineEvent, n: Int): Flow<RoutineEvent> {
+        val random = { (1..1000).random() }
+        return List(n) { RoutineEvent("${start.trigger}_${random()}", "${start.action}_${random()}") } .asFlow()
+    }
 
     private companion object {
         fun Routine.updateWith(updated: Routine) = Routine(
