@@ -10,6 +10,7 @@ import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -83,6 +84,7 @@ class RoutinesController(
     }
 
     @GetMapping("suggestions", produces = [APPLICATION_JSON_VALUE])
+    @FlowPreview
     fun getSuggestions(
             @RequestParam(required = true) trigger: String,
             @RequestParam(required = true) action: String,
@@ -90,10 +92,11 @@ class RoutinesController(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         val start = RoutineEvent(trigger, action)
-        return service.getContinuationSuggestions(start, limit)
+        return service.getContinuationSuggestions(start, limit, auth.asUser())
                 .asFlux()
                 .collectList()
                 .map { RoutineSuggestionsResponse(start, it, limit) }
-                .map { ok(it) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
     }
 }
