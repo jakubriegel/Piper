@@ -25,10 +25,10 @@ import { mapGetters, mapMutations } from "vuex";
 
 export default {
   computed: {
-    ...mapGetters("drawer", ["routes"])
+    ...mapGetters("navigation", ["routes"])
   },
   methods: {
-    ...mapMutations("drawer", ["toggleDrawer"])
+    ...mapMutations("navigation", ["toggleDrawer"])
   }
 };
 </script>

@@ -1,4 +1,4 @@
-export const drawer = {
+export const navigation = {
   namespaced: true,
   state: {
     drawer: false,

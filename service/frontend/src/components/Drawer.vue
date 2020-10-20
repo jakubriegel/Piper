@@ -32,10 +32,10 @@ import { mapGetters, mapMutations } from 'vuex';
 export default {
   name: 'Drawer',
   computed: {
-    ...mapGetters('drawer', ['routes']),
+    ...mapGetters('navigation', ['routes']),
     drawer: {
       get() {
-        return this.$store.state.drawer.drawer;
+        return this.$store.state.navigation.drawer;
       },
       set(val) {
         this.setDrawer(val);
@@ -43,7 +43,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('drawer', ['setDrawer']),
+    ...mapMutations('navigation', ['setDrawer']),
     onClick(e, item) {
       e.stopPropagation();
       if (item.to === '/') {
