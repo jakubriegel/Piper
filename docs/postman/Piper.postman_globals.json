@@ -2,11 +2,6 @@
 	"id": "459687bc-1e47-4e21-875d-244d86b0a9ed",
 	"values": [
 		{
-			"key": "houseId",
-			"value": "1234-abcd",
-			"enabled": true
-		},
-		{
 			"key": "password",
 			"value": "secret",
 			"enabled": true
@@ -19,6 +14,6 @@
 	],
 	"name": "Piper Globals",
 	"_postman_variable_scope": "globals",
-	"_postman_exported_at": "2020-10-14T19:31:33.997Z",
+	"_postman_exported_at": "2020-10-20T20:55:57.251Z",
 	"_postman_exported_using": "Postman/7.34.0"
 }
