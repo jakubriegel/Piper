@@ -1,29 +1,12 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
+import { drawer } from "./modules";
+
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {
-    drawer: false,
-    routes: [
-      {
-        text: "Home",
-        to: "/"
-      },
-      {
-        text: "About",
-        to: "/about"
-      }
-    ]
-  },
-  getters: {
-    routes: state => state.routes
-  },
-  mutations: {
-    setDrawer: (state, payload) => (state.drawer = payload),
-    toggleDrawer: state => (state.drawer = !state.drawer)
-  },
-  actions: {},
-  modules: {}
+  modules: {
+    drawer
+  }
 });
