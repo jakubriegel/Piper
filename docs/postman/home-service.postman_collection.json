@@ -441,6 +441,21 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "owner-1",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -566,6 +581,10 @@
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.id).to.eq(undefined);\r",
 									"});\r",
+									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
+									"});\r",
 									"pm.test(\"HATEOAS: Contains describedBy link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.links.filter(it => it.rel == \"describedBy\").length).to.eq(1);\r",
@@ -611,6 +630,148 @@
 							],
 							"path": [
 								"houses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rooms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "dec81f7f-c8df-4227-b8e2-bd07c73929c6",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Contains rooms preview\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.rooms.length > 0).to.eq(true);\r",
+									"});\r",
+									"pm.test(\"HATEOAS: Contains first link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"first\").length).to.eq(1);\r",
+									"});\r",
+									"pm.test(\"HATEOAS: Contains describes link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"describes\").length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "owner-1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/houses/rooms",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"houses",
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "836df401-69da-4190-97e5-af0a4353e884",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Contains id\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.id).to.be.not.eq(undefined);\r",
+									"    pm.expect(jsonData.id).to.be.not.eq(null);\r",
+									"});\r",
+									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
+									"});\r",
+									"pm.test(\"HATEOAS: Contains describes link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"describes\").length).to.eq(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "owner-1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/houses/rooms/{{$guid}}",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"houses",
+								"rooms",
+								"{{$guid}}"
 							]
 						}
 					},
@@ -717,7 +878,7 @@
 	],
 	"variable": [
 		{
-			"id": "6588672e-a94b-4dbf-83fd-890bdd56d4f9",
+			"id": "bc18d279-0256-4d78-b27c-7b8cb1386a0e",
 			"key": "home-service",
 			"value": "{{HOST}}:{{PORT}}"
 		}

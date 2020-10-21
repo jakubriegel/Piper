@@ -383,3 +383,109 @@ Content-Type: application/json
 
 ##### Statuses
 none
+
+#### Get house's rooms 
+##### Path
+`GET /houses/rooms`
+
+##### Parameters
+none
+
+##### Request
+```
+GET /houses/rooms
+Accept: application/json
+Authorization: Basic abc:123
+```
+
+##### Response
+```
+200 OK
+Content-Type: application/json
+{
+    "rooms": [
+        {
+            "id": "37382d61-3cd3-401d-8581-fa6fbf841dc3",
+            "name": "Living Room",
+            "links": [
+                {
+                    "rel": "canonical",
+                    "href": "/houses/rooms/37382d61-3cd3-401d-8581-fa6fbf841dc3"
+                }
+            ]
+        }
+    ],
+    "links": [
+        {
+            "rel": "self",
+            "href": "/houses/rooms"
+        },
+        {
+            "rel": "first",
+            "href": "/houses/rooms/37382d61-3cd3-401d-8581-fa6fbf841dc3"
+        },
+        {
+            "rel": "describes",
+            "href": "/houses"
+        }
+    ]
+}
+```
+
+##### Statuses
+none
+
+#### Get room's details 
+##### Path
+`GET /houses/rooms/<roomId>`
+
+##### Parameters
+none
+
+##### Request
+```
+GET /houses/rooms/<roomId>
+Accept: application/json
+Authorization: Basic abc:123
+```
+
+##### Response
+```
+200 OK
+Content-Type: application/json
+{
+    "id": "60a2d650-37da-4f21-b4d6-ad9967bd5fd6",
+    "name": "Living Room",
+    "devices": [
+        {
+            "id": "10b405eb-1678-4d60-8706-9e2fd5c8b216",
+            "name": "light switch",
+            "events": [
+                {
+                    "name": "on"
+                },
+                {
+                    "name": "off"
+                }
+            ]
+        }
+    ],
+    "links": [
+        {
+            "rel": "self",
+            "href": "/houses/rooms/60a2d650-37da-4f21-b4d6-ad9967bd5fd6"
+        },
+        {
+            "rel": "collection",
+            "href": "/houses/rooms"
+        },
+        {
+            "rel": "describes",
+            "href": "/houses"
+        }
+    ]
+}
+```
+
+##### Statuses
+none
