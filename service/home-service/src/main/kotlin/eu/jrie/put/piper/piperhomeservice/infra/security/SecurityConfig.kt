@@ -28,6 +28,7 @@ class SecurityConfig {
             .pathMatchers("/events").hasAnyRole(HOUSE, ADMIN)
             .pathMatchers("/routines/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/rooms/**").hasAnyRole(USER, ADMIN)
             .anyExchange().hasAnyRole(ADMIN).and()
             .cors().and()
             .httpBasic().and()

@@ -24,7 +24,7 @@ class RoutinesService (
     fun routinesForHouse(houseId: String): Flow<RoutinePreview> = repository.findRoutinesPreview(houseId)
 
     fun routineById(id: String, user: User): Mono<Routine> = repository.findById(id)
-                .map { authService.checkForHouseAccess(user, it.houseId); it }
+                .map { authService.checkForRoutineAccess(user, it) }
 
     fun createRoutine(routine: Routine) = repository.insert(routine)
 
@@ -34,7 +34,7 @@ class RoutinesService (
 
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
-            housesService.houseById(user.house)
+            housesService.houseOfUser(user)
                     .map { it.models.current?.id ?: throw NoModelException() }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }

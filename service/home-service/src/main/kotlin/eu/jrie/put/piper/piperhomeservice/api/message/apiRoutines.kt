@@ -7,8 +7,8 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.Routine
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineConfiguration
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinePreview
+import org.springframework.hateoas.IanaLinkRelations.ABOUT
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
-import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
 import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
@@ -19,7 +19,7 @@ data class RoutinesResponse (
 ) : RepresentationalResponse(
         linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel(),
         linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST),
-        linkTo(HousesController::class.java).withRel(DESCRIBES)
+        linkTo(HousesController::class.java).withRel(ABOUT)
 )
 
 data class RoutineResponse (
@@ -28,7 +28,7 @@ data class RoutineResponse (
         linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel(),
         linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT),
         linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION),
-        linkTo(HousesController::class.java).withRel(DESCRIBES)
+        linkTo(HousesController::class.java).withRel(ABOUT)
 )
 
 data class RoutineMessage (
