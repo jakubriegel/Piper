@@ -14,21 +14,24 @@ import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
+private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth))
+private val linkToHouses = linkTo(HousesController::class.java)
+
 data class RoutinesResponse (
         val routines: List<RoutinePreview>
 ) : RepresentationalResponse(
-        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel(),
-        linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST),
-        linkTo(HousesController::class.java).withRel(ABOUT)
+        linkToRoutines.withSelfRel(),
+        linkToRoutines.slash(routines.first().id).withRel(FIRST),
+        linkToHouses.withRel(ABOUT)
 )
 
 data class RoutineResponse (
         val routine: RoutineMessage
 ) : RepresentationalResponse(
-        linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel(),
-        linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT),
-        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION),
-        linkTo(HousesController::class.java).withRel(ABOUT)
+        linkToRoutines.slash(routine.id).withSelfRel(),
+        linkToRoutines.slash(routine.id).withRel(EDIT),
+        linkToRoutines.withRel(COLLECTION),
+        linkToHouses.withRel(ABOUT)
 )
 
 data class RoutineMessage (
@@ -61,5 +64,5 @@ data class RoutineSuggestionsResponse (
         val n: Int
 ) : RepresentationalResponse(
         linkTo(RoutinesController::class.java).slash("suggestions?trigger=${start.trigger}&trigger=${start.action}&limit=$n").withSelfRel(),
-        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION)
+        linkToRoutines.withRel(COLLECTION)
 )
