@@ -11,30 +11,25 @@ import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
 import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.IanaLinkRelations.FIRST
-import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
 data class RoutinesResponse (
         val routines: List<RoutinePreview>
-) : RepresentationModel<RoutinesResponse>(), ApiResponse {
-    init {
-        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel())
-        add(linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST))
-        add(linkTo(HousesController::class.java).withRel(DESCRIBES))
-    }
-}
+) : RepresentationalResponse(
+        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel(),
+        linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST),
+        linkTo(HousesController::class.java).withRel(DESCRIBES)
+)
 
 data class RoutineResponse (
         val routine: RoutineMessage
-) : RepresentationModel<RoutineResponse>(), ApiResponse {
-    init {
-        add(linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel())
-        add(linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT))
-        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
-        add(linkTo(HousesController::class.java).withRel(DESCRIBES))
-    }
-}
+) : RepresentationalResponse(
+        linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel(),
+        linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT),
+        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION),
+        linkTo(HousesController::class.java).withRel(DESCRIBES)
+)
 
 data class RoutineMessage (
         val id: String,
@@ -64,9 +59,7 @@ data class RoutineSuggestionsResponse (
         val start: RoutineEvent,
         val suggestions: List<RoutineEvent>,
         val n: Int
-) : RepresentationModel<RoutineSuggestionsResponse>(), ApiResponse {
-    init {
-        add(linkTo(RoutinesController::class.java).slash("suggestions?trigger=${start.trigger}&trigger=${start.action}&limit=$n").withSelfRel())
-        add(linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
-    }
-}
+) : RepresentationalResponse(
+        linkTo(RoutinesController::class.java).slash("suggestions?trigger=${start.trigger}&trigger=${start.action}&limit=$n").withSelfRel(),
+        linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION)
+)
