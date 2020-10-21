@@ -4,6 +4,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
+import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -34,7 +35,7 @@ class RoutinesService (
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.houseById(user.house)
-                    .map { it.models.current.id }
+                    .map { it.models.current?.id ?: throw NoModelException() }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
 
@@ -56,3 +57,5 @@ class RoutinesService (
                 .let { (trigger, action) -> RoutineEvent(trigger, action) }
     }
 }
+
+class NoModelException : PiperException("Predictions not available.")

@@ -35,3 +35,4 @@ out/
 
 *.p12
 piper.p12
+src/main/resources/piper.p12

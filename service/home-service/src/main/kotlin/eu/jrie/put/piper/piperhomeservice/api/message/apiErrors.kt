@@ -2,10 +2,12 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
+import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.status
@@ -27,7 +29,8 @@ fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
 }
 
 private fun PiperException.businessError() = when (this) {
-    is InsufficientAccessException -> HttpStatus.FORBIDDEN
+    is InsufficientAccessException -> FORBIDDEN
+    is NoModelException -> NO_CONTENT
     else -> throw IllegalStateException("Unknown exception: $this")
 }.let { status(it).body(this.asErrorResponse()) }
 

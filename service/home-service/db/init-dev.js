@@ -46,6 +46,17 @@ house.insert({
         "behaviourBasedLearning": true
     }
 })
+house.insert({
+    "_id": "house-3",
+    "name": "Our Home 3 [no models]",
+    "models": {
+        "current": null,
+        "past": []
+    },
+    "consents": {
+        "behaviourBasedLearning": true
+    }
+})
 
 const user = db.getCollection("user")
 user.remove({})
@@ -53,6 +64,18 @@ user.insert({
     "login":"house-1-server",
     "secret":"{noop}secret",
     "house": "house-1",
+    "roles":["HOUSE"]
+})
+user.insert({
+    "login":"house-2-server",
+    "secret":"{noop}secret",
+    "house": "house-2",
+    "roles":["HOUSE"]
+})
+user.insert({
+    "login":"house-3-server",
+    "secret":"{noop}secret",
+    "house": "house-3",
     "roles":["HOUSE"]
 })
 user.insert({
@@ -65,6 +88,12 @@ user.insert({
     "login":"owner-2",
     "secret":"{noop}secret",
     "house": "house-2",
+    "roles":["USER"]
+})
+user.insert({
+    "login":"owner-3",
+    "secret":"{noop}secret",
+    "house": "house-3",
     "roles":["USER"]
 })
 
@@ -108,6 +137,30 @@ routine.insert({
             "THURSDAY",
             "FRIDAY"
         ],
+        "start": null,
+        "end": null
+    }
+})
+routine.insert({
+    "_id": "ba7fa1ba-100a-4b16-94ce-f827ef7e1f74",
+    "name": "Evening 2",
+    "houseId": "house-2",
+    "enabled": false,
+    "events": [],
+    "configuration": {
+        "days": [],
+        "start": null,
+        "end": null
+    }
+})
+routine.insert({
+    "_id": "12dcd3ee-2199-4c3e-bf8e-df2fd2deb672",
+    "name": "Evening 3",
+    "houseId": "house-3",
+    "enabled": false,
+    "events": [],
+    "configuration": {
+        "days": [],
         "start": null,
         "end": null
     }

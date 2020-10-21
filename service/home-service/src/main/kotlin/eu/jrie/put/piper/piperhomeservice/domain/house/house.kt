@@ -16,7 +16,7 @@ data class House (
 )
 
 data class Models (
-        val current: Model,
+        val current: Model?,
         val past: Set<Model>
 )
 
