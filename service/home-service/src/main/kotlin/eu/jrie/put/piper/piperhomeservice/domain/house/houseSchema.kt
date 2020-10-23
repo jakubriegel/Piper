@@ -1,23 +1,26 @@
 package eu.jrie.put.piper.piperhomeservice.domain.house
 
-interface HouseNode {
-    val id: String
-    val name: String
-}
-
 data class Room (
-        override val id: String,
+        val id: String,
         val houseId: String,
-        override val name: String
-) : HouseNode
+        val name: String
+)
 
 data class Device (
-        override val id: String,
+        val id: String,
         val roomId: String,
-        override val name: String,
-        val events: Set<DeviceEvent>
-) : HouseNode
+        val typeId: String,
+        val name: String
+)
 
-data class DeviceEvent(
+data class DeviceType (
+        val id: String,
+        val houseId: String,
+        val name: String,
+        val events: Set<DeviceEvent>
+)
+
+data class DeviceEvent (
+        val id: String,
         val name: String
 )

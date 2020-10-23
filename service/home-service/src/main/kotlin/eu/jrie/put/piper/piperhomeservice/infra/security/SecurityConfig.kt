@@ -29,6 +29,7 @@ class SecurityConfig {
             .pathMatchers("/routines/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/rooms/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/devices/types/**").hasAnyRole(USER, ADMIN)
             .anyExchange().hasAnyRole(ADMIN).and()
             .cors().and()
             .httpBasic().and()

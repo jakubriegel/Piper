@@ -4,6 +4,7 @@ import eu.jrie.put.piper.piperhomeservice.api.HousesController
 import eu.jrie.put.piper.piperhomeservice.domain.house.Consents
 import eu.jrie.put.piper.piperhomeservice.domain.house.Device
 import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceEvent
+import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceType
 import eu.jrie.put.piper.piperhomeservice.domain.house.Room
 import org.springframework.hateoas.IanaLinkRelations.CANONICAL
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
@@ -48,14 +49,35 @@ data class RoomResponse (
 ) : RepresentationalResponse(
         linkToRooms.slash(id).withSelfRel(),
         linkToRooms.withRel(COLLECTION),
-        linkToHouses.withRel(DESCRIBES)
+        linkToHouses.withRel(DESCRIBES),
+        linkToHouses.slash("types").withRel(DESCRIBED_BY)
 )
 
 data class DeviceMessage (
         val id: String,
+        val typeId: String,
         val name: String,
-        val events: Set<DeviceEvent>
 ) : ApiMessage
 
 fun List<Device>.asMessage() = map { it.asMessage() }
-fun Device.asMessage() = DeviceMessage(id, name, events)
+fun Device.asMessage() = DeviceMessage(id, typeId, name)
+
+data class DeviceTypesResponse (
+        val types: List<DeviceTypeResponse>
+) : RepresentationalResponse(
+        linkToHouses.slash("types").withSelfRel(),
+        linkToHouses.slash("types").slash(types.first().id).withRel(FIRST),
+        linkToRooms.withRel(DESCRIBES)
+)
+
+data class DeviceTypeResponse (
+        val id: String,
+        val name: String,
+        val events: Set<DeviceEvent>
+) : RepresentationalResponse(
+        linkToHouses.slash("types").slash(id).withSelfRel(),
+        linkToHouses.slash("types").withRel(COLLECTION)
+)
+
+fun List<DeviceType>.asResponse() = map { it.asResponse() }
+fun DeviceType.asResponse() = DeviceTypeResponse(id, name, events)

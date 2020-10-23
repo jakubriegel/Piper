@@ -1,13 +1,16 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.DeviceTypesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoomResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoomsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
+import eu.jrie.put.piper.piperhomeservice.api.message.asResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -40,8 +43,8 @@ class HousesController (
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
        return service.roomsOfUsersHouse(auth.asUser())
-               .asFlux()
                .map { it.asMessage() }
+               .asFlux()
                .collectList()
                .map { RoomsResponse(it) }
                .map { ok(it as ApiResponse) }
@@ -55,6 +58,30 @@ class HousesController (
     ): Mono<ResponseEntity<ApiResponse>> {
         return service.roomDetails(id, auth.asUser())
                 .map { (room, devices) -> RoomResponse(room.id, room.name, devices.asMessage()) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
+    }
+
+    @GetMapping("devices/types", produces = [APPLICATION_JSON_VALUE])
+    fun getDeviceTypes(
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        return service.deviceTypesOfUsersHouse(auth.asUser())
+                .map { it.asResponse() }
+                .asFlux()
+                .collectList()
+                .map { DeviceTypesResponse(it) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
+    }
+
+    @GetMapping("devices/types/{id}", produces = [APPLICATION_JSON_VALUE])
+    fun getDeviceType(
+            @PathVariable id: String,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        return service.deviceTypeById(id, auth.asUser())
+                .map { it.asResponse() }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
     }

@@ -21,8 +21,8 @@ class HousesService (
 
     fun roomsOfUsersHouse(user: User): Flow<Room> {
         return flowOf(
-                Room(randomUUID().toString(), user.house, "Living Room"),
-                Room(randomUUID().toString(), user.house, "Kitchen")
+                Room(uuid, user.house, "Living Room"),
+                Room(uuid, user.house, "Kitchen")
         )
     }
 
@@ -31,8 +31,8 @@ class HousesService (
                 .map { authService.checkForRoomAccess(user, it) }
                 .map {
                     val devices = flowOf(
-                            Device(randomUUID().toString(), it.id, "light switch", setOf(DeviceEvent("on"), DeviceEvent("off"))),
-                            Device(randomUUID().toString(), it.id, "window", setOf(DeviceEvent("open"), DeviceEvent("close")))
+                            Device(uuid, it.id, uuid, "light switch"),
+                            Device(uuid, it.id, uuid, "window")
                     )
                     it to devices.toList()
                 }
@@ -40,4 +40,21 @@ class HousesService (
                 .toMono()
     }
 
+    fun deviceTypesOfUsersHouse(user: User): Flow<DeviceType> {
+        return flowOf(
+                DeviceType(uuid, "LAMP", user.house, setOf(DeviceEvent(uuid, "on"), DeviceEvent(uuid, "off"))),
+                DeviceType(uuid, "WINDOW", user.house, setOf(DeviceEvent(uuid, "open"), DeviceEvent(uuid, "close")))
+        )
+    }
+
+    fun deviceTypeById(typeId: String, user: User): Mono<DeviceType> {
+        return Mono.just(
+                DeviceType(typeId, user.house, "LAMP", setOf(DeviceEvent(uuid, "on"), DeviceEvent(uuid, "off")))
+        ).map { authService.checkForDeviceTypeAccess(user, it) }
+    }
+
+    private companion object {
+        val uuid: String
+            get() = randomUUID().toString()
+    }
 }
