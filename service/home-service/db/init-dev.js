@@ -61,6 +61,12 @@ house.insert({
 const user = db.getCollection("user")
 user.remove({})
 user.insert({
+    "login":"admin",
+    "secret":"{noop}secret",
+    "house": "",
+    "roles":["ADMIN"]
+})
+user.insert({
     "login":"house-1-server",
     "secret":"{noop}secret",
     "house": "house-1",

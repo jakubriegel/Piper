@@ -27,7 +27,7 @@ data class Model (
 )
 
 data class Consents (
-        val behaviourBasedLearning: Boolean
+        val behaviourBasedLearning: Boolean = true
 )
 
 interface HousesRepository : ReactiveMongoRepository<House, String>

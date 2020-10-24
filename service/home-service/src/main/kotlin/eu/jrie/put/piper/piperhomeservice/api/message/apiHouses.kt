@@ -5,6 +5,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.Consents
 import eu.jrie.put.piper.piperhomeservice.domain.house.Device
 import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceEvent
 import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceType
+import eu.jrie.put.piper.piperhomeservice.domain.house.House
 import eu.jrie.put.piper.piperhomeservice.domain.house.Room
 import org.springframework.hateoas.IanaLinkRelations.CANONICAL
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
@@ -24,6 +25,14 @@ data class HouseResponse (
         linkToHouses.withRel(COLLECTION),
         linkToRooms.withRel(DESCRIBED_BY)
 )
+
+fun House.asResponse() = HouseResponse(name, consents)
+
+data class HouseCreatedResponse (
+        val house: HouseResponse,
+        val ownerUserLogin: String,
+        val houseUseLogin: String
+) : ApiResponse
 
 data class RoomsResponse (
         val rooms: List<RoomPreviewMessage>
