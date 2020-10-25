@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NO_CONTENT
@@ -21,6 +23,7 @@ data class ErrorResponse (
 ) : ApiResponse
 
 fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
+    logger.error("An error occurred", e)
     when(e) {
         is PiperException -> e.businessError()
         is ServerWebInputException -> e.badRequest()
@@ -67,3 +70,5 @@ private fun Throwable.internalServerError(): ResponseEntity<ApiResponse> = Error
         "SERVER_ERROR", "An unknown error occurred",
         mapOf( "exception" to this::class.simpleName, "errorMessage" to message)
 ).let { status(INTERNAL_SERVER_ERROR).body(it) }
+
+private val logger: Logger = LoggerFactory.getLogger("ErrorLogger")
