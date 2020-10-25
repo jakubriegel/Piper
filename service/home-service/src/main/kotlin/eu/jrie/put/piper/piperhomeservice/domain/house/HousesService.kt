@@ -14,9 +14,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.function.Tuple2
 
 @Service
 class HousesService (
@@ -47,41 +49,33 @@ class HousesService (
     private fun updateSchema(schema: NewHouseSchema, houseId: String): Mono<HouseSchema> {
         return schema.deviceTypes.toFlux()
                 .distinct()
-                .flatMap { deviceTypeSchema ->
-                    val typeId = nextUUID
-                    val type = DeviceType(typeId, houseId, deviceTypeSchema.name)
-                    val events = deviceTypeSchema.events.toFlux()
-                            .map { DeviceEvent(nextUUID, typeId, it.name) }
+                .map { DeviceType(nextUUID, houseId, it.name) to it.events.toFlux() }
+                .map { (type, eventsSchema) -> type to eventsSchema.map { DeviceEvent(nextUUID, type.id, it.name) } }
+                .flatMap { (type, events) ->
                     Mono.zip(
                             deviceTypeRepository.insert(type),
                             deviceEventRepository.insert(events).collectList()
                     )
                 }
-                .collectList()
-                .map { it.map { (type, _) -> type } to it.flatMap { (_, deviceEvents) -> deviceEvents } }
-                .map { (deviceTypes, deviceEvents) -> deviceTypes.toSet() to deviceEvents.toSet() }
+                .collectLists()
                 .flatMap { (deviceTypes, deviceEvents) ->
                     schema.rooms.toFlux()
                             .distinct()
-                            .flatMap { roomSchema ->
-                                val roomId = nextUUID
-                                val room = Room(roomId, houseId, roomSchema.name)
-                                val devices = roomSchema.devices.toFlux()
-                                        .map { deviceSchema ->
-                                            val typeId = deviceTypes.first { it.name == deviceSchema.type }.id
-                                            Device(nextUUID, roomId, typeId, deviceSchema.name)
-                                        }
+                            .map { Room(nextUUID, houseId, it.name) to it.devices.toFlux() }
+                            .map { (room, devicesSchema) ->
+                                room to devicesSchema.map { deviceSchema ->
+                                    val type = deviceTypes.first { it.name == deviceSchema.type }
+                                    Device(nextUUID, room.id, type.id, deviceSchema.name)
+                                }
+                            }
+                            .flatMap { (room, devices) ->
                                 Mono.zip(
                                         roomRepository.insert(room),
                                         deviceRepository.insert(devices).collectList()
                                 )
                             }
-                            .collectList()
-                            .map { it.map { (room, _) -> room } to it.flatMap { (_, devices) -> devices } }
-                            .map { (room, devices) -> room.toSet() to devices.toSet() }
-                            .map { (rooms, devices) ->
-                                HouseSchema(deviceTypes, deviceEvents, rooms, devices)
-                            }
+                            .collectLists()
+                            .map { (rooms, devices) -> HouseSchema(deviceTypes, deviceEvents, rooms, devices) }
                 }
     }
 
@@ -125,5 +119,14 @@ class HousesService (
     fun deviceTypeById(typeId: String, user: User): Mono<DeviceType> {
         return deviceTypeRepository.findById(typeId)
                 .map { authService.checkForDeviceTypeAccess(user, it) }
+    }
+
+    private companion object {
+        fun <A, B> Flux<Tuple2<A, List<B>>>.collectLists() = collectList()
+                .map {
+                    val a = it.map { (a, _) -> a }.toSet()
+                    val b = it.flatMap { (_, b) -> b }.toSet()
+                    a to b
+                }
     }
 }
