@@ -89,4 +89,4 @@ data class DeviceTypeResponse (
 )
 
 fun List<DeviceType>.asResponse() = map { it.asResponse() }
-fun DeviceType.asResponse() = DeviceTypeResponse(id, name, events)
+fun DeviceType.asResponse() = DeviceTypeResponse(id, name, emptySet())
