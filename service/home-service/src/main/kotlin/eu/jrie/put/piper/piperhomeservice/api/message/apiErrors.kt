@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactor.asFlux
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.FORBIDDEN
@@ -15,12 +17,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.status
 import org.springframework.web.server.ServerWebInputException
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 data class ErrorResponse (
         val error: String,
         val message: String,
         val details: Map<String, Any?>
 ) : ApiResponse
+
+fun Flow<ResponseEntity<ApiResponse>>.handleErrors() = asFlux().toMono().handleErrors()
 
 fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
     logger.error("An error occurred", e)

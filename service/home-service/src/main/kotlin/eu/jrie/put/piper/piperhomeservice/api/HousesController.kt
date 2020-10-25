@@ -4,16 +4,18 @@ import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.DeviceTypesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseCreatedResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseResponse
-import eu.jrie.put.piper.piperhomeservice.api.message.RoomResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.HouseSchemaResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoomsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.asResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
-import eu.jrie.put.piper.piperhomeservice.domain.house.HouseSchema
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.house.NewHouseSchema
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
+import eu.jrie.put.piper.piperhomeservice.infra.common.component1
+import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -61,9 +63,24 @@ class HousesController (
     suspend fun putSchema(
             @RequestBody schema: NewHouseSchema,
             auth: Authentication
-    ): ResponseEntity<HouseSchema> {
+    ): ResponseEntity<ApiResponse> {
         return service.updateSchema(schema, auth.asUser())
-                .map { ok(it) }
+                .then(Mono.zip(
+                        service.deviceTypesOfUsersHouse(auth.asUser())
+                                .map { it.asResponse() }
+                                .asFlux()
+                                .collectList(),
+                        service.roomsOfUsersHouse(auth.asUser())
+                                .asFlux()
+                                .flatMap { service.roomDetails(it.id, auth.asUser()) }
+                                .asFlow()
+                                .map { it.asResponse() }
+                                .asFlux()
+                                .collectList()
+                ))
+                .map { (deviceTypes, rooms) -> HouseSchemaResponse(deviceTypes, rooms) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
                 .awaitFirst()
     }
 
@@ -86,7 +103,8 @@ class HousesController (
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         return service.roomDetails(id, auth.asUser())
-                .map { (room, devices) -> RoomResponse(room.id, room.name, devices.asMessage()) }
+                .asFlow()
+                .map { it.asResponse() }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
     }

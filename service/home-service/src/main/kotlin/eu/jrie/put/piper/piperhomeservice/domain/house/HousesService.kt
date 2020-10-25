@@ -8,16 +8,13 @@ import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
-import reactor.kotlin.core.publisher.toMono
 import reactor.util.function.Tuple2
 
 @Service
@@ -41,12 +38,12 @@ class HousesService (
                         }
             }
 
-    suspend fun updateSchema(schema: NewHouseSchema, user: User): Mono<HouseSchema> {
+    suspend fun updateSchema(schema: NewHouseSchema, user: User): Mono<Void> {
         deleteHouseSchema(user.house)
         return updateSchema(schema, user.house)
     }
 
-    private fun updateSchema(schema: NewHouseSchema, houseId: String): Mono<HouseSchema> {
+    private fun updateSchema(schema: NewHouseSchema, houseId: String): Mono<Void> {
         return schema.deviceTypes.toFlux()
                 .distinct()
                 .map { DeviceType(nextUUID, houseId, it.name) to it.events.toFlux() }
@@ -58,7 +55,7 @@ class HousesService (
                     )
                 }
                 .collectLists()
-                .flatMap { (deviceTypes, deviceEvents) ->
+                .flatMap { (deviceTypes, _) ->
                     schema.rooms.toFlux()
                             .distinct()
                             .map { Room(nextUUID, houseId, it.name) to it.devices.toFlux() }
@@ -75,7 +72,7 @@ class HousesService (
                                 )
                             }
                             .collectLists()
-                            .map { (rooms, devices) -> HouseSchema(deviceTypes, deviceEvents, rooms, devices) }
+                            .then(Mono.empty())
                 }
     }
 
@@ -91,35 +88,28 @@ class HousesService (
         roomRepository.deleteAllByHouseId(houseId).awaitFirstOrNull()
     }
 
-    fun roomsOfUsersHouse(user: User): Flow<Room> {
-        return flowOf(
-                Room(nextUUID, user.house, "Living Room"),
-                Room(nextUUID, user.house, "Kitchen")
-        )
-    }
+    fun roomsOfUsersHouse(user: User) = roomsOfHouse(user.house)
 
-    fun roomDetails(roomId: String, user: User): Mono<Pair<Room, List<Device>>> {
-        return flowOf(Room(roomId, user.house, "Living Room"))
+    private fun roomsOfHouse(houseId: String) = roomRepository.findAllByHouseId(houseId)
+
+    fun roomDetails(roomId: String, user: User): Mono<Pair<Room, Flow<Device>>> {
+        return roomRepository.findById(roomId)
                 .map { authService.checkForRoomAccess(user, it) }
-                .map {
-                    val devices = flowOf(
-                            Device(nextUUID, it.id, nextUUID, "light switch"),
-                            Device(nextUUID, it.id, nextUUID, "window")
-                    )
-                    it to devices.toList()
-                }
-                .asFlux()
-                .toMono()
+                .map { it to devicesOfRoom(it.id) }
     }
 
-    fun deviceTypesOfUsersHouse(user: User): Flow<DeviceType> {
-        return deviceTypeRepository.findAllByHouseId(user.house)
-    }
+    private fun devicesOfRoom(roomId: String) = deviceRepository.findAllByRoomId(roomId)
 
-    fun deviceTypeById(typeId: String, user: User): Mono<DeviceType> {
-        return deviceTypeRepository.findById(typeId)
-                .map { authService.checkForDeviceTypeAccess(user, it) }
-    }
+    fun deviceTypesOfUsersHouse(user: User) = deviceTypesOfHouse(user.house)
+
+    private fun deviceTypesOfHouse(houseId: String) = deviceTypeRepository.findAllByHouseId(houseId)
+            .map { it to deviceEventRepository.findAllByDeviceTypeId(it.id) }
+
+
+    fun deviceTypeById(typeId: String, user: User) = deviceTypeRepository.findById(typeId)
+            .asFlow()
+            .map { authService.checkForDeviceTypeAccess(user, it) }
+            .map { it to deviceEventRepository.findAllByDeviceTypeId(it.id) }
 
     private companion object {
         fun <A, B> Flux<Tuple2<A, List<B>>>.collectLists() = collectList()

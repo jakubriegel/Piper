@@ -7,6 +7,9 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceEvent
 import eu.jrie.put.piper.piperhomeservice.domain.house.DeviceType
 import eu.jrie.put.piper.piperhomeservice.domain.house.House
 import eu.jrie.put.piper.piperhomeservice.domain.house.Room
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toSet
 import org.springframework.hateoas.IanaLinkRelations.CANONICAL
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.DESCRIBED_BY
@@ -15,7 +18,8 @@ import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 
 private val linkToHouses = linkTo(HousesController::class.java)
-private val linkToRooms = linkTo(HousesController::class.java).slash("rooms")
+private val linkToRooms = linkToHouses.slash("rooms")
+private val linkToDevicesTypes = linkToHouses.slash("devices").slash("types")
 
 data class HouseResponse (
         val name: String,
@@ -33,6 +37,13 @@ data class HouseCreatedResponse (
         val ownerUserLogin: String,
         val houseUseLogin: String
 ) : ApiResponse
+
+data class HouseSchemaResponse (
+    val deviceTypes: List<DeviceTypeResponse>,
+    val rooms: List<RoomResponse>
+) : RepresentationalResponse(
+        linkToHouses.slash("schema").withSelfRel()
+)
 
 data class RoomsResponse (
         val rooms: List<RoomPreviewMessage>
@@ -54,39 +65,51 @@ fun Room.asMessage() = RoomPreviewMessage(id, name)
 data class RoomResponse (
         val id: String,
         val name: String,
-        val devices: List<DeviceMessage>
+        val devices: Set<DeviceMessage>
 ) : RepresentationalResponse(
         linkToRooms.slash(id).withSelfRel(),
         linkToRooms.withRel(COLLECTION),
-        linkToHouses.withRel(DESCRIBES),
-        linkToHouses.slash("types").withRel(DESCRIBED_BY)
 )
+
+@JvmName("asResponseRoomDevice")
+suspend fun Pair<Room, Flow<Device>>.asResponse() = let { (room, devices) ->
+    RoomResponse(room.id, room.name, devices.map { it.asMessage(room.id) }.toSet())
+}
 
 data class DeviceMessage (
         val id: String,
         val typeId: String,
         val name: String,
-) : ApiMessage
+        private val roomId: String
+) : RepresentationalResponse(
+        linkToRooms.slash(roomId).withRel(COLLECTION),
+        linkToDevicesTypes.slash(typeId).withRel(DESCRIBED_BY)
+)
 
-fun List<Device>.asMessage() = map { it.asMessage() }
-fun Device.asMessage() = DeviceMessage(id, typeId, name)
+private fun Device.asMessage(roomId: String) = DeviceMessage(id, typeId, name, roomId)
 
 data class DeviceTypesResponse (
         val types: List<DeviceTypeResponse>
 ) : RepresentationalResponse(
-        linkToHouses.slash("types").withSelfRel(),
-        linkToHouses.slash("types").slash(types.first().id).withRel(FIRST),
+        linkToDevicesTypes.withSelfRel(),
+        linkToDevicesTypes.slash(types.first().id).withRel(FIRST),
         linkToRooms.withRel(DESCRIBES)
 )
 
 data class DeviceTypeResponse (
         val id: String,
         val name: String,
-        val events: Set<DeviceEvent>
+        val events: Set<DeviceEventMessage>
 ) : RepresentationalResponse(
-        linkToHouses.slash("types").slash(id).withSelfRel(),
-        linkToHouses.slash("types").withRel(COLLECTION)
+        linkToDevicesTypes.slash(id).withSelfRel(),
+        linkToDevicesTypes.withRel(COLLECTION)
 )
 
-fun List<DeviceType>.asResponse() = map { it.asResponse() }
-fun DeviceType.asResponse() = DeviceTypeResponse(id, name, emptySet())
+suspend fun Pair<DeviceType, Flow<DeviceEvent>>.asResponse() = let { (type, events) ->
+    DeviceTypeResponse(type.id, type.name, events.map { DeviceEventMessage(it.id, it.name) } .toSet())
+}
+
+data class DeviceEventMessage (
+        val id: String,
+        val name: String
+)
