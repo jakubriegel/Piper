@@ -19,3 +19,16 @@ abstract class RepresentationalResponse (
 
     private fun addLinks(vararg links: Link) = add(*links)
 }
+
+fun Map<String, String>.asQuery() = when {
+    isEmpty() -> ""
+    else -> entries.joinToString(separator = "&", prefix = "?") { (k, v) -> "$k=$v" }
+}
+
+@Suppress("UNCHECKED_CAST")
+fun params(vararg params: Pair<String, String?>): Map<String, String> {
+    return params.filter { (_, v) -> v != null }
+            .map { it as Pair<String, String> }
+            .toTypedArray()
+            .let { mapOf(*it) }
+}

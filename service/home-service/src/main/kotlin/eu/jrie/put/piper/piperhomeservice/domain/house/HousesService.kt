@@ -6,11 +6,14 @@ import eu.jrie.put.piper.piperhomeservice.domain.user.UserService
 import eu.jrie.put.piper.piperhomeservice.infra.common.component1
 import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -97,6 +100,22 @@ class HousesService (
                 .map { authService.checkForRoomAccess(user, it) }
                 .map { it to devicesOfRoom(it.id) }
     }
+
+    @FlowPreview
+    fun devicesOfUsersHouse(user: User) = roomsOfUsersHouse(user).flatMapConcat {
+        deviceRepository.findAllByRoomId(it.id)
+    } .asFlux()
+
+    fun devicesOfRoom(roomId: String, user: User) = roomRepository.findById(roomId)
+            .map { authService.checkForRoomAccess(user, it) }
+            .flatMapMany { deviceRepository.findAllByRoomId(roomId).asFlux() }
+
+    fun deviceById(deviceId: String, user: User) = deviceRepository.findById(deviceId)
+            .flatMap { device ->
+                roomRepository.findById(device.roomId)
+                        .map { authService.checkForRoomAccess(user, it) }
+                        .map { device }
+            }
 
     private fun devicesOfRoom(roomId: String) = deviceRepository.findAllByRoomId(roomId)
 

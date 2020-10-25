@@ -25,9 +25,7 @@ data class Room (
 
 interface RoomRepository : ReactiveMongoRepository<Room, String> {
     fun findAllByHouseId(houseId: String): Flow<Room>
-
-    @DeleteQuery
-    fun deleteAllByHouseId(houseId: String): Mono<Void>
+    @DeleteQuery fun deleteAllByHouseId(houseId: String): Mono<Void>
 }
 
 data class RoomSchema (
@@ -44,8 +42,7 @@ data class Device (
 
 interface DeviceRepository : ReactiveMongoRepository<Device, String> {
     fun findAllByRoomId(roomId: String): Flow<Device>
-    @DeleteQuery
-    fun deleteAllByRoomId(houseId: String): Mono<Void>
+    @DeleteQuery fun deleteAllByRoomId(houseId: String): Mono<Void>
 }
 
 data class DeviceSchema (
@@ -66,9 +63,7 @@ data class DeviceTypeSchema (
 
 interface DeviceTypeRepository : ReactiveMongoRepository<DeviceType, String> {
     fun findAllByHouseId(houseId: String): Flow<DeviceType>
-
-    @DeleteQuery
-    fun deleteAllByHouseId(houseId: String): Mono<Void>
+    @DeleteQuery fun deleteAllByHouseId(houseId: String): Mono<Void>
 }
 
 data class DeviceEvent (
@@ -83,6 +78,5 @@ data class DeviceEventSchema (
 
 interface DeviceEventRepository : ReactiveMongoRepository<DeviceEvent, String> {
     fun findAllByDeviceTypeId(deviceTypeId: String): Flow<DeviceEvent>
-    @DeleteQuery
-    fun deleteAllByDeviceTypeId(houseId: String): Mono<Void>
+    @DeleteQuery fun deleteAllByDeviceTypeId(houseId: String): Mono<Void>
 }

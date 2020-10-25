@@ -2,6 +2,7 @@ package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.DeviceTypesResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.DevicesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseCreatedResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.HouseSchemaResponse
@@ -9,12 +10,13 @@ import eu.jrie.put.piper.piperhomeservice.api.message.RoomsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.asResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
+import eu.jrie.put.piper.piperhomeservice.api.message.params
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.house.NewHouseSchema
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
-import eu.jrie.put.piper.piperhomeservice.infra.common.component1
-import eu.jrie.put.piper.piperhomeservice.infra.common.component2
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.asFlux
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.net.URI
@@ -65,18 +68,16 @@ class HousesController (
             auth: Authentication
     ): ResponseEntity<ApiResponse> {
         return service.updateSchema(schema, auth.asUser())
-                .then(Mono.zip(
+                .then(Mono.just(
                         service.deviceTypesOfUsersHouse(auth.asUser())
                                 .map { it.asResponse() }
-                                .asFlux()
-                                .collectList(),
+                                .toList() to
                         service.roomsOfUsersHouse(auth.asUser())
                                 .asFlux()
                                 .flatMap { service.roomDetails(it.id, auth.asUser()) }
                                 .asFlow()
                                 .map { it.asResponse() }
-                                .asFlux()
-                                .collectList()
+                                .toList()
                 ))
                 .map { (deviceTypes, rooms) -> HouseSchemaResponse(deviceTypes, rooms) }
                 .map { ok(it as ApiResponse) }
@@ -97,14 +98,29 @@ class HousesController (
                .handleErrors()
     }
 
-    @GetMapping("rooms/{id}", produces = [APPLICATION_JSON_VALUE])
-    fun getRoom(
+    @GetMapping("devices", produces = [APPLICATION_JSON_VALUE])
+    @FlowPreview
+    fun getDevices(
+            @RequestParam(required = false) roomId: String?,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        return when (roomId) {
+            null -> service.devicesOfUsersHouse(auth.asUser())
+            else -> service.devicesOfRoom(roomId, auth.asUser())
+        }.map { it.asMessage() }
+                .collectList()
+                .map { DevicesResponse(it, params("roomId" to roomId)) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
+    }
+
+    @GetMapping("devices/{id}", produces = [APPLICATION_JSON_VALUE])
+    fun getDevice(
             @PathVariable id: String,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        return service.roomDetails(id, auth.asUser())
-                .asFlow()
-                .map { it.asResponse() }
+        return service.deviceById(id, auth.asUser())
+                .map { it.asMessage() }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
     }

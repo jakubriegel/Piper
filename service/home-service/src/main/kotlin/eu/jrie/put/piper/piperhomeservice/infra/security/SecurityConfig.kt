@@ -30,6 +30,7 @@ class SecurityConfig {
             .pathMatchers(POST, "/houses").hasRole(ADMIN)
             .pathMatchers(GET, "/houses").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/rooms/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/devices/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/devices/types/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/schema").hasAnyRole(HOUSE, ADMIN)
             .anyExchange().hasAnyRole(ADMIN).and()
