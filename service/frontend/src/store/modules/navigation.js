@@ -8,6 +8,10 @@ export const navigation = {
         to: "/"
       },
       {
+        text: "Routines",
+        to: "/routines"
+      },
+      {
         text: "About",
         to: "/about"
       }
