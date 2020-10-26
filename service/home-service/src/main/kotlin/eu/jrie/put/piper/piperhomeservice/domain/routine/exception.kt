@@ -9,5 +9,5 @@ class NoModelException : PiperException("Predictions not available.")
 class NotDeviceEventException(
         device: Device, event: DeviceEvent
 ) : PiperException("Provided event is not triggered by given device.") {
-    override val details = mapOf("device" to device.id, "event" to event)
+    override val details = mapOf("device" to device, "event" to event)
 }
