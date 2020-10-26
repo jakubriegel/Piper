@@ -59,8 +59,9 @@ data class RoutineRequest (
 data class RoutineSuggestionsResponse (
         val start: RoutineEvent,
         val suggestions: List<RoutineEvent>,
-        val n: Int
+        val n: Int,
+        val params: Map<String, String?>
 ) : RepresentationalResponse(
-        linkToRoutines.slash("suggestions?deviceId=${start.deviceId}&eventId=${start.eventId}&limit=$n").withSelfRel(),
+        linkToRoutines.slash("suggestions").withQuery(params).withSelfRel(),
         linkToRoutines.withRel(COLLECTION)
 )

@@ -92,7 +92,7 @@ data class DevicesResponse (
         val devices: List<DeviceResponse>,
         val params: Map<String, String>
 ) : RepresentationalResponse(
-        linkToHouses.slash(params.asQuery()).withSelfRel(),
+        linkToHouses.withQuery(params).withSelfRel(),
         linkToDevicesTypes.withRel(DESCRIBED_BY)
 )
 

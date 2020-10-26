@@ -91,11 +91,12 @@ class RoutinesController(
             @RequestParam(required = false, defaultValue = "5") limit: Int = 5,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
+        val params = mapOf("deviceId" to deviceId, "eventId" to eventId, "limit" to limit.toString())
         val start = RoutineEvent(deviceId, eventId)
         return service.getContinuationSuggestions(start, limit, auth.asUser())
                 .asFlux()
                 .collectList()
-                .map { RoutineSuggestionsResponse(start, it, limit) }
+                .map { RoutineSuggestionsResponse(start, it, limit, params) }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
     }

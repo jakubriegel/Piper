@@ -2,6 +2,7 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.RepresentationModel
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
 
 interface ApiMessage
 
@@ -20,9 +21,11 @@ abstract class RepresentationalResponse (
     private fun addLinks(vararg links: Link) = add(*links)
 }
 
-fun Map<String, String>.asQuery() = when {
+fun WebMvcLinkBuilder.withQuery(params: Map<String, String?>) = slash(params.asQuery())
+
+private fun Map<String, String?>.asQuery() = when {
     isEmpty() -> ""
-    else -> entries.joinToString(separator = "&", prefix = "?") { (k, v) -> "$k=$v" }
+    else -> entries.filter { it.value != null }.joinToString(separator = "&", prefix = "?") { (k, v) -> "$k=$v" }
 }
 
 @Suppress("UNCHECKED_CAST")
