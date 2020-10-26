@@ -10,10 +10,30 @@
 			"key": "routineId",
 			"value": "",
 			"enabled": true
+		},
+		{
+			"key": "deviceTypeId",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "roomId",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "deviceId",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "deviceEventId",
+			"value": "7248c7cb-1bb2-45f6-a53a-1016a0fca6c7",
+			"enabled": true
 		}
 	],
 	"name": "Piper Globals",
 	"_postman_variable_scope": "globals",
-	"_postman_exported_at": "2020-10-20T20:55:57.251Z",
+	"_postman_exported_at": "2020-10-26T15:19:24.799Z",
 	"_postman_exported_using": "Postman/7.34.0"
 }
