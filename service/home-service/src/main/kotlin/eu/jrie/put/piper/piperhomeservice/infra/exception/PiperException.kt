@@ -13,3 +13,14 @@ abstract class PiperException (
     open val details: Map<String, Any?>
         get() = emptyMap()
 }
+
+abstract class PiperNotFoundException(
+        private val entityName: String,
+        private val id: String
+) : PiperException("Requested entity does not exist.") {
+    override val details: Map<String, Any?>
+        get() = mapOf(
+                "name" to entityName,
+                "id" to id
+        )
+}

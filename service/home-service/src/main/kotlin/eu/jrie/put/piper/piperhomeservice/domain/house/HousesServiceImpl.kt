@@ -98,6 +98,7 @@ class HousesServiceImpl (
 
     override fun getDevice(deviceId: String, user: User): Mono<Device> {
         return deviceRepository.findById(deviceId)
+                .switchIfEmpty(Mono.error(DeviceNotFoundException(deviceId)))
                 .flatMap { device ->
                     roomRepository.findById(device.roomId)
                             .map { authService.checkForRoomAccess(user, it) }
@@ -134,6 +135,7 @@ class HousesServiceImpl (
 
     override fun getEvent(eventId: String, user: User): Mono<DeviceEvent> {
         return deviceEventRepository.findById(eventId)
+                .switchIfEmpty(Mono.error(EventNotFoundException(eventId)))
                 .flatMap { event ->
                     deviceTypeRepository.findById(event.deviceTypeId)
                             .map { authService.checkForDeviceTypeAccess(user, it) }

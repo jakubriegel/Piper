@@ -86,12 +86,12 @@ class RoutinesController(
     @GetMapping("suggestions", produces = [APPLICATION_JSON_VALUE])
     @FlowPreview
     fun getSuggestions(
-            @RequestParam(required = true) trigger: String,
-            @RequestParam(required = true) action: String,
+            @RequestParam(required = true) deviceId: String,
+            @RequestParam(required = true) eventId: String,
             @RequestParam(required = false, defaultValue = "5") limit: Int = 5,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        val start = RoutineEvent(trigger, action)
+        val start = RoutineEvent(deviceId, eventId)
         return service.getContinuationSuggestions(start, limit, auth.asUser())
                 .asFlux()
                 .collectList()

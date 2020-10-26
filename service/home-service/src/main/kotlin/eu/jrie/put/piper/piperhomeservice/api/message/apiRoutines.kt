@@ -10,7 +10,6 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinePreview
 import org.springframework.hateoas.IanaLinkRelations.ABOUT
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.EDIT
-import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
@@ -21,7 +20,6 @@ data class RoutinesResponse (
         val routines: List<RoutinePreview>
 ) : RepresentationalResponse(
         linkToRoutines.withSelfRel(),
-        linkToRoutines.slash(routines.first().id).withRel(FIRST),
         linkToHouses.withRel(ABOUT)
 )
 
@@ -63,6 +61,6 @@ data class RoutineSuggestionsResponse (
         val suggestions: List<RoutineEvent>,
         val n: Int
 ) : RepresentationalResponse(
-        linkTo(RoutinesController::class.java).slash("suggestions?trigger=${start.trigger}&trigger=${start.action}&limit=$n").withSelfRel(),
+        linkToRoutines.slash("suggestions?deviceId=${start.deviceId}&eventId=${start.eventId}&limit=$n").withSelfRel(),
         linkToRoutines.withRel(COLLECTION)
 )

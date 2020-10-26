@@ -3,14 +3,18 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
+import eu.jrie.put.piper.piperhomeservice.domain.routine.NotDeviceEventException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
+import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperNotFoundException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactor.asFlux
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ResponseEntity
@@ -39,6 +43,8 @@ fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
 private fun PiperException.businessError() = when (this) {
     is InsufficientAccessException -> FORBIDDEN
     is NoModelException -> NO_CONTENT
+    is PiperNotFoundException -> NOT_FOUND
+    is NotDeviceEventException -> BAD_REQUEST
     else -> throw IllegalStateException("Unknown exception: $this")
 }.let { status(it).body(this.asErrorResponse()) }
 

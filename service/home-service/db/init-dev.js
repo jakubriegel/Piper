@@ -174,3 +174,15 @@ routine.insert({
 
 const pastEvent = db.getCollection("pastEvent")
 pastEvent.remove({})
+
+const deviceEvent = db.getCollection("deviceEvent")
+deviceEvent.remove({})
+
+const deviceType = db.getCollection("deviceType")
+deviceType.remove({})
+
+const room = db.getCollection("room")
+room.remove({})
+
+const device = db.getCollection("device")
+device.remove({})

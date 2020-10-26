@@ -4,7 +4,8 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
-import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
+import eu.jrie.put.piper.piperhomeservice.infra.common.component1
+import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -34,7 +35,14 @@ class RoutinesService (
 
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
-            housesService.getHouse(user)
+            Mono.zip(
+                    housesService.getDevice(start.deviceId, user),
+                    housesService.getEvent(start.eventId, user)
+            ).flatMap { (device, event) ->
+                if (device.typeId != event.deviceTypeId) Mono.error(NotDeviceEventException(device, event))
+                else Mono.empty<Void>()
+            }
+                    .then(housesService.getHouse(user))
                     .map { it.models.current?.id ?: throw NoModelException() }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
@@ -51,11 +59,11 @@ class RoutinesService (
                 id, updated.name, houseId, updated.enabled, updated.events, updated.configuration
         )
 
-        fun RoutineEvent.asMlEvent() = "${trigger}-$action"
+        const val ML_EVENT_DELIMITER = '_'
 
-        fun parseEvent(mlEvent: String) = mlEvent.split('-')
+        fun RoutineEvent.asMlEvent() = "$deviceId$ML_EVENT_DELIMITER$eventId"
+
+        fun parseEvent(mlEvent: String) = mlEvent.split(ML_EVENT_DELIMITER)
                 .let { (trigger, action) -> RoutineEvent(trigger, action) }
     }
 }
-
-class NoModelException : PiperException("Predictions not available.")
