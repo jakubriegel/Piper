@@ -34,7 +34,7 @@ class RoutinesService (
 
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
-            housesService.houseOfUser(user)
+            housesService.getHouse(user)
                     .map { it.models.current?.id ?: throw NoModelException() }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }

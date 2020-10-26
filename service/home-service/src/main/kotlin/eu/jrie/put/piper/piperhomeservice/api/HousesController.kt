@@ -14,9 +14,10 @@ import eu.jrie.put.piper.piperhomeservice.api.message.params
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.house.NewHouseSchema
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
+import eu.jrie.put.piper.piperhomeservice.infra.common.component1
+import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.asFlux
@@ -48,7 +49,7 @@ class HousesController (
     fun getHouse(
             auth: Authentication
     ): Mono<ResponseEntity<HouseResponse>> {
-        return service.houseOfUser(auth.asUser())
+        return service.getHouse(auth.asUser())
                 .map { it.asResponse() }
                 .map { ok(it) }
     }
@@ -67,17 +68,18 @@ class HousesController (
             @RequestBody schema: NewHouseSchema,
             auth: Authentication
     ): ResponseEntity<ApiResponse> {
-        return service.updateSchema(schema, auth.asUser())
-                .then(Mono.just(
-                        service.deviceTypesOfUsersHouse(auth.asUser())
+        val user = auth.asUser()
+        return service.updateSchema(schema, user)
+                .then(Mono.zip(
+                        service.getDevicesTypes(user)
                                 .map { it.asResponse() }
-                                .toList() to
-                        service.roomsOfUsersHouse(auth.asUser())
+                                .asFlux().collectList(),
+                        service.getRooms(auth.asUser())
                                 .asFlux()
-                                .flatMap { service.roomDetails(it.id, auth.asUser()) }
+                                .map { it to service.getDevices(it.id, user) }
                                 .asFlow()
                                 .map { it.asResponse() }
-                                .toList()
+                                .asFlux().collectList()
                 ))
                 .map { (deviceTypes, rooms) -> HouseSchemaResponse(deviceTypes, rooms) }
                 .map { ok(it as ApiResponse) }
@@ -89,7 +91,7 @@ class HousesController (
     fun getRooms(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-       return service.roomsOfUsersHouse(auth.asUser())
+       return service.getRooms(auth.asUser())
                .map { it.asMessage() }
                .asFlux()
                .collectList()
@@ -105,9 +107,10 @@ class HousesController (
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         return when (roomId) {
-            null -> service.devicesOfUsersHouse(auth.asUser())
-            else -> service.devicesOfRoom(roomId, auth.asUser())
+            null -> service.getDevices(auth.asUser())
+            else -> service.getDevices(roomId, auth.asUser())
         }.map { it.asMessage() }
+                .asFlux()
                 .collectList()
                 .map { DevicesResponse(it, params("roomId" to roomId)) }
                 .map { ok(it as ApiResponse) }
@@ -119,17 +122,18 @@ class HousesController (
             @PathVariable id: String,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        return service.deviceById(id, auth.asUser())
+        return service.getDevice(id, auth.asUser())
                 .map { it.asMessage() }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
+                .defaultIfEmpty(notFound().build())
     }
 
     @GetMapping("devices/types", produces = [APPLICATION_JSON_VALUE])
     fun getDeviceTypes(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        return service.deviceTypesOfUsersHouse(auth.asUser())
+        return service.getDevicesTypes(auth.asUser())
                 .map { it.asResponse() }
                 .asFlux()
                 .collectList()
@@ -143,7 +147,19 @@ class HousesController (
             @PathVariable id: String,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        return service.deviceTypeById(id, auth.asUser())
+        return service.getDeviceType(id, auth.asUser())
+                .map { it.asResponse() }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
+                .defaultIfEmpty(notFound().build())
+    }
+
+    @GetMapping("devices/events/{id}", produces = [APPLICATION_JSON_VALUE])
+    fun getEvent(
+            @PathVariable id: String,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        return service.getEvent(id, auth.asUser())
                 .map { it.asResponse() }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()

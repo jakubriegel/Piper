@@ -14,14 +14,13 @@ import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.CONTENTS
 import org.springframework.hateoas.IanaLinkRelations.DESCRIBED_BY
 import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
-import org.springframework.hateoas.IanaLinkRelations.FIRST
 import org.springframework.hateoas.IanaLinkRelations.RELATED
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 
 private val linkToHouses = linkTo(HousesController::class.java)
 private val linkToRooms = linkToHouses.slash("rooms")
 private val linkToDevices = linkToHouses.slash("devices")
-private val linkToDevicesTypes = linkToHouses.slash("devices").slash("types")
+private val linkToDevicesTypes = linkToDevices.slash("types")
 
 data class HouseResponse (
         val name: String,
@@ -51,7 +50,6 @@ data class RoomsResponse (
         val rooms: List<RoomMessage>
 ) : RepresentationalResponse(
         linkToRooms.withSelfRel(),
-        linkToRooms.slash(rooms.first().id).withRel(FIRST),
         linkToHouses.withRel(DESCRIBES)
 )
 
@@ -104,24 +102,29 @@ data class DeviceTypesResponse (
         val types: List<DeviceTypeResponse>
 ) : RepresentationalResponse(
         linkToDevicesTypes.withSelfRel(),
-        linkToDevicesTypes.slash(types.first().id).withRel(FIRST),
         linkToRooms.withRel(DESCRIBES)
 )
 
 data class DeviceTypeResponse (
         val id: String,
         val name: String,
-        val events: Set<DeviceEventMessage>
+        val events: Set<DeviceEventResponse>
 ) : RepresentationalResponse(
         linkToDevicesTypes.slash(id).withSelfRel(),
         linkToDevicesTypes.withRel(COLLECTION)
 )
 
 suspend fun Pair<DeviceType, Flow<DeviceEvent>>.asResponse() = let { (type, events) ->
-    DeviceTypeResponse(type.id, type.name, events.map { DeviceEventMessage(it.id, it.name) } .toSet())
+    DeviceTypeResponse(type.id, type.name, events.map { it.asResponse() } .toSet())
 }
 
-data class DeviceEventMessage (
+data class DeviceEventResponse (
         val id: String,
+        val deviceTypeId: String,
         val name: String
+) : RepresentationalResponse(
+        linkToDevices.slash("events").slash(id).withSelfRel(),
+        linkToDevicesTypes.slash(deviceTypeId).withRel(DESCRIBED_BY)
 )
+
+fun DeviceEvent.asResponse() = DeviceEventResponse(id, deviceTypeId, name)
