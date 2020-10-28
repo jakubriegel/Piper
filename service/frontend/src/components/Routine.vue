@@ -4,9 +4,10 @@
       <Draggable v-for="(event, id) in sequence.events" :key="id">
         <v-card class="draggable-item" outlined>
           <v-card-text>
-            <v-text-field label="Trigger" v-model="event.trigger">
+            <v-text-field label="deviceId" v-model="event.deviceId">
             </v-text-field>
-            <v-text-field label="Action" v-model="event.action"> </v-text-field>
+            <v-text-field label="eventId" v-model="event.eventId">
+            </v-text-field>
           </v-card-text>
         </v-card>
         <v-hover v-slot="{ hover }">
