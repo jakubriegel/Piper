@@ -23,11 +23,15 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: "CustomRoutines",
   computed: {
     ...mapGetters("routines", ["routines"])
+  },
+
+  mounted() {
+    this.getRoutines();
   },
 
   data: () => ({
@@ -45,6 +49,8 @@ export default {
   }),
 
   methods: {
+    ...mapActions('routines', ['getRoutines']),
+
     deleteItem(item) {
       console.log("Delete " + item);
     }

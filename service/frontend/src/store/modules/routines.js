@@ -1,3 +1,5 @@
+import Axios from 'axios';
+
 export const routines = {
   namespaced: true,
   state: {
@@ -7,21 +9,16 @@ export const routines = {
     routines: state => state.routines
   },
   actions: {
-    addEmptyRoutine({ commit }) {
-      commit("ADD_EMPTY_ROUTINE");
+    addRoutine() {},
+    getRoutines({ commit }) {
+      Axios.get('piper.jrie.eu/routines').then(res => {
+        commit('SET_ROUTINES', res.data.routines);
+      });
     }
   },
   mutations: {
-    ADD_EMPTY_ROUTINE(state) {
-      state.routines.push({
-        name: "",
-        events: [
-          {
-            trigger: "",
-            action: ""
-          }
-        ]
-      });
+    SET_ROUTINES(state, data) {
+      state.routines = data;
     }
   }
 };
