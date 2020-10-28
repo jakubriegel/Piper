@@ -14,12 +14,12 @@ data class PastEvent (
         @Id
         val id: String?,
         val houseId: String,
-        override val trigger: String,
-        override val action: String,
+        override val deviceId: String,
+        override val eventId: String,
         val time: Instant
 ) : Event {
-        constructor(houseId: String, trigger: String, action: String, time: Instant)
-                : this(null, houseId, trigger, action, time)
+        constructor(houseId: String, deviceId: String, eventId: String, time: Instant)
+                : this(null, houseId, deviceId, eventId, time)
 }
 
 interface PastEventRepository : ReactiveMongoRepository<PastEvent, String> {

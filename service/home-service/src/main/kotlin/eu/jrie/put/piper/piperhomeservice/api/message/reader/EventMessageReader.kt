@@ -55,8 +55,8 @@ class EventMessageReader(
 
         val schema: CsvSchema = builder()
                 .addColumn("time")
-                .addColumn("trigger")
-                .addColumn("action")
+                .addColumn("deviceId")
+                .addColumn("eventId")
                 .setLineSeparator(',')
                 .build()
 

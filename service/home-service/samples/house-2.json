@@ -1,0 +1,134 @@
+{
+  "deviceTypes": [
+    {
+      "name": "LIGHT",
+      "events": [
+        {
+          "name": "On"
+        },
+        {
+          "name": "Off"
+        }
+      ]
+    },
+    {
+      "name": "WINDOW",
+      "events": [
+        {
+          "name": "Open"
+        },
+        {
+          "name": "Half Open"
+        },
+        {
+          "name": "Close"
+        }
+      ]
+    },
+    {
+      "name": "GATE",
+      "events": [
+        {
+          "name": "Open"
+        },
+        {
+          "name": "Close"
+        }
+      ]
+    },
+    {
+      "name": "BLINDS",
+      "events": [
+        {
+          "name": "Open"
+        },
+        {
+          "name": "Close"
+        }
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "name": "Kitchen",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Main Lamp"
+        },
+        {
+          "type": "WINDOW",
+          "name": "Window"
+        }
+      ]
+    },
+    {
+      "name": "Living Room",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Light 1"
+        },
+        {
+          "type": "LIGHT",
+          "name": "Light 2"
+        },
+        {
+          "type": "WINDOW",
+          "name": "Window 1"
+        },
+        {
+          "type": "WINDOW",
+          "name": "Window 2"
+        }
+      ]
+    },
+    {
+      "name": "Bedroom",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Main Light"
+        },
+        {
+          "type": "LIGHT",
+          "name": "Night Lamp"
+        },
+        {
+          "type": "WINDOW",
+          "name": "Window"
+        },
+        {
+          "type": "BLINDS",
+          "name": "Blinds"
+        }
+      ]
+    },
+    {
+      "name": "Garden",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Paths Lights"
+        },
+        {
+          "type": "GATE",
+          "name": "Gate"
+        }
+      ]
+    },
+    {
+      "name": "Garage",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Lights"
+        },
+        {
+          "type": "GATE",
+          "name": "Gate"
+        }
+      ]
+    }
+  ]
+}

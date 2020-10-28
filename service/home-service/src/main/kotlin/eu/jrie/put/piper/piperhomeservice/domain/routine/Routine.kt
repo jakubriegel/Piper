@@ -37,8 +37,8 @@ data class RoutineConfiguration (
 )
 
 data class RoutineEvent (
-        override val trigger: String,
-        override val action: String
+        override val deviceId: String,
+        override val eventId: String
 ) : Event
 
 interface RoutinesRepository : ReactiveMongoRepository<Routine, String>, RoutinesRepositoryCustom {

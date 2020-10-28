@@ -1,0 +1,44 @@
+{
+  "deviceTypes": [
+    {
+      "name": "LIGHT",
+      "events": [
+        {
+          "name": "On"
+        },
+        {
+          "name": "Off"
+        }
+      ]
+    },
+    {
+      "name": "WINDOW",
+      "events": [
+        {
+          "name": "Open"
+        },
+        {
+          "name": "Half Open"
+        },
+        {
+          "name": "Close"
+        }
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "name": "Kitchen",
+      "devices": [
+        {
+          "type": "LIGHT",
+          "name": "Main Lamp"
+        },
+        {
+          "type": "WINDOW",
+          "name": "Window"
+        }
+      ]
+    }
+  ]
+}
