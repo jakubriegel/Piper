@@ -27,9 +27,9 @@
 </template>
 
 <script>
-import { Container, Draggable } from "vue-smooth-dnd";
+import { Container, Draggable } from 'vue-smooth-dnd';
 export default {
-  name: "Routine",
+  name: 'Routine',
   components: { Container, Draggable },
   props: {
     sequence: {
@@ -43,8 +43,8 @@ export default {
       this.sequence.events = [
         ...head,
         {
-          trigger: "",
-          action: ""
+          trigger: '',
+          action: ''
         },
         ...tail
       ];

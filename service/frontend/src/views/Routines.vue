@@ -23,11 +23,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 export default {
-  name: "CustomRoutines",
+  name: 'CustomRoutines',
   computed: {
-    ...mapGetters("routines", ["routines"])
+    ...mapGetters('routines', ['routines'])
   },
 
   mounted() {
@@ -37,14 +37,14 @@ export default {
   data: () => ({
     headers: [
       {
-        text: "Id",
-        align: "start",
+        text: 'Id',
+        align: 'start',
         sortable: false,
-        value: "id"
+        value: 'id'
       },
-      { text: "Name", value: "name" },
-      { text: "Enabled", value: "enabled" },
-      { text: "Actions", value: "actions" }
+      { text: 'Name', value: 'name' },
+      { text: 'Enabled', value: 'enabled' },
+      { text: 'Actions', value: 'actions' }
     ]
   }),
 
@@ -52,7 +52,7 @@ export default {
     ...mapActions('routines', ['getRoutines']),
 
     deleteItem(item) {
-      console.log("Delete " + item);
+      console.log('Delete ' + item);
     }
   }
 };

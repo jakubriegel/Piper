@@ -1,7 +1,7 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-import { navigation, routines } from "./modules";
+import { navigation, routines } from './modules';
 
 Vue.use(Vuex);
 
