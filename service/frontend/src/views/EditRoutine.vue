@@ -1,6 +1,10 @@
 <template>
   <v-container>
-    <Routine :sequence="routine" />
+    <v-row>
+      <v-col cols="12">
+        <Routine :id="id" />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -16,14 +20,6 @@ export default {
       type: String,
       required: true
     }
-  },
-
-  data: () => ({
-    routine: null
-  }),
-
-  mounted() {
-    //TODO axios get routine by id
   }
 };
 </script>
