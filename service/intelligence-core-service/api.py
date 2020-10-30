@@ -1,11 +1,11 @@
 from flask import Flask, request, Response
 import json
 
-from controller import Controller
+from modelService import ModelService
 
 app = Flask(__name__)
 
-controller = Controller()
+modelServiceInstance = ModelService()
 
 
 @app.route('/status', methods=['GET'])
@@ -22,7 +22,7 @@ def getPredictions():
         modelId = int(request.args.get('modelId'))
         event = request.args.get('event')
         limit = int(request.args.get('limit'))
-        prediction = controller.predict(modelId, event, limit)
+        prediction = modelServiceInstance.predict(modelId, event, limit)
         return Response(response=json.dumps({"sequence": prediction}), status=200, mimetype='application/json')
     except:
         return Response(status=422)

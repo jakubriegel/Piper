@@ -1,7 +1,7 @@
 from serveModel import ServeModel
 
 
-class Controller:
+class ModelService:
     def __init__(self):
         self.serveModel = ServeModel()
 
