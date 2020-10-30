@@ -1,3 +1,5 @@
+import json
+
 import tensorflow as tf
 
 
@@ -6,77 +8,23 @@ class ServeModel:
         self.models = {
             0: tf.keras.models.load_model('model', compile=True)
         }
-        self.categories_dict = {0: 'bathroom_light_1_switch_light_off',
-                                1: 'bathroom_light_1_switch_light_on',
-                                2: 'bathroom_light_2_switch_light_off',
-                                3: 'bathroom_light_2_switch_light_on',
-                                4: 'bedroom_1_blind_1_switch_blind_down',
-                                5: 'bedroom_1_blind_1_switch_blind_up',
-                                6: 'bedroom_1_light_1_switch_light_off',
-                                7: 'bedroom_1_light_1_switch_light_on',
-                                8: 'bedroom_1_light_2_switch_light_off',
-                                9: 'bedroom_1_light_2_switch_light_on',
-                                10: 'bedroom_1_light_3_switch_light_off',
-                                11: 'bedroom_1_light_3_switch_light_on',
-                                12: 'bedroom_2_blind_1_switch_blind_down',
-                                13: 'bedroom_2_blind_1_switch_blind_up',
-                                14: 'bedroom_2_light_1_switch_light_off',
-                                15: 'bedroom_2_light_1_switch_light_on',
-                                16: 'bedroom_2_light_2_switch_light_off',
-                                17: 'bedroom_2_light_2_switch_light_on',
-                                18: 'bedroom_3_blind_1_switch_blind_down',
-                                19: 'bedroom_3_blind_1_switch_blind_up',
-                                20: 'bedroom_3_light_1_switch_light_off',
-                                21: 'bedroom_3_light_1_switch_light_on',
-                                22: 'bedroom_3_light_2_switch_light_off',
-                                23: 'bedroom_3_light_2_switch_light_on',
-                                24: 'corridor_light_1_sensor_light_off',
-                                25: 'corridor_light_1_sensor_light_on',
-                                26: 'general_ac_temp_up',
-                                27: 'kitchen_blind_1_switch_blind_down',
-                                28: 'kitchen_blind_1_switch_blind_up',
-                                29: 'kitchen_blind_2_switch_blind_down',
-                                30: 'kitchen_blind_2_switch_blind_up',
-                                31: 'kitchen_light_1_switch_light_off',
-                                32: 'kitchen_light_1_switch_light_on',
-                                33: 'kitchen_light_2_switch_light_off',
-                                34: 'kitchen_light_2_switch_light_on',
-                                35: 'kitchen_light_3_switch_light_off',
-                                36: 'kitchen_light_3_switch_light_on',
-                                37: 'living_room_blind_1_switch_blind_down',
-                                38: 'living_room_blind_1_switch_blind_up',
-                                39: 'living_room_blind_2_switch_blind_down',
-                                40: 'living_room_blind_2_switch_blind_up',
-                                41: 'living_room_blind_3_switch_blind_down',
-                                42: 'living_room_blind_3_switch_blind_up',
-                                43: 'living_room_light_1_switch_light_off',
-                                44: 'living_room_light_1_switch_light_on',
-                                45: 'living_room_light_2_switch_light_off',
-                                46: 'living_room_light_2_switch_light_on',
-                                47: 'living_room_light_3_switch_light_off',
-                                48: 'living_room_light_3_switch_light_on',
-                                49: 'living_room_tv_off',
-                                50: 'living_room_tv_on',
-                                51: 'outdoor_gate_1_switch_gate_close',
-                                52: 'outdoor_gate_1_switch_gate_open',
-                                53: 'outdoor_gate_2_switch_gate_close',
-                                54: 'outdoor_gate_2_switch_gate_open',
-                                55: 'outdoor_light_1_sensor_light_off',
-                                56: 'outdoor_light_1_sensor_light_on',
-                                57: 'outdoor_light_2_sensor_light_off',
-                                58: 'outdoor_light_2_sensor_light_on'}
+        self.categories_dict = self.load_categories_dict('model/category_dict.json')
 
-    def getCategoryById(self, category_id):
-        return self.categories_dict[category_id]
+    def load_categories_dict(self, path):
+        with open(path) as f:
+            return json.load(f)
 
-    def getCategoryByName(self, category_name):
+    def get_category_by_id(self, category_id):
+        return self.categories_dict[str(category_id)]
+
+    def get_category_by_name(self, category_name):
         key_list = list(self.categories_dict.keys())
         val_list = list(self.categories_dict.values())
-        return key_list[val_list.index(category_name)]
+        return int(key_list[val_list.index(category_name)])
 
     def generate_sequences(self, model_id, initial_event_name, num_generate=10):
         model = self.models[model_id]
-        start_sequence_event_id = self.getCategoryByName(initial_event_name)
+        start_sequence_event_id = self.get_category_by_name(initial_event_name)
 
         # Converting our start frame to vector of numbers (vectorizing)
         input_eval = [start_sequence_event_id]
@@ -105,7 +53,7 @@ class ServeModel:
             # along with the previous hidden state
             input_eval = tf.expand_dims([predicted_id], 0)
 
-            generated_sequences.append(self.getCategoryById(predicted_id))
+            generated_sequences.append(self.get_category_by_id(predicted_id))
 
-        generated_sequences.insert(0, self.getCategoryById(start_sequence_event_id))
+        generated_sequences.insert(0, self.get_category_by_id(start_sequence_event_id))
         return generated_sequences

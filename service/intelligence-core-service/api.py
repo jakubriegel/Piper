@@ -9,15 +9,15 @@ modelServiceInstance = ModelService()
 
 
 @app.route('/status', methods=['GET'])
-def getStatus():
+def get_status():
     try:
         return Response(response=json.dumps('active'), status=200, mimetype='application/json')
     except:
-        return Response(status=404)
+        return Response(status=500)
 
 
 @app.route('/get-sequence', methods=['GET'])
-def getPredictions():
+def get_predictions():
     try:
         modelId = int(request.args.get('modelId'))
         event = request.args.get('event')
@@ -29,4 +29,4 @@ def getPredictions():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=True)
