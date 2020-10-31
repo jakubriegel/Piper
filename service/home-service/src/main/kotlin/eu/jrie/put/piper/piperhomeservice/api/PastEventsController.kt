@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("house")
+@RequestMapping("events")
 class PastEventsController (
         private val service: PastEventService
 ) {
 
-    @PostMapping("events", consumes = [TEXT_CSV_VALUE])
+    @PostMapping(consumes = [TEXT_CSV_VALUE])
     suspend fun postEvents(
             @RequestBody events: Flow<EventMessage>,
             auth: Authentication

@@ -1,4 +1,4 @@
-FROM node:13.13.0-alpine as setup-stage
+FROM node:13.13.0 as setup-stage
 
 WORKDIR /frontend
 COPY package.json /frontend/
@@ -25,8 +25,11 @@ RUN ls
 RUN ls /frontend/
 RUN npm run build
 
-FROM nginx:1.15.7-alpine as production-stage
+FROM nginx:1.15.7 as production-stage
+
 COPY --from=install-stage /frontend/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/conf.d
+
 EXPOSE 8080
+
 CMD ["nginx", "-g", "daemon off;"]

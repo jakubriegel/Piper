@@ -4,9 +4,9 @@ services:
     build:
       context: ../service/frontend
       target: ${TARGET}
-      dockerfile: docker/${ARCHITECTURE}/Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8003:8080"
     volumes:
       - ../service/frontend/:/frontend/
   intelligence-core-service:
@@ -20,6 +20,7 @@ services:
   home-service:
     build:
       context: ../service/home-service
+      target: ${TARGET}
       dockerfile: Dockerfile
     ports:
       - "8001:80"
@@ -29,6 +30,6 @@ services:
       - "8002:27017"
     volumes:
       - routines-db:/data/db
-         
+
 volumes:
   routines-db:
