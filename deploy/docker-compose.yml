@@ -9,6 +9,14 @@ services:
       - "8003:8080"
     volumes:
       - ../service/frontend/:/frontend/
+  intelligence-core-service:
+    build:
+      context: ../service/intelligence-core-service
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../service/intelligence-core-service:/intelligence-core-service/
   home-service:
     build:
       context: ../service/home-service
