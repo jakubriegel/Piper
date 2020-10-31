@@ -5,10 +5,16 @@
     </v-row>
     <v-row>
       <v-col cols="6" class="mr-5">
-        <v-text-field label="Name" v-model="routine.name"></v-text-field>
+        <v-text-field
+          label="Name"
+          v-model="selectedRoutine.name"
+        ></v-text-field>
       </v-col>
       <v-col cols="2">
-        <v-checkbox label="Enabled" v-model="routine.enabled"></v-checkbox>
+        <v-checkbox
+          label="Enabled"
+          v-model="selectedRoutine.enabled"
+        ></v-checkbox>
       </v-col>
       <v-col cols="2" class="hidden-sm-and-down">
         <v-btn @click="saveChanges"> Save changes</v-btn>
@@ -17,12 +23,12 @@
     <div v-if="loading">
       <v-progress-circular indeterminate color="accent" />
     </div>
-    <div v-else-if="routine && !routine.events.length">
-      <v-btn @click="addFirstEvent()">Add event</v-btn>
-    </div>
     <v-card v-else>
       <Container @drop="onDrop">
-        <Draggable v-for="(event, index) in routine.events" :key="index">
+        <Draggable
+          v-for="(event, index) in selectedRoutine.events"
+          :key="index"
+        >
           <v-card class="draggable-item" outlined>
             <v-card-text>
               <v-text-field label="deviceId" v-model="event.deviceId">
@@ -35,7 +41,7 @@
             <div class="d-flex align-self-center justify-center flex-wrap">
               <v-icon
                 :class="{ 'on-hover': hover }"
-                @click="addEvent(id)"
+                @click="addEventToRoutine(index)"
                 size="40"
               >
                 mdi-arrow-down-thick
@@ -50,8 +56,7 @@
 
 <script>
 import { Container, Draggable } from 'vue-smooth-dnd';
-import Axios from 'axios';
-import globals from '@/commons/globals';
+import { mapActions, mapGetters } from 'vuex';
 export default {
   name: 'Routine',
 
@@ -63,73 +68,35 @@ export default {
     }
   },
 
-  data() {
-    return {
-      routine: {},
-      loading: true
-    };
+  computed: {
+    ...mapGetters('routines', ['selectedRoutine'])
   },
 
+  data: () => ({
+    routine: {},
+    loading: true
+  }),
+
   mounted() {
-    Axios.get('https://jrie.eu:8001/routines/' + this.id, {
-      headers: {
-        Accept: 'application/json'
-      },
-      auth: {
-        username: globals.API_USERNAME,
-        password: globals.API_PASSWORD
-      }
-    })
-      .then(res => {
-        this.routine = res.data.routine;
-      })
-      .catch(() => {
-        //TODO handle error
-      })
-      .finally(() => {
-        this.loading = false;
-      });
+    this.getRoutine(this.id).then(() => {
+      this.loading = false;
+    });
   },
 
   methods: {
+    ...mapActions('routines', [
+      'getRoutine',
+      'editRoutine',
+      'addEventToRoutine',
+      'setSelectedRoutineEvents'
+    ]),
     saveChanges() {
-      Axios.put('https://jrie.eu:8001/routines/' + this.id, this.routine, {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: {
-          username: globals.API_USERNAME,
-          password: globals.API_PASSWORD
-        }
-      })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(() => {
-          //TODO handle error
-        });
-    },
-    addFirstEvent() {
-      this.routine.events.push({
-        trigger: '',
-        action: ''
-      });
-      console.log(this.routine);
-    },
-    addEvent(id) {
-      let tail = [...this.routine.events];
-      let head = tail.splice(0, id + 1);
-      this.routine.events = [
-        ...head,
-        {
-          trigger: '',
-          action: ''
-        },
-        ...tail
-      ];
+      this.editRoutine(this.id);
     },
     onDrop(dropResult) {
-      this.routine.events = this.applyDrag(this.routine.events, dropResult);
+      this.setSelectedRoutineEvents(
+        this.applyDrag(this.selectedRoutine.events, dropResult)
+      );
     },
     applyDrag(arr, dragResult) {
       const { removedIndex, addedIndex, payload } = dragResult;
