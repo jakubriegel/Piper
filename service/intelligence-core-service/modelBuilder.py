@@ -10,15 +10,17 @@ class ModelBuilder:
     def __init__(self):
         self.categories_dict = {}
 
-    def get_category(self, category_id):
+    def __get_category(self, category_id):
         return self.categories_dict[category_id]
 
-    def split_input_target(self, chunk):
+    @staticmethod
+    def __split_input_target(chunk):
         input_text = chunk[:-1]
         target_text = chunk[1:]
         return input_text, target_text
 
-    def build_model(self, vocab_size, embedding_dim, rnn_units, batch_size):
+    @staticmethod
+    def __build_model(vocab_size, embedding_dim, rnn_units, batch_size):
         model = tf.keras.Sequential([
             tf.keras.layers.Embedding(vocab_size, embedding_dim,
                                       batch_input_shape=[batch_size, None]),
@@ -30,7 +32,8 @@ class ModelBuilder:
         ])
         return model
 
-    def loss_function(self, labels, logits):
+    @staticmethod
+    def __loss_function(labels, logits):
         return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
     def generate_and_save_model_from_csv(self, csv_file):
@@ -67,7 +70,7 @@ class ModelBuilder:
 
         sequences = sequence_dataset.batch(seq_length + 1, drop_remainder=True)
 
-        dataset = sequences.map(self.split_input_target)
+        dataset = sequences.map(self.__split_input_target)
 
         # Batch size
         BATCH_SIZE = 64
@@ -89,7 +92,7 @@ class ModelBuilder:
         # Number of RNN units
         rnn_units = 1024
 
-        model = self.build_model(
+        model = self.__build_model(
             vocab_size=vocab_size,
             embedding_dim=embedding_dim,
             rnn_units=rnn_units,
@@ -103,9 +106,9 @@ class ModelBuilder:
         sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
         sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
 
-        example_batch_loss = self.loss_function(target_example_batch, example_batch_predictions)
+        example_batch_loss = self.__loss_function(target_example_batch, example_batch_predictions)
 
-        model.compile(optimizer='adam', loss=self.loss_function)
+        model.compile(optimizer='adam', loss=self.__loss_function)
 
         # Directory where the checkpoints will be saved
         checkpoint_dir = 'model_test/training_checkpoints'
@@ -121,7 +124,7 @@ class ModelBuilder:
         history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
 
         tf.train.latest_checkpoint(checkpoint_dir)
-        model = self.build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
+        model = self.__build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
         model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
         model.build(tf.TensorShape([1, None]))
 
