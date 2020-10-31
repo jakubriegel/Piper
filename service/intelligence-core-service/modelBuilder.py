@@ -3,14 +3,37 @@ from pathlib import Path
 
 import tensorflow as tf
 import pandas as pd
+import os
 
 
 class ModelBuilder:
     def __init__(self):
-        print("Initalize ModelBuilder \n")
+        self.categories_dict = {}
 
-    @staticmethod
-    def build_model(csv_file):
+    def get_category(self, category_id):
+        return self.categories_dict[category_id]
+
+    def split_input_target(self, chunk):
+        input_text = chunk[:-1]
+        target_text = chunk[1:]
+        return input_text, target_text
+
+    def build_model(self, vocab_size, embedding_dim, rnn_units, batch_size):
+        model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(vocab_size, embedding_dim,
+                                      batch_input_shape=[batch_size, None]),
+            tf.keras.layers.GRU(rnn_units,
+                                return_sequences=True,
+                                stateful=True,
+                                recurrent_initializer='glorot_uniform'),
+            tf.keras.layers.Dense(vocab_size)
+        ])
+        return model
+
+    def loss_function(self, labels, logits):
+        return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+
+    def generate_and_save_model_from_csv(self, csv_file):
         header_list = ["timestamp", "sensor", "action"]
         sensors_df = pd.read_csv('model/data.csv', names=header_list)
 
@@ -21,12 +44,90 @@ class ModelBuilder:
         CATEGORIES_AMOUNT = len(categories.categories.values)
         print('There is', CATEGORIES_AMOUNT, 'unique categories')
 
-        categories_dict = dict(enumerate(sensors_df['sensors_with_action_code'].cat.categories))
+        self.categories_dict = dict(enumerate(sensors_df['sensors_with_action_code'].cat.categories))
 
-        category_dict_file = Path('model/category_dict.json')
-        category_dict_file.write_text(json.dumps(categories_dict, indent=4) + '\n')
+        category_dict_file = Path('model_test/category_dict.json')
+        category_dict_file.write_text(json.dumps(self.categories_dict, indent=4) + '\n')
+
+        sensors_df['sensors_with_action_code'] = sensors_df.sensors_with_action_code.cat.codes
+
+        Y_data = sensors_df.iloc[1:10000]
+        Y_data = pd.concat([Y_data, sensors_df.iloc[0:1]], ignore_index=True)
+        Y_data = Y_data.reset_index(drop=True)
+
+        new_dataSet = pd.DataFrame()
+        new_dataSet['X'] = sensors_df['sensors_with_action_code']
+        new_dataSet['Y'] = Y_data['sensors_with_action_code']
+
+        # The maximum length sentence we want for a single input in characters
+        seq_length = 100
+        examples_per_epoch = len(new_dataSet) // (seq_length + 1)
+
+        sequence_dataset = tf.data.Dataset.from_tensor_slices(sensors_df['sensors_with_action_code'].values)
+
+        sequences = sequence_dataset.batch(seq_length + 1, drop_remainder=True)
+
+        dataset = sequences.map(self.split_input_target)
+
+        # Batch size
+        BATCH_SIZE = 64
+
+        # Buffer size to shuffle the dataset
+        # (TF data is designed to work with possibly infinite sequences,
+        # so it doesn't attempt to shuffle the entire sequence in memory. Instead,
+        # it maintains a buffer in which it shuffles elements).
+        BUFFER_SIZE = 10000
+
+        dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
+
+        # Length of the vocabulary (amount of categories)
+        vocab_size = CATEGORIES_AMOUNT
+
+        # The embedding dimension
+        embedding_dim = 256
+
+        # Number of RNN units
+        rnn_units = 1024
+
+        model = self.build_model(
+            vocab_size=vocab_size,
+            embedding_dim=embedding_dim,
+            rnn_units=rnn_units,
+            batch_size=BATCH_SIZE
+        )
+
+        for input_example_batch, target_example_batch in dataset.take(1):
+            example_batch_predictions = model(input_example_batch)
+            print(example_batch_predictions.shape, "# (batch_size, sequence_length, vocab_size)")
+
+        sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+        sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+
+        example_batch_loss = self.loss_function(target_example_batch, example_batch_predictions)
+
+        model.compile(optimizer='adam', loss=self.loss_function)
+
+        # Directory where the checkpoints will be saved
+        checkpoint_dir = 'model_test/training_checkpoints'
+        # Name of the checkpoint files
+        checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
+
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_prefix,
+            save_weights_only=True
+        )
+
+        EPOCHS = 10
+        history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
+
+        tf.train.latest_checkpoint(checkpoint_dir)
+        model = self.build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
+        model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+        model.build(tf.TensorShape([1, None]))
+
+        model.save("model_test/test_model")
 
 
-if __name__ == '__main__':
-    mb = ModelBuilder()
-    mb.build_model('test.csv')
+# if __name__ == '__main__':
+#     mb = ModelBuilder()
+#     mb.generate_and_save_model_from_csv('test.csv')
