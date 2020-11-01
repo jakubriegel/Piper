@@ -9,6 +9,7 @@ services:
       - "8003:8080"
     volumes:
       - ../service/frontend/:/frontend/
+    container_name: frontend
   intelligence-core-service:
     build:
       context: ../service/intelligence-core-service
@@ -17,6 +18,9 @@ services:
       - "5000:5000"
     volumes:
       - ../service/intelligence-core-service:/intelligence-core-service/
+    depends_on:
+      - kafka-broker
+    container_name: intelligence-core-service
   home-service:
     build:
       context: ../service/home-service
@@ -24,12 +28,31 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:80"
+    depends_on:
+      - routines-db
+    container_name: home-service
   routines-db:
     image: mongo:4.4.1
     ports:
       - "8002:27017"
     volumes:
       - routines-db:/data/db
-
+    container_name: routines-db
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    container_name: zoo-keeper
+  kafka-broker:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_CREATE_TOPICS: "UserDataSamplesTopic:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    container_name: kafka-broker
 volumes:
   routines-db:
