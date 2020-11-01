@@ -1,56 +1,79 @@
 <template>
   <div>
-    <v-row class="hidden-md-and-up justify-center">
-      <v-btn @click="saveChanges">Save changes</v-btn>
-    </v-row>
-    <v-row>
-      <v-col cols="6" class="mr-5">
-        <v-text-field
-          label="Name"
-          v-model="selectedRoutine.name"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-checkbox
-          label="Enabled"
-          v-model="selectedRoutine.enabled"
-        ></v-checkbox>
-      </v-col>
-      <v-col cols="2" class="hidden-sm-and-down">
-        <v-btn @click="saveChanges"> Save changes</v-btn>
+    <v-row class="justify-center">
+      <v-col cols="6">
+        <v-row class="hidden-md-and-up">
+          <v-btn dark @click="saveChanges">Save changes</v-btn>
+        </v-row>
+        <v-row>
+          <v-col cols="5">
+            <v-checkbox
+              label="Enabled"
+              v-model="selectedRoutine.enabled"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="5" class="hidden-sm-and-down mt-2">
+            <v-btn dark @click="saveChanges"> Save changes</v-btn>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
-    <div v-if="loading">
+    <v-row v-if="loading">
       <v-progress-circular indeterminate color="accent" />
-    </div>
-    <v-card v-else>
-      <Container @drop="onDrop">
-        <Draggable
-          v-for="(event, index) in selectedRoutine.events"
-          :key="index"
-        >
-          <v-card class="draggable-item" outlined>
-            <v-card-text>
-              <v-text-field label="deviceId" v-model="event.deviceId">
-              </v-text-field>
-              <v-text-field label="eventId" v-model="event.eventId">
-              </v-text-field>
-            </v-card-text>
-          </v-card>
-          <v-hover v-slot="{ hover }">
-            <div class="d-flex align-self-center justify-center flex-wrap">
-              <v-icon
-                :class="{ 'on-hover': hover }"
-                @click="addEventToRoutine(index)"
-                size="40"
-              >
-                mdi-arrow-down-thick
-              </v-icon>
-            </div>
-          </v-hover>
-        </Draggable>
-      </Container>
-    </v-card>
+    </v-row>
+    <v-row
+      class="justify-center"
+      v-else-if="selectedRoutine.events && !selectedRoutine.events.length"
+    >
+      <v-col cols="3">
+        <v-row class="red--text">
+          Routine has no events!
+        </v-row>
+        <v-row class="mt-2">
+          <v-btn dark @click="addEventToRoutine(0)">Initialize events</v-btn>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row v-else class="justify-center">
+      <v-col class="pt-0" cols="6">
+        <v-row class="justify-center">
+          <v-col class="pt-0">
+            <v-text-field
+              label="Name"
+              v-model="selectedRoutine.name"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-card>
+          <Container @drop="onDrop" class="pa-3">
+            <Draggable
+              v-for="(event, index) in selectedRoutine.events"
+              :key="index"
+            >
+              <v-card class="draggable-item" outlined>
+                <v-card-text>
+                  <v-text-field label="deviceId" v-model="event.deviceId">
+                  </v-text-field>
+                  <v-text-field label="eventId" v-model="event.eventId">
+                  </v-text-field>
+                </v-card-text>
+              </v-card>
+              <v-hover v-slot="{ hover }">
+                <div class="d-flex align-self-center justify-center flex-wrap">
+                  <v-icon
+                    :class="{ 'on-hover': hover }"
+                    @click="addEventToRoutine(index)"
+                    size="40"
+                  >
+                    mdi-arrow-down-thick
+                  </v-icon>
+                </div>
+              </v-hover>
+            </Draggable>
+          </Container>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
