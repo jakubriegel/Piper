@@ -2,6 +2,7 @@ from flask import Flask, request, Response
 import json
 
 from modelService import ModelService
+from modelBuilder import ModelBuilder
 
 app = Flask(__name__)
 
@@ -30,3 +31,4 @@ def get_predictions():
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
+
