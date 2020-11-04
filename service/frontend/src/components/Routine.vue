@@ -96,7 +96,6 @@ export default {
   },
 
   data: () => ({
-    routine: {},
     loading: true
   }),
 
