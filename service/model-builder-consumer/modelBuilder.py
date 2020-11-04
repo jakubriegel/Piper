@@ -10,7 +10,12 @@ import os
 class ModelBuilder:
     def __init__(self):
         self.categories_dict = {}
-        self.consumer = KafkaConsumer('UserDataSamplesTopic', bootstrap_servers='localhost:9092', value_deserializer=lambda m: json.loads(m.decode('utf-8')))
+        self.consumer = KafkaConsumer(
+            'UserDataSamplesTopic',
+            bootstrap_servers='localhost',
+            api_version=(2,6,0),
+            value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+        )
 
     def __get_category(self, category_id):
         return self.categories_dict[category_id]
@@ -142,8 +147,7 @@ class ModelBuilder:
             self.generate_and_save_model_from_csv(data_packge.value['path'])
 
 
-
-# if __name__ == '__main__':
-#     mb = ModelBuilder()
-#     # mb.generate_and_save_model_from_csv('test.csv')
-#     mb.run_kafka_data_consumer()
+if __name__ == '__main__':
+    print('=================================start========================================')
+    mb = ModelBuilder()
+    mb.run_kafka_data_consumer()
