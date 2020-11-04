@@ -46,15 +46,24 @@ export const routines = {
     },
 
     editRoutine({ state }, id) {
-      Axios.put('https://jrie.eu:8001/routines/' + id, state.selectedRoutine, {
-        headers: {
-          Accept: 'application/json'
+      Axios.put(
+        'https://jrie.eu:8001/routines/' + id,
+        {
+          name: state.selectedRoutine.name,
+          enabled: state.selectedRoutine.enabled,
+          events: state.selectedRoutine.events,
+          configuration: state.selectedRoutine.configuration
         },
-        auth: {
-          username: globals.API_USERNAME,
-          password: globals.API_PASSWORD
+        {
+          headers: {
+            Accept: 'application/json'
+          },
+          auth: {
+            username: globals.API_USERNAME,
+            password: globals.API_PASSWORD
+          }
         }
-      })
+      )
         .then(res => {
           console.log(res);
         })
