@@ -18,18 +18,19 @@ services:
       - "5000:5000"
     volumes:
       - ../service/intelligence-core-service:/intelligence-core-service/
-    depends_on:
-      - kafka
+      - ../service/model-builder:/model-builder/
     container_name: intelligence-core-service
-  model-builder-consumer:
+  model-builder:
     build:
-      context: ../service/model-builder-consumer
+      context: ../service/model-builder
       dockerfile: Dockerfile
     ports:
     - "2121:2121"
     volumes:
-    - ../service/model-builder-consumer:/model-builder-consumer/
-    container_name: model-builder-consumer
+    - ../service/model-builder:/model-builder/
+    depends_on:
+      - kafka
+    container_name: model-builder
   home-service:
     build:
       context: ../service/home-service

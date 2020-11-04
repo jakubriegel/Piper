@@ -148,6 +148,5 @@ class ModelBuilder:
 
 
 if __name__ == '__main__':
-    print('=================================start========================================')
     mb = ModelBuilder()
     mb.run_kafka_data_consumer()

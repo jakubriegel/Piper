@@ -6,5 +6,10 @@ If you want trigger model build send kafka event on topic `UserDataSamplesTopic`
 `{"path": "path/to/data.csv"}
 
 To send event manually you can enter kafka container console (using `docker exec` command) and run this: 
-```kafka-console-producer.sh --broker-list localhost:9092 --topic UserDataSamplesTopic```
+```kafka-console-producer --broker-list localhost:9092 --topic UserData```
 And then paste above payload and hit enter.
+
+To debug event you can listen on it using command as above: 
+```kafka-console-consumer --bootstrap-server localhost:9092 --topic UserData```
+
+IMPORTANT Note: Kafka in this configuration may <b>NOT</b> be visible outside docker network!!!
