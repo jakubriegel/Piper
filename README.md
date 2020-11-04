@@ -3,7 +3,11 @@ Piper will be an AI based system, that will be able to propose automated routine
 
 # Model building through Kafka
 If you want trigger model build send kafka event on topic `UserDataSamplesTopic` with payload like this:
-`{"path": "path/to/data.csv"}
+`{"path": "path/to/data.csv"}`.
+
+By default there is one dataset soo you can send this payload for testing purpose: `{"path": "data.csv"}`.
+
+Models are saved in `/model-builder/models` folder.
 
 To send event manually you can enter kafka container console (using `docker exec` command) and run this: 
 ```kafka-console-producer --broker-list localhost:9092 --topic UserData```
