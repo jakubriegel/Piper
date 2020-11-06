@@ -18,10 +18,7 @@ export const routines = {
         headers: {
           Accept: 'application/json'
         },
-        auth: {
-          username: globals.API_USERNAME,
-          password: globals.API_PASSWORD
-        }
+        auth: globals.authentication
       }).then(res => {
         commit('SET_ROUTINES', res.data.routines);
       });
@@ -32,10 +29,7 @@ export const routines = {
         headers: {
           Accept: 'application/json'
         },
-        auth: {
-          username: globals.API_USERNAME,
-          password: globals.API_PASSWORD
-        }
+        auth: globals.authentication
       })
         .then(res => {
           commit('SET_SELECTED_ROUTINE', res.data.routine);
@@ -58,10 +52,7 @@ export const routines = {
           headers: {
             Accept: 'application/json'
           },
-          auth: {
-            username: globals.API_USERNAME,
-            password: globals.API_PASSWORD
-          }
+          auth: globals.authentication
         }
       )
         .then(res => {
