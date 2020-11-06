@@ -6,6 +6,7 @@ COPY build.gradle.kts /app/build.gradle.kts
 COPY settings.gradle.kts /app/settings.gradle.kts
 COPY gradle /app/gradle
 COPY src /app/src
+COPY piper.p12 /app/src/main/resources/piper.p12
 
 RUN gradle build
 

@@ -3,11 +3,14 @@ package eu.jrie.put.piper.piperhomeservice.api
 import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutineRequest
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutineResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.RoutineSuggestionsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutinesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
+import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.net.URI
@@ -63,7 +67,7 @@ class RoutinesController(
                 .map {
                     created(URI.create("/routines/${it.id}"))
                         .body(RoutineResponse(it.asMessage()) as ApiResponse)
-                }
+                    }
                 .handleErrors()
     }
 
@@ -76,6 +80,24 @@ class RoutinesController(
         val user = auth.asUser()
         return routine.flatMap { service.updateRoutine(it.toRoutine(id, user.house), user) }
                 .map { ok(RoutineResponse(it.asMessage()) as ApiResponse) }
+                .handleErrors()
+    }
+
+    @GetMapping("suggestions", produces = [APPLICATION_JSON_VALUE])
+    @FlowPreview
+    fun getSuggestions(
+            @RequestParam(required = true) deviceId: String,
+            @RequestParam(required = true) eventId: String,
+            @RequestParam(required = false, defaultValue = "5") limit: Int = 5,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        val params = mapOf("deviceId" to deviceId, "eventId" to eventId, "limit" to limit.toString())
+        val start = RoutineEvent(deviceId, eventId)
+        return service.getContinuationSuggestions(start, limit, auth.asUser())
+                .asFlux()
+                .collectList()
+                .map { RoutineSuggestionsResponse(start, it, limit, params) }
+                .map { ok(it as ApiResponse) }
                 .handleErrors()
     }
 }
