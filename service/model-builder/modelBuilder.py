@@ -1,14 +1,21 @@
-import json
+from kafka import KafkaConsumer
 from pathlib import Path
-
 import tensorflow as tf
 import pandas as pd
+import datetime
+import json
 import os
 
 
 class ModelBuilder:
     def __init__(self):
         self.categories_dict = {}
+        self.consumer = KafkaConsumer(
+            'UserData',
+            bootstrap_servers='kafka:29092',
+            api_version=(2,6,0),
+            value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+        )
 
     def __get_category(self, category_id):
         return self.categories_dict[category_id]
@@ -36,9 +43,13 @@ class ModelBuilder:
     def __loss_function(labels, logits):
         return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
-    def generate_and_save_model_from_csv(self, csv_file):
+    def generate_and_save_model_from_csv(self, csv_file_path):
+        datestring = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        model_dir = 'models/' + datestring + '_model'
+        os.makedirs(model_dir, exist_ok=True)
+
         header_list = ["timestamp", "sensor", "action"]
-        sensors_df = pd.read_csv('model/data.csv', names=header_list)
+        sensors_df = pd.read_csv(csv_file_path, names=header_list)
 
         sensors_df['sensors_with_action'] = sensors_df['sensor'] + '_' + sensors_df['action']
 
@@ -49,7 +60,7 @@ class ModelBuilder:
 
         self.categories_dict = dict(enumerate(sensors_df['sensors_with_action_code'].cat.categories))
 
-        category_dict_file = Path('model_test/category_dict.json')
+        category_dict_file = Path(model_dir + '/category_dict.json')
         category_dict_file.write_text(json.dumps(self.categories_dict, indent=4) + '\n')
 
         sensors_df['sensors_with_action_code'] = sensors_df.sensors_with_action_code.cat.codes
@@ -111,7 +122,7 @@ class ModelBuilder:
         model.compile(optimizer='adam', loss=self.__loss_function)
 
         # Directory where the checkpoints will be saved
-        checkpoint_dir = 'model_test/training_checkpoints'
+        checkpoint_dir = model_dir + '/training_checkpoints'
         # Name of the checkpoint files
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
 
@@ -128,9 +139,14 @@ class ModelBuilder:
         model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
         model.build(tf.TensorShape([1, None]))
 
-        model.save("model_test/test_model")
+        model.save(model_dir)
+
+    def run_kafka_data_consumer(self):
+        for data_packge in self.consumer:
+            print("File submitted as training dataset:  {}", data_packge.value['path'])
+            self.generate_and_save_model_from_csv(data_packge.value['path'])
 
 
-# if __name__ == '__main__':
-#     mb = ModelBuilder()
-#     mb.generate_and_save_model_from_csv('test.csv')
+if __name__ == '__main__':
+    mb = ModelBuilder()
+    mb.run_kafka_data_consumer()
