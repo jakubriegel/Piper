@@ -2,15 +2,26 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
+import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
+import eu.jrie.put.piper.piperhomeservice.domain.routine.NotDeviceEventException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
-import org.springframework.http.HttpStatus
+import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperNotFoundException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactor.asFlux
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.status
 import org.springframework.web.server.ServerWebInputException
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 data class ErrorResponse (
         val error: String,
@@ -18,7 +29,10 @@ data class ErrorResponse (
         val details: Map<String, Any?>
 ) : ApiResponse
 
+fun Flow<ResponseEntity<ApiResponse>>.handleErrors() = asFlux().toMono().handleErrors()
+
 fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
+    logger.error("An error occurred", e)
     when(e) {
         is PiperException -> e.businessError()
         is ServerWebInputException -> e.badRequest()
@@ -27,7 +41,10 @@ fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
 }
 
 private fun PiperException.businessError() = when (this) {
-    is InsufficientAccessException -> HttpStatus.FORBIDDEN
+    is InsufficientAccessException -> FORBIDDEN
+    is NoModelException -> NO_CONTENT
+    is PiperNotFoundException -> NOT_FOUND
+    is NotDeviceEventException -> BAD_REQUEST
     else -> throw IllegalStateException("Unknown exception: $this")
 }.let { status(it).body(this.asErrorResponse()) }
 
@@ -64,3 +81,5 @@ private fun Throwable.internalServerError(): ResponseEntity<ApiResponse> = Error
         "SERVER_ERROR", "An unknown error occurred",
         mapOf( "exception" to this::class.simpleName, "errorMessage" to message)
 ).let { status(INTERNAL_SERVER_ERROR).body(it) }
+
+private val logger: Logger = LoggerFactory.getLogger("ErrorLogger")

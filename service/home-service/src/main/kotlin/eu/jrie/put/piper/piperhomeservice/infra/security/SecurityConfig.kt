@@ -25,8 +25,14 @@ class SecurityConfig {
     fun configure(http: ServerHttpSecurity): SecurityWebFilterChain = http
             .csrf().disable()
             .authorizeExchange()
-            .pathMatchers("/house/**").hasAnyRole(HOUSE, ADMIN)
+            .pathMatchers("/events").hasAnyRole(HOUSE, ADMIN)
             .pathMatchers("/routines/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers(POST, "/houses").hasRole(ADMIN)
+            .pathMatchers(GET, "/houses").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/rooms/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/devices/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/devices/types/**").hasAnyRole(USER, ADMIN)
+            .pathMatchers("/houses/schema").hasAnyRole(HOUSE, ADMIN)
             .anyExchange().hasAnyRole(ADMIN).and()
             .cors().and()
             .httpBasic().and()
@@ -46,6 +52,7 @@ class SecurityConfig {
 
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/routines/**", cors)
+            registerCorsConfiguration("/houses", cors)
         }
     }
 

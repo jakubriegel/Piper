@@ -1,5 +1,6 @@
 package eu.jrie.put.piper.piperhomeservice.infra.mapper
 
+import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvParser.Feature.SKIP_EMPTY_LINES
@@ -25,6 +26,7 @@ class MapperConfig {
     fun jsonMapper(): JsonMapper = JsonMapper().apply {
         registerModule(KotlinModule())
         registerModule(JavaTimeModule())
+        disable(WRITE_DATES_AS_TIMESTAMPS)
     }
 
     @Bean

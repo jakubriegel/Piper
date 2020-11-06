@@ -7,34 +7,30 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.Routine
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineConfiguration
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinePreview
+import org.springframework.hateoas.IanaLinkRelations.ABOUT
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
-import org.springframework.hateoas.IanaLinkRelations.DESCRIBES
 import org.springframework.hateoas.IanaLinkRelations.EDIT
-import org.springframework.hateoas.IanaLinkRelations.FIRST
-import org.springframework.hateoas.RepresentationModel
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
+
+private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth))
+private val linkToHouses = linkTo(HousesController::class.java)
 
 data class RoutinesResponse (
         val routines: List<RoutinePreview>
-) : RepresentationModel<RoutinesResponse>(), ApiResponse {
-    init {
-        add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withSelfRel())
-        add(linkTo(RoutinesController::class.java).slash(routines.first().id).withRel(FIRST))
-        add(linkTo(HousesController::class.java).withRel(DESCRIBES))
-    }
-}
+) : RepresentationalResponse(
+        linkToRoutines.withSelfRel(),
+        linkToHouses.withRel(ABOUT)
+)
 
 data class RoutineResponse (
         val routine: RoutineMessage
-) : RepresentationModel<RoutineResponse>(), ApiResponse {
-    init {
-        add(linkTo(RoutinesController::class.java).slash(routine.id).withSelfRel())
-        add(linkTo(RoutinesController::class.java).slash(routine.id).withRel(EDIT))
-        add(linkTo(WebMvcLinkBuilder.methodOn(RoutinesController::class.java).getRoutines(Auth)).withRel(COLLECTION))
-        add(linkTo(HousesController::class.java).withRel(DESCRIBES))
-    }
-}
+) : RepresentationalResponse(
+        linkToRoutines.slash(routine.id).withSelfRel(),
+        linkToRoutines.slash(routine.id).withRel(EDIT),
+        linkToRoutines.withRel(COLLECTION),
+        linkToHouses.withRel(ABOUT)
+)
 
 data class RoutineMessage (
         val id: String,
@@ -59,3 +55,13 @@ data class RoutineRequest (
             id, name, houseId, enabled, events, configuration ?: RoutineConfiguration()
     )
 }
+
+data class RoutineSuggestionsResponse (
+        val start: RoutineEvent,
+        val suggestions: List<RoutineEvent>,
+        val n: Int,
+        val params: Map<String, String?>
+) : RepresentationalResponse(
+        linkToRoutines.slash("suggestions").withQuery(params).withSelfRel(),
+        linkToRoutines.withRel(COLLECTION)
+)
