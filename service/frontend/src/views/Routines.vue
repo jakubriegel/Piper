@@ -25,7 +25,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 export default {
-  name: 'CustomRoutines',
+  name: 'Routines',
   computed: {
     ...mapGetters('routines', ['routines'])
   },
