@@ -1,7 +1,13 @@
-FROM python:3.6
+FROM python:3.8.6
 
-ADD . /intelligence-core-service
-WORKDIR /intelligence-core-service
-RUN pip install -r requirements.txt
+COPY ./requirements.txt /service/requirements.txt
+RUN pip install -r /service/requirements.txt
+
+COPY ./app /service/app
+COPY ./api.py /service/api.py
+
+COPY ./model /service/model
+
+WORKDIR /service
 
 CMD python api.py

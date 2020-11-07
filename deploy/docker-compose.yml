@@ -14,8 +14,6 @@ services:
     build:
       context: ../service/intelligence-core-service
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
     volumes:
       - ../service/intelligence-core-service:/intelligence-core-service/
       - ../service/model-builder:/model-builder/
