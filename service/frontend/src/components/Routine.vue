@@ -99,6 +99,7 @@ export default {
       } else {
         this.addRoutine();
       }
+      this.$router.push('/routines');
     },
     onDrop(dropResult) {
       this.setSelectedRoutineEvents(
