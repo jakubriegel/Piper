@@ -6,3 +6,7 @@ spring:
     mongodb:
       host: localhost
       port: 27017
+
+client:
+  intelligence-core-service:
+    host: localhost
