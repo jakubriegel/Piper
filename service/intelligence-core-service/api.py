@@ -3,7 +3,7 @@ import json
 from uuid import uuid4
 from time import sleep
 
-from app.modelService import ModelService
+# from app.modelService import ModelService
 
 app = Flask(__name__)
 
