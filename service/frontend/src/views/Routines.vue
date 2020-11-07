@@ -19,6 +19,9 @@
         </template>
       </v-data-table>
     </v-card>
+    <v-btn dark class="mt-3" @click="$router.push('/routine')">
+      Add routine
+    </v-btn>
   </v-container>
 </template>
 

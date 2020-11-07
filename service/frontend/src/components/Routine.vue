@@ -18,12 +18,9 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row v-if="loading">
-      <v-progress-circular indeterminate color="accent" />
-    </v-row>
     <v-row
       class="justify-center"
-      v-else-if="selectedRoutine.events && !selectedRoutine.events.length"
+      v-if="selectedRoutine.events && !selectedRoutine.events.length"
     >
       <v-col cols="3">
         <v-row class="red--text">
@@ -85,35 +82,23 @@ export default {
 
   components: { Container, Draggable },
 
-  props: {
-    id: {
-      required: true
-    }
-  },
-
   computed: {
     ...mapGetters('routines', ['selectedRoutine'])
   },
 
-  data: () => ({
-    loading: true
-  }),
-
-  mounted() {
-    this.getRoutine(this.id).then(() => {
-      this.loading = false;
-    });
-  },
-
   methods: {
     ...mapActions('routines', [
-      'getRoutine',
+      'addRoutine',
       'editRoutine',
       'addEventToRoutine',
       'setSelectedRoutineEvents'
     ]),
     saveChanges() {
-      this.editRoutine(this.id);
+      if (this.selectedRoutine.id) {
+        this.editRoutine(this.selectedRoutine.id);
+      } else {
+        this.addRoutine();
+      }
     },
     onDrop(dropResult) {
       this.setSelectedRoutineEvents(

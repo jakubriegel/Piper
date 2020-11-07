@@ -12,7 +12,29 @@ export const routines = {
     selectedRoutine: state => state.selectedRoutine
   },
   actions: {
-    addRoutine() {},
+    addRoutine({ state }) {
+      Axios.post(
+        'https://jrie.eu:8001/routines/',
+        {
+          name: state.selectedRoutine.name,
+          enabled: state.selectedRoutine.enabled,
+          events: state.selectedRoutine.events,
+          configuration: state.selectedRoutine.configuration
+        },
+        {
+          headers: {
+            Accept: 'application/json'
+          },
+          auth: utils.authentication
+        }
+      )
+        .then(res => {
+          console.log(res);
+        })
+        .catch(() => {
+          //TODO handle error
+        });
+    },
     getRoutines({ commit }) {
       Axios.get('https://jrie.eu:8001/routines', {
         headers: {
