@@ -11,11 +11,11 @@
 
 <script>
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    Toolbar: () => import("@/components/Toolbar.vue"),
-    Drawer: () => import("@/components/Drawer.vue"),
-    Footer: () => import("@/components/Footer.vue")
+    Toolbar: () => import('@/components/Toolbar.vue'),
+    Drawer: () => import('@/components/Drawer.vue'),
+    Footer: () => import('@/components/Footer.vue')
   },
   data: () => ({
     //

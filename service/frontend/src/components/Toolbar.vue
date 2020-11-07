@@ -21,14 +21,14 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations } from 'vuex';
 
 export default {
   computed: {
-    ...mapGetters("navigation", ["routes"])
+    ...mapGetters('navigation', ['routes'])
   },
   methods: {
-    ...mapMutations("navigation", ["toggleDrawer"])
+    ...mapMutations('navigation', ['toggleDrawer'])
   }
 };
 </script>

@@ -55,27 +55,27 @@
 
 <script>
 export default {
-  name: "Footer",
+  name: 'Footer',
   data: () => ({
     socialMedia: [
       {
-        icon: "mdi-github",
-        link: "https://github.com/jakubriegel/Piper"
+        icon: 'mdi-github',
+        link: 'https://github.com/jakubriegel/Piper'
       },
       {
-        icon: "mdi-vuejs",
-        link: "https://vuejs.org/"
+        icon: 'mdi-vuejs',
+        link: 'https://vuejs.org/'
       },
       {
-        icon: "mdi-vuetify",
-        link: "https://vuetifyjs.com/en/"
+        icon: 'mdi-vuetify',
+        link: 'https://vuetifyjs.com/en/'
       },
       {
-        icon: "mdi-language-kotlin",
-        link: "https://spring.io/"
+        icon: 'mdi-language-kotlin',
+        link: 'https://spring.io/'
       }
     ],
-    ppLogo: require("../assets/PolitechnikaPoznanska.png")
+    ppLogo: require('../assets/PolitechnikaPoznanska.png')
   })
 };
 </script>
