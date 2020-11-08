@@ -1,4 +1,4 @@
-FROM python:3.8.6
+FROM python:3.6
 
 COPY ./requirements.txt /service/requirements.txt
 RUN pip install -r /service/requirements.txt
