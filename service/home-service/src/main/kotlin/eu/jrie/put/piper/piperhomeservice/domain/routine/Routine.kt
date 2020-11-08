@@ -1,6 +1,7 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
 import eu.jrie.put.piper.piperhomeservice.domain.event.Event
+import eu.jrie.put.piper.piperhomeservice.infra.repository.CustomRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.data.annotation.Id
@@ -51,11 +52,10 @@ interface RoutinesRepositoryCustom {
 
 @Repository
 class RoutinesRepositoryCustomImpl (
-        private val template: ReactiveMongoTemplate
-) : RoutinesRepositoryCustom {
+        template: ReactiveMongoTemplate
+) : RoutinesRepositoryCustom, CustomRepository(template) {
         override fun findRoutinesPreview(houseId: String): Flow<RoutinePreview> {
-                val projection = mapOf("id" to 1, "name" to 1, "enabled" to 1)
-                        .let { org.bson.Document(it) }
+                val projection = projectionOf("id" to 1, "name" to 1, "enabled" to 1)
                 val query = BasicQuery(Criteria.where("houseId").`is`(houseId).criteriaObject, projection)
                 return template.find(query, RoutinePreview::class.java, "routine").asFlow()
         }

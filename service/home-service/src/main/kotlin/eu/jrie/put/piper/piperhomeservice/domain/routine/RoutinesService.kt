@@ -4,6 +4,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
+import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -35,7 +36,7 @@ class RoutinesService (
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
                     .then(housesService.getHouse(user))
-                    .map { it.models.current?.id ?: throw NoModelException() }
+                    .map { /*it.models.current?.id ?:*/ nextUUID ?: throw NoModelException() }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
 
