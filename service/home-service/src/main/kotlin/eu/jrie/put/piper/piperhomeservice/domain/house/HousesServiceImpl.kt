@@ -142,4 +142,12 @@ class HousesServiceImpl (
                             .map { event }
                 }
     }
+
+    override fun checkIsEventOfDevice(deviceId: String, eventId: String, user: User): Mono<Void> {
+        return Mono.zip(getDevice(deviceId, user), getEvent(eventId, user))
+                .flatMap { (device, event) ->
+                    if (device.typeId != event.deviceTypeId) Mono.error(NotDeviceEventException(device, event))
+                    else Mono.empty()
+                }
+    }
 }

@@ -19,4 +19,5 @@ interface HousesService {
     fun getDevicesTypes(user: User): Flow<Pair<DeviceType, Flow<DeviceEvent>>>
 
     fun getEvent(eventId: String, user: User): Mono<DeviceEvent>
+    fun checkIsEventOfDevice(deviceId: String, eventId: String, user: User): Mono<Void>
 }

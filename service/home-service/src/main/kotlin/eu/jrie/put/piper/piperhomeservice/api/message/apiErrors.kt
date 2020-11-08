@@ -2,8 +2,8 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
+import eu.jrie.put.piper.piperhomeservice.domain.house.NotDeviceEventException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
-import eu.jrie.put.piper.piperhomeservice.domain.routine.NotDeviceEventException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.client.ServiceNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException

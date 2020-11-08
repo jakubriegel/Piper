@@ -4,8 +4,6 @@ import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
-import eu.jrie.put.piper.piperhomeservice.infra.common.component1
-import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -35,13 +33,7 @@ class RoutinesService (
 
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
-            Mono.zip(
-                    housesService.getDevice(start.deviceId, user),
-                    housesService.getEvent(start.eventId, user)
-            ).flatMap { (device, event) ->
-                if (device.typeId != event.deviceTypeId) Mono.error(NotDeviceEventException(device, event))
-                else Mono.empty<Void>()
-            }
+            housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
                     .then(housesService.getHouse(user))
                     .map { it.models.current?.id ?: throw NoModelException() }
                     .asFlow()
