@@ -53,6 +53,8 @@ class SecurityConfig {
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/routines/**", cors)
             registerCorsConfiguration("/houses", cors)
+            registerCorsConfiguration("/houses/rooms/**", cors)
+            registerCorsConfiguration("/houses/devices/**", cors)
         }
     }
 

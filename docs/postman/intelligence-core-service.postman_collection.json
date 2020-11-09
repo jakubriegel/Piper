@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "b35ad28d-86e3-4e93-be01-2a9fb9becd51",
+		"name": "intelligence-core-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get-sequence",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b2bdd19e-ebe8-4206-8ffb-a0aaeafddc96",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"let query = {};\r",
+							"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
+							"pm.test(\"Contains modelId\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(query['modelId']).to.not.eq(undefined);\r",
+							"    pm.expect(jsonData.modelId).to.eq(query['modelId']);\r",
+							"});\r",
+							"pm.test(\"Contains head\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(query['event']).to.not.eq(undefined);\r",
+							"    pm.expect(jsonData.head).to.eq(query['event']);\r",
+							"});\r",
+							"pm.test(\"Contains sequence\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.sequence.length).to.eq(parseInt(query['limit']));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{intelligence-core}}/get-sequence?modelId={{modelId}}&event={{$guid}}_{{$guid}}&limit=5",
+					"host": [
+						"{{intelligence-core}}"
+					],
+					"path": [
+						"get-sequence"
+					],
+					"query": [
+						{
+							"key": "modelId",
+							"value": "{{modelId}}"
+						},
+						{
+							"key": "event",
+							"value": "{{$guid}}_{{$guid}}"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "66e8292b-5cc2-464f-9172-a337586080b7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "7d9b45d7-d762-47bf-8dce-dcb116b29e50",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "4b79a319-d0e0-4200-9954-a31669b14b13",
+			"key": "intelligence-core",
+			"value": "http://{{HOST}}:8004"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

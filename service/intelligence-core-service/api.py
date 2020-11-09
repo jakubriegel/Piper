@@ -1,12 +1,14 @@
 from flask import Flask, request, Response
 from werkzeug.exceptions import HTTPException, abort
 import json
+from uuid import uuid4
+from time import sleep
 
-from modelService import ModelService
+# from app.modelService import ModelService
 
 app = Flask(__name__)
 
-modelServiceInstance = ModelService()
+# modelServiceInstance = ModelService()
 
 
 @app.errorhandler(Exception)
@@ -37,6 +39,7 @@ def get_status():
 
 @app.route('/get-sequence', methods=['GET'])
 def get_predictions():
+
     try:
         modelId = int(request.args.get('modelId'))
         event = request.args.get('event')
@@ -49,5 +52,7 @@ def get_predictions():
         abort(422)
 
 
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8004, debug=True)
+

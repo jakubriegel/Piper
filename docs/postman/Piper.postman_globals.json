@@ -30,10 +30,15 @@
 			"key": "deviceEventId",
 			"value": "7248c7cb-1bb2-45f6-a53a-1016a0fca6c7",
 			"enabled": true
+		},
+		{
+			"key": "modelId",
+			"value": "2dfe3a56-f71e-4e69-b4b2-2f44d60b53f9",
+			"enabled": true
 		}
 	],
 	"name": "Piper Globals",
 	"_postman_variable_scope": "globals",
-	"_postman_exported_at": "2020-10-26T15:19:24.799Z",
-	"_postman_exported_using": "Postman/7.34.0"
+	"_postman_exported_at": "2020-11-07T17:12:16.875Z",
+	"_postman_exported_using": "Postman/7.35.0"
 }

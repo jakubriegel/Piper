@@ -4,12 +4,16 @@ export const navigation = {
     drawer: false,
     routes: [
       {
-        text: "Home",
-        to: "/"
+        text: 'Home',
+        to: '/'
       },
       {
-        text: "About",
-        to: "/about"
+        text: 'Routines',
+        to: '/routines'
+      },
+      {
+        text: 'About',
+        to: '/about'
       }
     ]
   },

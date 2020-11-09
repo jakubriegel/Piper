@@ -318,7 +318,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"deviceId\": \"3365f617-b43a-4248-a4bf-296621d586c7\",\r\n      \"eventId\": \"a64f2a8c-81f5-4f05-87ca-2a1aee369fa1\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
+							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"deviceId\": \"{{deviceId}}\",\r\n      \"eventId\": \"{{deviceEventId}}\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -384,7 +384,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n        \"name\": \"COOL {{$timestamp}}\",\r\n        \"enabled\": true,\r\n        \"events\": [\r\n            {\r\n                \"trigger\": \"kitchen_lamp_1\",\r\n                \"action\": \"light_on\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
+							"raw": "{\r\n        \"name\": \"COOL {{$timestamp}}\",\r\n        \"enabled\": true,\r\n        \"events\": [\r\n            {\r\n                \"deviceId\": \"kitchen_lamp_1\",\r\n                \"eventId\": \"light_on\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -410,7 +410,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "0a7ed1c3-4da9-4b9e-8e8c-41ea9b81fd6f",
+								"id": "6dac448b-d02f-48cb-804a-58d40baa5f7c",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -419,8 +419,11 @@
 									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
 									"pm.test(\"Contains start event\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.start.trigger).to.eq(query['trigger']);\r",
-									"    pm.expect(jsonData.start.action).to.eq(query['action']);\r",
+									"    console.log(query)\r",
+									"    pm.expect(query['deviceId']).to.not.eq(undefined);\r",
+									"    pm.expect(query['eventId']).to.not.eq(undefined);\r",
+									"    pm.expect(jsonData.start.deviceId).to.eq(query['deviceId']);\r",
+									"    pm.expect(jsonData.start.eventId).to.eq(query['eventId']);\r",
 									"});\r",
 									"pm.test(\"Contains suggestions\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
@@ -430,7 +433,6 @@
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
 									"});\r",
-									"\r",
 									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
@@ -1083,6 +1085,12 @@
 									"    pm.expect(jsonData.id).to.be.not.eq(undefined);\r",
 									"    pm.expect(jsonData.id).to.be.not.eq(null);\r",
 									"});\r",
+									"pm.test(\"Contains events\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let field = jsonData.events;\r",
+									"    pm.expect(field).be.a('array');\r",
+									"    pm.globals.set(\"deviceEventId\", field[0].id)\r",
+									"});\r",
 									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
@@ -1306,9 +1314,9 @@
 	],
 	"variable": [
 		{
-			"id": "f0352db3-a344-4d65-82c4-52e839adc42f",
+			"id": "4707da2f-5719-40da-b84b-4465fc011d69",
 			"key": "home-service",
-			"value": "{{HOST}}:{{PORT}}"
+			"value": "{{PROTOCOL}}{{HOST}}:8001"
 		}
 	],
 	"protocolProfileBehavior": {}

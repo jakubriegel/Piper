@@ -7,3 +7,8 @@ spring:
       database: piper
   main:
     web-application-type: reactive
+
+client:
+  intelligence-core-service:
+    host: intelligence-core-service
+    port: 8004
