@@ -13,6 +13,7 @@
 
 <script>
 import Routine from '@/components/Routine';
+import { mapActions } from 'vuex';
 export default {
   name: 'EditRoutine',
 
@@ -33,6 +34,10 @@ export default {
     this.getRoutine(this.id).then(() => {
       this.loading = false;
     });
+  },
+
+  methods: {
+    ...mapActions('routines', ['getRoutine'])
   }
 };
 </script>
