@@ -14,16 +14,16 @@ services:
     build:
       context: ../service/intelligence-core-service
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
     volumes:
-      - ../service/intelligence-core-service:/intelligence-core-service/
-      - ../service/model-builder:/model-builder/
+      - models:/models
     container_name: intelligence-core-service
   model-builder:
     build:
       context: ../service/model-builder
       dockerfile: Dockerfile
+    volumes:
+      - training-data:/training-data
+      - models:/models
     ports:
     - "2121:2121"
     volumes:
@@ -36,6 +36,8 @@ services:
       context: ../service/home-service
       target: ${TARGET}
       dockerfile: Dockerfile
+    volumes:
+      - training-data:/training-data
     ports:
       - "8001:80"
     depends_on:
@@ -74,3 +76,5 @@ services:
     container_name: kafka
 volumes:
   routines-db:
+  training-data:
+  models:

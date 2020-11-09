@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "client.intelligence-core-service.host",
+      "type": "java.lang.String",
+      "description": "Client host."
+    },
+    {
+      "name": "client.intelligence-core-service.port",
+      "type": "java.lang.String",
+      "description": "Client port."
+    }
+  ] }

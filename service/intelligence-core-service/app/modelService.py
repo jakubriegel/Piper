@@ -1,4 +1,4 @@
-from serveModel import ServeModel
+from app.serveModel import ServeModel
 
 
 class ModelService:

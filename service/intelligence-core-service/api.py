@@ -1,11 +1,13 @@
 from flask import Flask, request, Response
 import json
+from uuid import uuid4
+from time import sleep
 
-from modelService import ModelService
+# from app.modelService import ModelService
 
 app = Flask(__name__)
 
-modelServiceInstance = ModelService()
+# modelServiceInstance = ModelService()
 
 
 @app.route('/status', methods=['GET'])
@@ -18,16 +20,19 @@ def get_status():
 
 @app.route('/get-sequence', methods=['GET'])
 def get_predictions():
-    try:
-        modelId = int(request.args.get('modelId'))
-        event = request.args.get('event')
-        limit = int(request.args.get('limit'))
-        prediction = modelServiceInstance.predict(modelId, event, limit)
-        return Response(response=json.dumps({"sequence": prediction}), status=200, mimetype='application/json')
-    except:
-        return Response(status=422)
+    modelId = request.args.get('modelId')
+    event = request.args.get('event')
+    limit = int(request.args.get('limit'))
+    
+    sleep(.5)
+    response = {
+        'modelId': modelId,
+        'head': event,
+        'sequence': [f'{uuid4()}_{uuid4()}' for _ in range(limit)]
+    }
+    return Response(response=json.dumps(response), status=200, mimetype='application/json')
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8004, debug=True)
 
