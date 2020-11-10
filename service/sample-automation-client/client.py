@@ -3,6 +3,7 @@ import time
 import requests
 import uuid
 
+
 url = "https://jrie.eu:8001/events"
 while True:
     payload = str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \

@@ -1,1 +1,3 @@
 .idea/*
+service/sample-automation-client/venv/Lib/site-packages/_distutils_hack/__pycache__/__init__.cpython-38.pyc
+*.pyc
