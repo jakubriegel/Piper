@@ -3,9 +3,6 @@ import time
 import requests
 import uuid
 
-class Client:
-    def __init__(self):
-
 
 def first_contact():
     url = "https://jrie.eu:8001/houses/schema"
