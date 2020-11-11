@@ -3,8 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.domain.routine
 import eu.jrie.put.piper.piperhomeservice.domain.house.Consents
 import eu.jrie.put.piper.piperhomeservice.domain.house.House
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
-import eu.jrie.put.piper.piperhomeservice.domain.house.Model
-import eu.jrie.put.piper.piperhomeservice.domain.house.Models
+import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
@@ -19,14 +18,16 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
-import java.time.Instant.now
+import reactor.core.publisher.Mono.empty
+import reactor.core.publisher.Mono.just
 
 internal class RoutinesServiceTest {
 
     private val housesService: HousesService = mockk()
+    private val modelService: ModelService = mockk()
     private val intelligenceClient: IntelligenceCoreServiceClient = mockk()
 
-    private val service = RoutinesService(mockk(), mockk(), housesService, intelligenceClient)
+    private val service = RoutinesService(mockk(), mockk(), housesService, modelService, intelligenceClient)
 
     @Test
     @FlowPreview
@@ -39,8 +40,8 @@ internal class RoutinesServiceTest {
         val (device2, event2) = nextUUID to nextUUID
         val expectedSuggestions = listOf("${device1}_$event1", "${device2}_$event2")
 
-        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns Mono.empty()
-        every { housesService.getHouse(user) } returns Mono.just(House(nextUUID, "", Models(Model(modelId, now()), emptySet()), Consents()))
+        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns empty()
+        every { modelService.getLatestModel(user) } returns just(modelId)
         every { intelligenceClient.getSequence(modelId, expectedMlEvent, N) } returns expectedSuggestions.asFlow()
 
         // when
@@ -49,7 +50,7 @@ internal class RoutinesServiceTest {
         // then
         verifyOrder {
             housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user)
-            housesService.getHouse(user)
+            modelService.getLatestModel(user)
             intelligenceClient.getSequence(modelId, expectedMlEvent, N)
         }
 
@@ -60,10 +61,10 @@ internal class RoutinesServiceTest {
 
     @Test
     @FlowPreview
-    fun `should throw NoModelException when house has no model`() = runBlocking {
+    fun `should throw PredictionsNotAvailableException when house has no model`() = runBlocking {
         // given
-        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns Mono.empty()
-        every { housesService.getHouse(user) } returns Mono.just(House(nextUUID, "", Models(null, emptySet()), Consents()))
+        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns empty()
+        every { modelService.getLatestModel(user) } returns empty()
 
         // when
         val result = runCatching { service.getContinuationSuggestions(start, N, user).single() }
@@ -71,11 +72,11 @@ internal class RoutinesServiceTest {
         // then
         verifyOrder {
             housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user)
-            housesService.getHouse(user)
+            modelService.getLatestModel(user)
         }
 
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()!! is NoModelException)
+        assertTrue(result.exceptionOrNull()!! is PredictionsNotAvailableException)
     }
 
     private companion object {

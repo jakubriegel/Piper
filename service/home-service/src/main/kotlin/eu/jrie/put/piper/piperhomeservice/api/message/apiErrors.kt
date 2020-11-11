@@ -3,7 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.api.message
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import eu.jrie.put.piper.piperhomeservice.domain.house.NotDeviceEventException
-import eu.jrie.put.piper.piperhomeservice.domain.routine.NoModelException
+import eu.jrie.put.piper.piperhomeservice.domain.routine.PredictionsNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.domain.user.InsufficientAccessException
 import eu.jrie.put.piper.piperhomeservice.infra.client.ServiceNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
@@ -44,7 +44,7 @@ fun Mono<ResponseEntity<ApiResponse>>.handleErrors() = onErrorResume { e ->
 
 private fun PiperException.businessError() = when (this) {
     is InsufficientAccessException -> FORBIDDEN
-    is NoModelException -> NO_CONTENT
+    is PredictionsNotAvailableException -> NO_CONTENT
     is PiperNotFoundException -> NOT_FOUND
     is NotDeviceEventException -> BAD_REQUEST
     is ServiceNotAvailableException -> SERVICE_UNAVAILABLE

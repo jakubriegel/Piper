@@ -2,6 +2,7 @@
 
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesServiceConsents
+import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
@@ -15,11 +16,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.time.Instant
 
 
         @Service
 class ModelService (
+                private val repository: ModelRepository,
                 private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelMessage>,
                 private val housesService: HousesServiceConsents,
                 private val pastEventService: PastEventService
@@ -43,6 +46,11 @@ class ModelService (
                 .let { kafka.send("UserData", it) }
                 .doOnError { e -> logger.error("Error during emitting event: ", e) }
                 .awaitSingle()
+    }
+
+    fun getLatestModel(user: User): Mono<String> {
+        return repository.findTopByHouseIdOrderByCreatedAt(user.house)
+                .map { it.id }
     }
 
     private companion object {
