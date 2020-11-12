@@ -1,37 +1,43 @@
 import json
 import time
+import random
+
 import requests
 import uuid
 
 
-def first_contact():
-    url = "https://jrie.eu:8001/houses/schema"
-    payload = json.dumps(json.load(open("devices.json")))
-    print(payload)
-    headers = {
-      'Accept': 'application/json',
-      'Origin': 'localhost',
-      'Authorization': 'Basic aG91c2UtMi1zZXJ2ZXI6c2VjcmV0',
-      'Content-Type': 'application/json'
-    }
+class SampleClient:
+    devIds_with_types: dict = {}
+    typeIds_with_actions: dict = {}
 
-    response = requests.request("PUT", url, headers=headers, data=payload, verify=False)
+    def first_contact(self):
+        url = "https://jrie.eu:8001/houses/schema"
+        payload = json.dumps(json.load(open("devices.json")))
+        print(payload)
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': 'Basic aG91c2UtMi1zZXJ2ZXI6c2VjcmV0',
+            'Content-Type': 'application/json'
+        }
 
-    print(response.text)
+        response = requests.request("PUT", url, headers=headers, data=payload, verify=False)
+        json_response = json.loads(response.text)
 
-def send_data():
-    url = "https://jrie.eu:8001/events"
-    while True:
-        payload = str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4()) + "\r\n" + \
-                  str(int(time.time())) + "," + str(uuid.uuid4()) + "," + str(uuid.uuid4())
+        for deviceType in json_response['deviceTypes']:
+            for event in deviceType['events']:
+                self.typeIds_with_actions.setdefault(deviceType['id'], []).append(event['id'])
+
+        for room in json_response['rooms']:
+            for device in room['devices']:
+                self.devIds_with_types[device['id']] = device['typeId']
+
+    def send_data(self):
+        url = "https://jrie.eu:8001/events"
+        payload = ''
+        for event in range(random.randint(10, 30)):
+            device, devType = random.choice(list(self.devIds_with_types.items()))
+            event = random.choice(self.typeIds_with_actions[devType])
+            payload += str(int(time.time())) + "," + device + "," + event + "\r\n"
         print(payload)
         headers = {
             'Content-Type': 'text/csv',
@@ -43,7 +49,8 @@ def send_data():
 
 
 if __name__ == '__main__':
-    first_contact()
-    # while True:
-    #     send_data()
-    #     time.sleep(30)
+    client = SampleClient()
+    client.first_contact()
+    while True:
+        client.send_data()
+        time.sleep(random.randint(10, 30))
