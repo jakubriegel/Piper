@@ -53,4 +53,4 @@ if __name__ == '__main__':
     client.first_contact()
     while True:
         client.send_data()
-        time.sleep(random.randint(10, 30))
+        time.sleep(random.randint(30, 3600))
