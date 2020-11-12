@@ -39,6 +39,7 @@ class RoutinesService (
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
                     .then(modelService.getLatestModel(user))
                     .switchIfEmpty { throw PredictionsNotAvailableException() }
+                    .map { it.id }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
 

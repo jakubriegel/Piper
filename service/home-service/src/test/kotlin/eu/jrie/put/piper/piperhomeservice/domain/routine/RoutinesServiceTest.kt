@@ -1,8 +1,12 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
+import eu.jrie.put.piper.piperhomeservice.DEVICE_ID
+import eu.jrie.put.piper.piperhomeservice.EVENT_ID
+import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
 import eu.jrie.put.piper.piperhomeservice.domain.house.Consents
 import eu.jrie.put.piper.piperhomeservice.domain.house.House
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
+import eu.jrie.put.piper.piperhomeservice.domain.model.Model
 import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.just
+import java.time.Instant.now
 
 internal class RoutinesServiceTest {
 
@@ -41,7 +46,7 @@ internal class RoutinesServiceTest {
         val expectedSuggestions = listOf("${device1}_$event1", "${device2}_$event2")
 
         every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns empty()
-        every { modelService.getLatestModel(user) } returns just(modelId)
+        every { modelService.getLatestModel(user) } returns just(Model(modelId, now(), now(), nextUUID))
         every { intelligenceClient.getSequence(modelId, expectedMlEvent, N) } returns expectedSuggestions.asFlow()
 
         // when
@@ -80,11 +85,10 @@ internal class RoutinesServiceTest {
     }
 
     private companion object {
-        val DEVICE_ID = nextUUID
-        val EVENT_ID = nextUUID
+
         const val N = 5
 
         val start = RoutineEvent(DEVICE_ID, EVENT_ID)
-        val user = User("id", "login", "secret", "house-id", emptySet())
+        val user = User("id", "login", "secret", HOUSE_ID, emptySet())
     }
 }

@@ -20,7 +20,7 @@ class KafkaConfig {
     )
 
     @Bean
-    fun  modelMessageProducer(): ReactiveKafkaProducerTemplate<Int, ModelService.NewModelMessage> {
+    fun  modelMessageProducer(): ReactiveKafkaProducerTemplate<Int, ModelService.NewModelEvent> {
         return ReactiveKafkaProducerTemplate(create(producerOptions()))
     }
 }

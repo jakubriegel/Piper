@@ -7,6 +7,7 @@ import kotlinx.coroutines.reactor.asFlux
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
+import reactor.core.publisher.Mono
 import java.time.Instant
 
 @Document
@@ -24,4 +25,5 @@ data class PastEvent (
 
 interface PastEventRepository : ReactiveMongoRepository<PastEvent, String> {
         fun insert(events: Flow<PastEvent>): Flow<PastEvent> = insert(events.asFlux()).asFlow()
+        fun countAllByHouseIdAndTimeGreaterThan(houseId: String, minTime: Instant): Mono<Long>
 }
