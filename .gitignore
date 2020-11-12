@@ -1,1 +1,5 @@
 .idea/*
+service/sample-automation-client/venv/Lib/site-packages/_distutils_hack/__pycache__/__init__.cpython-38.pyc
+*.pyc
+service/sample-automation-client/typeIds_with_actions.json
+service/sample-automation-client/devIds_with_types.json
