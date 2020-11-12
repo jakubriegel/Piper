@@ -2,6 +2,10 @@ function uuid() {
     return `${UUID()}`
 }
 
+function now() {
+    return new Date()
+}
+
 const house = db.getCollection('house')
 house.remove({})
 const house1Id = uuid()
@@ -155,14 +159,14 @@ for (let i = 0; i < 1000; i++) {
         'houseId': house1Id,
         'deviceId': uuid(),
         'eventId': uuid(),
-        'time': new Date()
+        'time': now()
     })
 
     pastEvent.insert({
         'houseId': house2Id,
         'deviceId': uuid(),
         'eventId': uuid(),
-        'time': new Date()
+        'time': now()
     })
 }
 
@@ -183,14 +187,14 @@ model.remove({})
 
 model.insert({
     '_id': uuid(),
-    'stagedAt': new Date(),
-    'createdAt': new Date(),
+    'stagedAt': now(),
+    'createdAt': now(),
     'houseId': house1Id
 })
 
 model.insert({
     '_id': uuid(),
-    'stagedAt': new Date(),
-    'createdAt': new Date(),
+    'stagedAt': now(),
+    'createdAt': now(),
     'houseId': house2Id
 })
