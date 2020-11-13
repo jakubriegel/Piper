@@ -11,7 +11,8 @@ data class NotReadyModel (
         @Id
         val id: String,
         val stagedAt: Instant,
-        val houseId: String
+        val houseId: String,
+        val dataFilePath: String
 )
 
 interface NotReadyModelsRepository : ReactiveMongoRepository<NotReadyModel, String>

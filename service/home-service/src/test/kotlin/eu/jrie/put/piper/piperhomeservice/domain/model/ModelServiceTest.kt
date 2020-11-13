@@ -30,13 +30,19 @@ import java.time.temporal.ChronoUnit.DAYS
 
 internal class ModelServiceTest {
 
-    private val repository: ModelRepository = mockk()
+    private val modelRepository: ModelRepository = mockk()
+    private val notReadyModelsRepository: NotReadyModelsRepository = mockk()
     private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent> = mockk()
     private val housesService: HousesServiceConsents = mockk()
     private val pastEventService: PastEventService = mockk()
     private val mapper = MapperConfig().csvMapper()
 
-    private val service = ModelService(repository, kafka, housesService, pastEventService, TEMP_DIR.absolutePath, mapper)
+    private val service = ModelService(
+            modelRepository, notReadyModelsRepository,
+            kafka,
+            housesService,
+            pastEventService, TEMP_DIR.absolutePath, mapper
+    )
 
     @Test
     @FlowPreview
@@ -44,12 +50,15 @@ internal class ModelServiceTest {
         // given
         val lastUpdateTime = now()
         val latestModel = Model(nextUUID, now(), lastUpdateTime, HOUSE_ID)
+
+        val createdModel = slot<NotReadyModel>()
         val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(latestModel)
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(latestModel)
         every { pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID) } returns flowOf(1_000L)
         every { pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID) } returns pastEvents.asFlow()
+        every { notReadyModelsRepository.insert(capture(createdModel)) } returns empty()
         every { kafka.send(TOPIC, capture(newModelEvent)) } returns just(mockk())
 
         // when
@@ -58,16 +67,18 @@ internal class ModelServiceTest {
         // then
         verify {
             housesService.getHousesIdsWithLearningConsent()
-            repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
+            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID)
             pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID)
+            notReadyModelsRepository.insert(ofType(NotReadyModel::class))
             kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
         }
 
-        // and dataset saved correctly
-        val newModelId = newModelEvent.captured.modelId
+        // and new model was created
+        val newModelId = createdModel.captured.id
         assertTrue(newModelId.isUUID())
 
+        // and dataset saved correctly
         val dataFile = File("${TEMP_DIR.absolutePath}/dataset_$newModelId.csv").readLines()
         assertEquals(pastEvents.size, dataFile.size)
         assertTrue {
@@ -76,18 +87,24 @@ internal class ModelServiceTest {
                         row == "${event.time.epochSecond},${event.deviceId},${event.eventId}"
                     }
         }
+
+        // and event emitted correctly
+        val idInEvent = newModelEvent.captured.modelId
+        assertEquals(newModelId, idInEvent)
     }
 
     @Test
     @FlowPreview
     fun `should get events from past 30 days when no models are present`() {
         // given
+        val createdModel = slot<NotReadyModel>()
         val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
         every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(1_000L)
         every { pastEventService.getEventsSince(any(), HOUSE_ID) } returns pastEvents.asFlow()
+        every { notReadyModelsRepository.insert(capture(createdModel)) } returns empty()
         every { kafka.send(TOPIC, capture(newModelEvent)) } returns just(mockk())
 
         // when
@@ -96,16 +113,18 @@ internal class ModelServiceTest {
         // then
         verify {
             housesService.getHousesIdsWithLearningConsent()
-            repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
+            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
             pastEventService.getEventsSince(nowMinus30Days(), HOUSE_ID)
+            notReadyModelsRepository.insert(ofType(NotReadyModel::class))
             kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
         }
 
-        // and dataset saved correctly
-        val newModelId = newModelEvent.captured.modelId
+        // and new model was created
+        val newModelId = createdModel.captured.id
         assertTrue(newModelId.isUUID())
 
+        // and dataset saved correctly
         val dataFile = File("${TEMP_DIR.absolutePath}/dataset_$newModelId.csv").readLines()
         assertEquals(pastEvents.size, dataFile.size)
         assertTrue {
@@ -114,6 +133,10 @@ internal class ModelServiceTest {
                         row == "${event.time.epochSecond},${event.deviceId},${event.eventId}"
                     }
         }
+
+        // and event emitted correctly
+        val idInEvent = newModelEvent.captured.modelId
+        assertEquals(newModelId, idInEvent)
     }
 
     @Test
@@ -121,7 +144,7 @@ internal class ModelServiceTest {
     fun `should not emit event if threshold is not reached`() {
         // given
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
         every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(0L)
 
         // when
@@ -130,10 +153,11 @@ internal class ModelServiceTest {
         // then
         verify {
             housesService.getHousesIdsWithLearningConsent()
-            repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
+            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
         }
         verify { pastEventService.getEventsSince(any(), any()) wasNot called }
+        verify { notReadyModelsRepository wasNot called }
         verify { kafka wasNot called }
     }
 

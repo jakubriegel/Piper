@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
@@ -33,13 +34,14 @@ import java.time.temporal.ChronoUnit.DAYS
 
         @Service
 class ModelService (
-        private val repository: ModelRepository,
-        private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent>,
-        private val housesService: HousesServiceConsents,
-        private val pastEventService: PastEventService,
-        @Value("\${models.data-files-dir}")
+                private val modelRepository: ModelRepository,
+                private val notReadyModelsRepository: NotReadyModelsRepository,
+                private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent>,
+                private val housesService: HousesServiceConsents,
+                private val pastEventService: PastEventService,
+                @Value("\${models.data-files-dir}")
         private val dataFilesDir: String,
-        csvMapper: CsvMapper
+                csvMapper: CsvMapper
 ) {
 
     private val writer = csvMapper.writerFor(PastEventRow::class.java).with(pastEventCsvSchema)
@@ -59,12 +61,14 @@ class ModelService (
                     val n = pastEventService.countEventsAfter(lastUpdateTime, houseId)
                     n.single() >= NEW_MODEL_THRESHOLD
                 }
-                .map { (houseId, lastUpdateTime) -> pastEventService.getEventsSince(lastUpdateTime, houseId) }
-                .map { dataset ->
+                .map { (houseId, lastUpdateTime) -> houseId to pastEventService.getEventsSince(lastUpdateTime, houseId) }
+                .map { (houseId, dataset) ->
                     val newModelId = nextUUID
-                    val pathToDataFile = saveDatasetToFile(dataset, newModelId)
-                    NewModelEvent(newModelId, pathToDataFile)
+                    val dataFilePath = saveDatasetToFile(dataset, newModelId)
+                    NotReadyModel(newModelId, now(), houseId, dataFilePath)
                 }
+                .onEach { notReadyModelsRepository.insert(it) }
+                .map { NewModelEvent(it.id, it.dataFilePath) }
                 .collect { emitNewModelEvent(it) }
     }
 
@@ -88,7 +92,7 @@ class ModelService (
     fun getLatestModel(user: User) = getLatestModel(user.house)
 
     private fun getLatestModel(houseId: String): Mono<Model> {
-        return repository.findTopByHouseIdOrderByCreatedAt(houseId)
+        return modelRepository.findTopByHouseIdOrderByCreatedAt(houseId)
     }
 
     private fun newDataFile(modelId: String) = File("$dataFilesDir/dataset_$modelId.csv")
