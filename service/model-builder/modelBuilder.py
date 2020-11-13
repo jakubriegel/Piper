@@ -12,7 +12,7 @@ class ModelBuilder:
         self.categories_dict = {}
         self.consumer = KafkaConsumer(
             'UserData',
-            bootstrap_servers='kafka:29092',
+            bootstrap_servers='localhost:9092',
             api_version=(2,6,0),
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
@@ -142,9 +142,11 @@ class ModelBuilder:
         model.save(model_dir)
 
     def run_kafka_data_consumer(self):
+        print('Listeing')
         for data_packge in self.consumer:
+            print(f'Got {data_packge.value}')
             print("File submitted as training dataset:  {}", data_packge.value['path'])
-            self.generate_and_save_model_from_csv(data_packge.value['path'])
+            # self.generate_and_save_model_from_csv(data_packge.value['path'])
 
 
 if __name__ == '__main__':

@@ -27,7 +27,7 @@ class PastEventService (
     }
 
     fun getEventsSince(time: Instant, houseId: String): Flow<PastEvent> {
-        return emptyFlow()
+        return repository.findAllByHouseIdAndTimeGreaterThan(houseId, time)
     }
 
     private companion object {

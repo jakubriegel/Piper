@@ -1,9 +1,11 @@
 package eu.jrie.put.piper.piperhomeservice.domain.model
 
 import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
+import eu.jrie.put.piper.piperhomeservice.TEMP_DIR
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesServiceConsents
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
+import eu.jrie.put.piper.piperhomeservice.infra.mapper.MapperConfig
 import io.mockk.MockKMatcherScope
 import io.mockk.called
 import io.mockk.every
@@ -33,8 +35,9 @@ internal class ModelServiceTest {
     private val kafka: ReactiveKafkaProducerTemplate<Int, ModelService.NewModelEvent> = mockk()
     private val housesService: HousesServiceConsents = mockk()
     private val pastEventService: PastEventService = mockk()
+    private val mapper = MapperConfig().csvMapper()
 
-    private val service = ModelService(repository, kafka, housesService, pastEventService)
+    private val service = ModelService(repository, kafka, housesService, pastEventService, TEMP_DIR.absolutePath, mapper)
 
     @Test
     @FlowPreview
@@ -46,7 +49,7 @@ internal class ModelServiceTest {
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
         every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(latestModel)
         every { pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID) } returns flowOf(1_000L)
-        every { pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID) } returns emptyFlow()
+        every { pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID) } returns pastEvents.asFlow()
         every { kafka.send(TOPIC, ofType(ModelService.NewModelEvent::class)) } returns just(mockk())
 
         // when
@@ -58,7 +61,7 @@ internal class ModelServiceTest {
             repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID)
             pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID)
-            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.endsWith(it.modelId) })
+            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.contains(it.modelId) })
         }
     }
 
@@ -69,7 +72,7 @@ internal class ModelServiceTest {
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
         every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
         every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(1_000L)
-        every { pastEventService.getEventsSince(any(), HOUSE_ID) } returns emptyFlow()
+        every { pastEventService.getEventsSince(any(), HOUSE_ID) } returns pastEvents.asFlow()
         every { kafka.send(TOPIC, ofType(ModelService.NewModelEvent::class)) } returns just(mockk())
 
         // when
@@ -81,7 +84,7 @@ internal class ModelServiceTest {
             repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
             pastEventService.getEventsSince(nowMinus30Days(), HOUSE_ID)
-            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.endsWith(it.modelId) })
+            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.contains(it.modelId) })
         }
     }
 
@@ -108,6 +111,10 @@ internal class ModelServiceTest {
 
     private companion object {
         const val TOPIC = "UserData"
+        val pastEvents = listOf(
+                PastEvent(nextUUID, HOUSE_ID, nextUUID, nextUUID, now()),
+                PastEvent(nextUUID, HOUSE_ID, nextUUID, nextUUID, now())
+        )
 
         fun MockKMatcherScope.nowMinus30Days() = match<Instant> {
             val time = now().minus(30, DAYS)

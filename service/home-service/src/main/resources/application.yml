@@ -12,3 +12,6 @@ client:
   intelligence-core-service:
     host: intelligence-core-service
     port: 8004
+
+models:
+  data-files-dir: training-data

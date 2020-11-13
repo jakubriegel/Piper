@@ -3,3 +3,6 @@ spring:
     mongodb:
       host: routines-db
       port: 27017
+
+models:
+  data-files-dir: /training-data
