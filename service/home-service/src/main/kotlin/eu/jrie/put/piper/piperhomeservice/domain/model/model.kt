@@ -28,3 +28,8 @@ data class Model (
 interface ModelRepository : ReactiveMongoRepository<Model, String> {
         fun findTopByHouseIdOrderByCreatedAt(houseId: String): Mono<Model>
 }
+
+data class NewModelEvent (
+        val modelId: String,
+        val path: String
+)

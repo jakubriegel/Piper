@@ -31,7 +31,7 @@ import java.time.temporal.ChronoUnit.DAYS
 internal class ModelServiceTest {
 
     private val repository: ModelRepository = mockk()
-    private val kafka: ReactiveKafkaProducerTemplate<Int, ModelService.NewModelEvent> = mockk()
+    private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent> = mockk()
     private val housesService: HousesServiceConsents = mockk()
     private val pastEventService: PastEventService = mockk()
     private val mapper = MapperConfig().csvMapper()
@@ -44,7 +44,7 @@ internal class ModelServiceTest {
         // given
         val lastUpdateTime = now()
         val latestModel = Model(nextUUID, now(), lastUpdateTime, HOUSE_ID)
-        val newModelEvent = slot<ModelService.NewModelEvent>()
+        val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
         every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(latestModel)
@@ -61,7 +61,7 @@ internal class ModelServiceTest {
             repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID)
             pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID)
-            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.contains(it.modelId) })
+            kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
         }
 
         // and dataset saved correctly
@@ -82,7 +82,7 @@ internal class ModelServiceTest {
     @FlowPreview
     fun `should get events from past 30 days when no models are present`() {
         // given
-        val newModelEvent = slot<ModelService.NewModelEvent>()
+        val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
         every { repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
@@ -99,7 +99,7 @@ internal class ModelServiceTest {
             repository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
             pastEventService.getEventsSince(nowMinus30Days(), HOUSE_ID)
-            kafka.send(TOPIC, match<ModelService.NewModelEvent> { it.path.contains(it.modelId) })
+            kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
         }
 
         // and dataset saved correctly

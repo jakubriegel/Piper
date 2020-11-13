@@ -1,7 +1,6 @@
         package eu.jrie.put.piper.piperhomeservice.domain.model
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
-import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventRow
 import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
@@ -9,8 +8,6 @@ import eu.jrie.put.piper.piperhomeservice.domain.event.past.pastEventCsvSchema
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesServiceConsents
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -23,7 +20,6 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.collect
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -32,11 +28,10 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.io.File
-import java.time.Instant
 import java.time.Instant.now
 import java.time.temporal.ChronoUnit.DAYS
 
-@Service
+        @Service
 class ModelService (
         private val repository: ModelRepository,
         private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent>,
@@ -104,9 +99,4 @@ class ModelService (
         const val NEW_MODEL_EVENTS_TOPIC = "UserData"
         const val NEW_MODEL_THRESHOLD = 1
     }
-
-    data class NewModelEvent (
-            val modelId: String,
-            val path: String
-    )
 }
