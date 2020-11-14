@@ -1,176 +1,94 @@
 package eu.jrie.put.piper.piperhomeservice.domain.model
 
 import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
-import eu.jrie.put.piper.piperhomeservice.TEMP_DIR
-import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEvent
-import eu.jrie.put.piper.piperhomeservice.domain.event.past.PastEventService
-import eu.jrie.put.piper.piperhomeservice.domain.house.HousesServiceConsents
-import eu.jrie.put.piper.piperhomeservice.infra.common.isUUID
-import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
-import eu.jrie.put.piper.piperhomeservice.infra.mapper.MapperConfig
-import io.mockk.MockKMatcherScope
+import eu.jrie.put.piper.piperhomeservice.MODEL_ID
+import eu.jrie.put.piper.piperhomeservice.USER
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
-import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.just
-import java.io.File
-import java.time.Instant
 import java.time.Instant.now
-import java.time.temporal.ChronoUnit.DAYS
 
 internal class ModelServiceTest {
 
     private val modelRepository: ModelRepository = mockk()
-    private val notReadyModelsRepository: NotReadyModelsRepository = mockk()
-    private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent> = mockk()
-    private val housesService: HousesServiceConsents = mockk()
-    private val pastEventService: PastEventService = mockk()
-    private val mapper = MapperConfig().csvMapper()
+    private val notReadyModelRepository: NotReadyModelsRepository = mockk()
 
-    private val service = ModelService(
-            modelRepository, notReadyModelsRepository,
-            kafka,
-            housesService,
-            pastEventService, TEMP_DIR.absolutePath, mapper
-    )
+    private val service = ModelService(modelRepository, notReadyModelRepository)
 
     @Test
-    @FlowPreview
-    fun `should retrain models`() {
+    fun `should create new not ready model`() = runBlocking {
         // given
-        val lastUpdateTime = now()
-        val latestModel = Model(nextUUID, now(), lastUpdateTime, HOUSE_ID)
-
-        val createdModel = slot<NotReadyModel>()
-        val newModelEvent = slot<NewModelEvent>()
-
-        every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(latestModel)
-        every { pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID) } returns flowOf(1_000L)
-        every { pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID) } returns pastEvents.asFlow()
-        every { notReadyModelsRepository.insert(capture(createdModel)) } returns empty()
-        every { kafka.send(TOPIC, capture(newModelEvent)) } returns just(mockk())
+        val model = NotReadyModel(MODEL_ID, now(), HOUSE_ID, "path")
+        every { notReadyModelRepository.insert(model) } returns just(model)
 
         // when
-        service.retrainModels()
+        service.addNewModel(model)
 
         // then
-        verify {
-            housesService.getHousesIdsWithLearningConsent()
-            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
-            pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID)
-            pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID)
-            notReadyModelsRepository.insert(ofType(NotReadyModel::class))
-            kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
-        }
-
-        // and new model was created
-        val newModelId = createdModel.captured.id
-        assertTrue(newModelId.isUUID())
-
-        // and dataset saved correctly
-        val dataFile = File("${TEMP_DIR.absolutePath}/dataset_$newModelId.csv").readLines()
-        assertEquals(pastEvents.size, dataFile.size)
-        assertTrue {
-            dataFile.zip(pastEvents)
-                    .all { (row, event) ->
-                        row == "${event.time.epochSecond},${event.deviceId},${event.eventId}"
-                    }
-        }
-
-        // and event emitted correctly
-        val idInEvent = newModelEvent.captured.modelId
-        assertEquals(newModelId, idInEvent)
+        verify { notReadyModelRepository.insert(model) }
+        verify { modelRepository wasNot called }
     }
 
     @Test
-    @FlowPreview
-    fun `should get events from past 30 days when no models are present`() {
+    fun `should latest model by user`() = runBlocking {
         // given
-        val createdModel = slot<NotReadyModel>()
-        val newModelEvent = slot<NewModelEvent>()
-
-        every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
-        every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(1_000L)
-        every { pastEventService.getEventsSince(any(), HOUSE_ID) } returns pastEvents.asFlow()
-        every { notReadyModelsRepository.insert(capture(createdModel)) } returns empty()
-        every { kafka.send(TOPIC, capture(newModelEvent)) } returns just(mockk())
+        val model = Model(MODEL_ID, now(), now(), HOUSE_ID)
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(model)
 
         // when
-        service.retrainModels()
+        val result = service.getLatestModel(USER).awaitSingle()
 
         // then
-        verify {
-            housesService.getHousesIdsWithLearningConsent()
-            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
-            pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
-            pastEventService.getEventsSince(nowMinus30Days(), HOUSE_ID)
-            notReadyModelsRepository.insert(ofType(NotReadyModel::class))
-            kafka.send(TOPIC, match<NewModelEvent> { it.path.contains(it.modelId) })
-        }
+        verify { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) }
+        verify { notReadyModelRepository wasNot called }
 
-        // and new model was created
-        val newModelId = createdModel.captured.id
-        assertTrue(newModelId.isUUID())
-
-        // and dataset saved correctly
-        val dataFile = File("${TEMP_DIR.absolutePath}/dataset_$newModelId.csv").readLines()
-        assertEquals(pastEvents.size, dataFile.size)
-        assertTrue {
-            dataFile.zip(pastEvents)
-                    .all { (row, event) ->
-                        row == "${event.time.epochSecond},${event.deviceId},${event.eventId}"
-                    }
-        }
-
-        // and event emitted correctly
-        val idInEvent = newModelEvent.captured.modelId
-        assertEquals(newModelId, idInEvent)
+        assertEquals(model, result)
     }
 
     @Test
-    @FlowPreview
-    fun `should not emit event if threshold is not reached`() {
+    fun `should latest model by house id`() = runBlocking {
         // given
-        every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
-        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns empty()
-        every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(0L)
+        val model = Model(MODEL_ID, now(), now(), HOUSE_ID)
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns just(model)
 
         // when
-        service.retrainModels()
+        val result = service.getLatestModel(HOUSE_ID).awaitSingle()
+
+        // then
+        verify { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) }
+        verify { notReadyModelRepository wasNot called }
+
+        assertEquals(model, result)
+    }
+
+    @Test
+    fun `should move model from not ready to models`() = runBlocking {
+        // given
+        val notReadyModel = NotReadyModel(MODEL_ID, now(), HOUSE_ID, "path")
+
+        every { notReadyModelRepository.findById(MODEL_ID) } returns just(notReadyModel)
+        every { modelRepository.insert(ofType(Model::class)) } returns just(mockk())
+
+        // when
+        service.setModelReady(MODEL_ID).awaitFirstOrNull()
 
         // then
         verify {
-            housesService.getHousesIdsWithLearningConsent()
-            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
-            pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
-        }
-        verify { pastEventService.getEventsSince(any(), any()) wasNot called }
-        verify { notReadyModelsRepository wasNot called }
-        verify { kafka wasNot called }
-    }
-
-    private companion object {
-        const val TOPIC = "UserData"
-        val pastEvents = listOf(
-                PastEvent(nextUUID, HOUSE_ID, nextUUID, nextUUID, now()),
-                PastEvent(nextUUID, HOUSE_ID, nextUUID, nextUUID, now())
-        )
-
-        fun MockKMatcherScope.nowMinus30Days() = match<Instant> {
-            val time = now().minus(30, DAYS)
-            it.isBefore(time)
+            notReadyModelRepository.findById(MODEL_ID)
+            modelRepository.insert(match<Model> {
+                it.id == notReadyModel.id &&
+                it.stagedAt == notReadyModel.stagedAt &&
+                it.houseId == notReadyModel.houseId &&
+                it.createdAt.isAfter(notReadyModel.stagedAt)
+            })
         }
     }
+
 }
