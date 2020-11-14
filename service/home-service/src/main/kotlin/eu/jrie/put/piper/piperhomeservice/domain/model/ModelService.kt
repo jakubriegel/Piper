@@ -34,16 +34,17 @@ import java.time.temporal.ChronoUnit.DAYS
 
         @Service
 class ModelService (
-                private val modelRepository: ModelRepository,
-                private val notReadyModelsRepository: NotReadyModelsRepository,
-                private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent>,
-                private val housesService: HousesServiceConsents,
-                private val pastEventService: PastEventService,
-                @Value("\${models.data-files-dir}")
-        private val dataFilesDir: String,
-                csvMapper: CsvMapper
+        private val modelRepository: ModelRepository,
+        private val notReadyModelsRepository: NotReadyModelsRepository,
+        private val kafka: ReactiveKafkaProducerTemplate<Int, NewModelEvent>,
+        private val housesService: HousesServiceConsents,
+        private val pastEventService: PastEventService,
+        @Value("\${models.data-files-dir}")
+        dataFilesDirPath: String,
+        csvMapper: CsvMapper
 ) {
 
+    private val dataFilesDir = File(dataFilesDirPath).also { if(!it.exists()) it.mkdir() }
     private val writer = csvMapper.writerFor(PastEventRow::class.java).with(pastEventCsvSchema)
 
     @FlowPreview
@@ -67,7 +68,7 @@ class ModelService (
                     val dataFilePath = saveDatasetToFile(dataset, newModelId)
                     NotReadyModel(newModelId, now(), houseId, dataFilePath)
                 }
-                .onEach { notReadyModelsRepository.insert(it) }
+                .onEach { notReadyModelsRepository.insert(it).awaitSingle() }
                 .map { NewModelEvent(it.id, it.dataFilePath) }
                 .collect { emitNewModelEvent(it) }
     }
@@ -95,7 +96,7 @@ class ModelService (
         return modelRepository.findTopByHouseIdOrderByCreatedAt(houseId)
     }
 
-    private fun newDataFile(modelId: String) = File("$dataFilesDir/dataset_$modelId.csv")
+    private fun newDataFile(modelId: String) = File("${dataFilesDir.absolutePath}/dataset_$modelId.csv")
 
     private companion object {
         val logger: Logger = LoggerFactory.getLogger(ModelService::class.java)
