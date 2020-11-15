@@ -81,6 +81,12 @@ user.insert({
     'house': house3Id,
     'roles':['USER']
 })
+user.insert({
+    'login':'model-builder',
+    'secret':'{noop}secret',
+    'house': '',
+    'roles':['MODEL_BUILDER']
+})
 
 const routine = db.getCollection('routine')
 routine.remove({})

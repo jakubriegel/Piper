@@ -5,6 +5,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Instant.now
 
 @Service
@@ -25,6 +26,7 @@ class ModelService (
 
     fun setModelReady(modelId: String): Mono<Void> {
         return notReadyModelsRepository.findById(modelId)
+                .switchIfEmpty { throw ModelNotFoundException(modelId) }
                 .map { Model(modelId, it.stagedAt, now(), it.houseId) }
                 .map { modelRepository.insert(it) }
                 .then(empty())
