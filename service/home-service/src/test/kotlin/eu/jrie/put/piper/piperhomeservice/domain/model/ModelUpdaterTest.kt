@@ -59,6 +59,7 @@ internal class ModelUpdaterTest {
         val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
+        every { modelService.getNotReadyModel(HOUSE_ID) } returns empty()
         every { modelService.getLatestModel(HOUSE_ID) } returns just(latestModel)
         every { pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID) } returns flowOf(1_000L)
         every { pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID) } returns pastEvents.asFlow()
@@ -71,6 +72,7 @@ internal class ModelUpdaterTest {
         // then
         coVerify {
             housesService.getHousesIdsWithLearningConsent()
+            modelService.getNotReadyModel(HOUSE_ID)
             modelService.getLatestModel(HOUSE_ID)
             pastEventService.countEventsAfter(lastUpdateTime, HOUSE_ID)
             pastEventService.getEventsSince(lastUpdateTime, HOUSE_ID)
@@ -99,12 +101,32 @@ internal class ModelUpdaterTest {
 
     @Test
     @FlowPreview
+    fun `should not retrain models if not ready model is present for house`() {
+        // given
+        every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
+        every { modelService.getNotReadyModel(HOUSE_ID) } returns just(mockk())
+
+        // when
+        updater.retrainModels()
+
+        // then
+        verify {
+            housesService.getHousesIdsWithLearningConsent()
+            modelService.getNotReadyModel(HOUSE_ID)
+            pastEventService wasNot called
+            kafka wasNot called
+        }
+    }
+
+    @Test
+    @FlowPreview
     fun `should get events from past 30 days when no models are present`() {
         // given
         val createdModel = slot<NotReadyModel>()
         val newModelEvent = slot<NewModelEvent>()
 
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
+        every { modelService.getNotReadyModel(HOUSE_ID) } returns empty()
         every { modelService.getLatestModel(HOUSE_ID) } returns empty()
         every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(1_000L)
         every { pastEventService.getEventsSince(any(), HOUSE_ID) } returns pastEvents.asFlow()
@@ -117,6 +139,7 @@ internal class ModelUpdaterTest {
         // then
         coVerify {
             housesService.getHousesIdsWithLearningConsent()
+            modelService.getNotReadyModel(HOUSE_ID)
             modelService.getLatestModel(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
             pastEventService.getEventsSince(nowMinus30Days(), HOUSE_ID)
@@ -148,6 +171,7 @@ internal class ModelUpdaterTest {
     fun `should not emit event if threshold is not reached`() {
         // given
         every { housesService.getHousesIdsWithLearningConsent() } returns flowOf(HOUSE_ID)
+        every { modelService.getNotReadyModel(HOUSE_ID) } returns empty()
         every { modelService.getLatestModel(HOUSE_ID) } returns empty()
         every { pastEventService.countEventsAfter(any(), HOUSE_ID) } returns flowOf(0L)
 
@@ -157,6 +181,7 @@ internal class ModelUpdaterTest {
         // then
         verify {
             housesService.getHousesIdsWithLearningConsent()
+            modelService.getNotReadyModel(HOUSE_ID)
             modelService.getLatestModel(HOUSE_ID)
             pastEventService.countEventsAfter(nowMinus30Days(), HOUSE_ID)
         }

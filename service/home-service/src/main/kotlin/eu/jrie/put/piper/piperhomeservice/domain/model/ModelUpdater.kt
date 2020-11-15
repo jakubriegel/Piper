@@ -49,6 +49,7 @@ class ModelUpdater (
     fun retrainModels() = runBlocking {
         logger.info("Scanning for models to retrain")
         housesService.getHousesIdsWithLearningConsent()
+                .filter { hasNoNotReadyModels(it) }
                 .flatMapConcat { houseId ->
                     modelService.getLatestModel(houseId)
                             .map { houseId to it.createdAt }
@@ -68,6 +69,13 @@ class ModelUpdater (
                 .onEach { modelService.addNewModel(it) }
                 .map { NewModelEvent(it.id, it.dataFilePath) }
                 .collect { emitNewModelEvent(it) }
+    }
+
+    private suspend fun hasNoNotReadyModels(houseId: String): Boolean {
+        return modelService.getNotReadyModel(houseId)
+                .map { false }
+                .defaultIfEmpty(true)
+                .awaitSingle()
     }
 
     private suspend fun saveDatasetToFile(dataset: Flow<PastEvent>, modelId: String): String {

@@ -6,7 +6,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.core.publisher.Mono.empty
+import reactor.core.publisher.Mono.error
 import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
 
         @Service
@@ -23,6 +26,18 @@ class ModelService (
 
     fun getLatestModel(houseId: String): Mono<Model> {
         return modelRepository.findTopByHouseIdOrderByCreatedAt(houseId)
+    }
+
+    fun getNotReadyModel(houseId: String): Mono<NotReadyModel> {
+        return notReadyModelsRepository.findAllByHouseId(houseId)
+                .collectList()
+                .flatMap {
+                    when {
+                        it.isEmpty() -> empty()
+                        it.size == 1 -> it.first().toMono()
+                        else -> error(IllegalStateException("There should be only one not ready model for house $houseId"))
+                    }
+                }
     }
 
     fun setModelReady(modelId: String): Mono<Void> {

@@ -11,9 +11,11 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.just
+import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant.now
 
 internal class ModelServiceTest {
@@ -95,4 +97,35 @@ internal class ModelServiceTest {
         }
     }
 
+    @Test
+    fun `should get not ready model for house`() = runBlocking {
+        // given
+        val model = NotReadyModel(MODEL_ID, now(), HOUSE_ID, "path")
+        every { notReadyModelRepository.findAllByHouseId(HOUSE_ID) } returns listOf(model).toFlux()
+
+        // when
+        val result = service.getNotReadyModel(HOUSE_ID).awaitSingle()
+
+        // then
+        verify { notReadyModelRepository.findAllByHouseId(HOUSE_ID) }
+        verify { modelRepository wasNot called }
+
+        assertEquals(model, result)
+    }
+
+    @Test
+    fun `should throw exception when more than one not ready model is present for house`() = runBlocking {
+        // given
+        every { notReadyModelRepository.findAllByHouseId(HOUSE_ID) } returns listOf<NotReadyModel>(mockk(), mockk()).toFlux()
+
+        // when
+        val result = runCatching { service.getNotReadyModel(HOUSE_ID).awaitSingle() }
+
+        // then
+        verify { notReadyModelRepository.findAllByHouseId(HOUSE_ID) }
+        verify { modelRepository wasNot called }
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull()!! is IllegalStateException)
+    }
 }
