@@ -6,7 +6,11 @@ spring:
     mongodb:
       host: localhost
       port: 27017
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
 
 client:
   intelligence-core-service:
     host: localhost
+

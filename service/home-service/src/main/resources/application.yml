@@ -7,6 +7,10 @@ spring:
       database: piper
   main:
     web-application-type: reactive
+  kafka:
+    producer:
+      client-id: home-service
+      acks: all
 
 client:
   intelligence-core-service:

@@ -3,6 +3,9 @@ spring:
     mongodb:
       host: routines-db
       port: 27017
+  kafka:
+    producer:
+      bootstrap-servers: kafka:29092
 
 models:
   data-files-dir: /training-data
