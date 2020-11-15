@@ -13,7 +13,3 @@ spring:
 client:
   intelligence-core-service:
     host: localhost
-
-
-models:
-  retrain-cron: 0/15 * * ? * *
