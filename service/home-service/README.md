@@ -11,6 +11,8 @@ The service keeps list of current and past models for every house.
 With specified interval _home-service_ is triggering creation of new models. 
 Retraining process goes as follows:
 1. Find all houses.
+1. Check if any not ready models are present for given houseId.
+1. If true, finish here.
 1. Check if since last training more than _N_ events have been added.
 1. If false, finish here.
 1. Generate and store id for new model.
@@ -29,6 +31,7 @@ house-1-server | secret   | HOUSE | house-1 |
 house-2-server | secret   | HOUSE | house-2 |
 house-3-server | secret   | HOUSE | house-3 | house-3 has no model
 admin          | secret   | ADMIN | -       | 
+model-builder  | secret   | MODEL_BUILDER |-|
 
 ## REST API
 For documentation check Postman collection under `Piper/docs/postman`
