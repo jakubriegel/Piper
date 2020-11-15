@@ -12,7 +12,12 @@ export const routines = {
     selectedRoutine: state => state.selectedRoutine
   },
   actions: {
-    addRoutine({ state }) {
+    handleAxios({ dispatch }, message) {
+      dispatch('snackbar/setSnackbarActive', true, { root: true });
+      dispatch('snackbar/setSnackbarMessage', message, { root: true });
+    },
+
+    addRoutine({ dispatch, state }) {
       Axios.post(
         'https://jrie.eu:8001/routines/',
         {
@@ -31,22 +36,26 @@ export const routines = {
         .then(res => {
           console.log(res);
         })
-        .catch(() => {
-          //TODO handle error
+        .catch(e => {
+          dispatch('handleAxios', e);
         });
     },
-    getRoutines({ commit }) {
+    getRoutines({ dispatch, commit }) {
       Axios.get('https://jrie.eu:8001/routines', {
         headers: {
           Accept: 'application/json'
         },
         auth: utils.authentication
-      }).then(res => {
-        commit('SET_ROUTINES', res.data.routines);
-      });
+      })
+        .then(res => {
+          commit('SET_ROUTINES', res.data.routines);
+        })
+        .catch(e => {
+          dispatch('handleAxios', e);
+        });
     },
 
-    getRoutine({ commit }, id) {
+    getRoutine({ dispatch, commit }, id) {
       Axios.get('https://jrie.eu:8001/routines/' + id, {
         headers: {
           Accept: 'application/json'
@@ -56,12 +65,12 @@ export const routines = {
         .then(res => {
           commit('SET_SELECTED_ROUTINE', res.data.routine);
         })
-        .catch(() => {
-          //TODO handle error
+        .catch(e => {
+          dispatch('handleAxios', e);
         });
     },
 
-    editRoutine({ state }, id) {
+    editRoutine({ dispatch, state }, id) {
       Axios.put(
         'https://jrie.eu:8001/routines/' + id,
         {
@@ -80,8 +89,8 @@ export const routines = {
         .then(res => {
           console.log(res);
         })
-        .catch(() => {
-          //TODO handle error
+        .catch(e => {
+          dispatch('handleAxios', e);
         });
     },
 
@@ -95,9 +104,7 @@ export const routines = {
         ]);
       } else {
         let tail = [...state.selectedRoutine.events];
-        console.log(tail, index);
         let head = tail.splice(0, index + 1);
-        console.log(head);
 
         commit('ASSIGN_EVENTS_TO_ROUTINE', [
           ...head,
