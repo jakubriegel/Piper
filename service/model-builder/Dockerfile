@@ -1,7 +1,10 @@
 FROM python:3.6
 
-ADD . /model-builder
+COPY ./requirements.txt /model-builder/requirements.txt
+RUN pip install -r /model-builder/requirements.txt
+
+COPY ./modelBuilder.py /model-builder/modelBuilder.py
+
 WORKDIR /model-builder
-RUN pip install -r requirements.txt
 
 CMD python modelBuilder.py

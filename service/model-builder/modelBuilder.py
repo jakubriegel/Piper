@@ -1,18 +1,23 @@
 from kafka import KafkaConsumer
 from pathlib import Path
-import tensorflow as tf
-import pandas as pd
+# import tensorflow as tf
+# import pandas as pd
 import datetime
 import json
 import os
+from time import sleep
+from requests import post
+from requests.auth import HTTPBasicAuth
 
+
+HOME_SERVICE_AUTH = HTTPBasicAuth('model-builder', 'secret')
 
 class ModelBuilder:
     def __init__(self):
         self.categories_dict = {}
         self.consumer = KafkaConsumer(
             'UserData',
-            bootstrap_servers='localhost:9092',
+            bootstrap_servers='kafka:29092',
             api_version=(2,6,0),
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
@@ -145,7 +150,13 @@ class ModelBuilder:
         print('Listeing')
         for data_packge in self.consumer:
             print(f'Got {data_packge.value}')
-            print("File submitted as training dataset:  {}", data_packge.value['path'])
+            model_id = data_packge.value['modelId']
+            file_path = data_packge.value['path']
+            print(f'File submitted as training dataset: {file_path}')
+            
+            sleep(5)
+            post(f'https://home-service:80/models/{model_id}/ready', auth=HOME_SERVICE_AUTH, verify=False)
+
             # self.generate_and_save_model_from_csv(data_packge.value['path'])
 
 
