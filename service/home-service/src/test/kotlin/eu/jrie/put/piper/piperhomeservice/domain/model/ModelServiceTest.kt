@@ -12,6 +12,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.just
 import java.time.Instant.now
 
@@ -72,9 +73,11 @@ internal class ModelServiceTest {
     fun `should move model from not ready to models`() = runBlocking {
         // given
         val notReadyModel = NotReadyModel(MODEL_ID, now(), HOUSE_ID, "path")
+        val model = Model(notReadyModel.id, notReadyModel.stagedAt, now(), notReadyModel.houseId)
 
         every { notReadyModelRepository.findById(MODEL_ID) } returns just(notReadyModel)
-        every { modelRepository.insert(ofType(Model::class)) } returns just(mockk())
+        every { modelRepository.insert(ofType(Model::class)) } returns just(model)
+        every { notReadyModelRepository.deleteById(MODEL_ID) } returns empty()
 
         // when
         service.setModelReady(MODEL_ID).awaitFirstOrNull()
@@ -88,6 +91,7 @@ internal class ModelServiceTest {
                 it.houseId == notReadyModel.houseId &&
                 it.createdAt.isAfter(notReadyModel.stagedAt)
             })
+            notReadyModelRepository.deleteById(MODEL_ID)
         }
     }
 
