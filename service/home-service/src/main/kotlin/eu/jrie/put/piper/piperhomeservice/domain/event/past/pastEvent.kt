@@ -1,6 +1,5 @@
 package eu.jrie.put.piper.piperhomeservice.domain.event.past
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import eu.jrie.put.piper.piperhomeservice.domain.event.Event
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +12,6 @@ import reactor.core.publisher.Mono
 import java.time.Instant
 
 @Document
-@JsonInclude()
 data class PastEvent (
         @Id
         val id: String?,

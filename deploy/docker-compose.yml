@@ -29,18 +29,18 @@ services:
     depends_on:
       - kafka
     container_name: model-builder
-  # home-service:
-  #   build:
-  #     context: ../service/home-service
-  #     target: ${TARGET}
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - training-data:/training-data
-  #   ports:
-  #     - "8001:80"
-  #   depends_on:
-  #     - routines-db
-  #   container_name: home-service
+  home-service:
+    build:
+      context: ../service/home-service
+      target: ${TARGET}
+      dockerfile: Dockerfile
+    volumes:
+      - training-data:/training-data
+    ports:
+      - "8001:80"
+    depends_on:
+      - routines-db
+    container_name: home-service
   routines-db:
     image: mongo:4.4.1
     ports:
