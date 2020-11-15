@@ -9,3 +9,4 @@ spring:
 
 models:
   data-files-dir: /training-data
+  retrain-cron: * * 0/12 ? * *

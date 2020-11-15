@@ -45,7 +45,7 @@ class ModelUpdater (
     private val writer = csvMapper.writerFor(PastEventRow::class.java).with(pastEventCsvSchema)
 
     @FlowPreview
-    @Scheduled(fixedDelay = 10_000, initialDelay = 1_000)
+    @Scheduled(cron = "\${models.retrain-cron}")
     fun retrainModels() = runBlocking {
         logger.info("Scanning for models to retrain")
         housesService.getHousesIdsWithLearningConsent()
