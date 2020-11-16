@@ -8,6 +8,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineConfiguration
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinePreview
 import org.springframework.hateoas.IanaLinkRelations.ABOUT
+import org.springframework.hateoas.IanaLinkRelations.CANONICAL
 import org.springframework.hateoas.IanaLinkRelations.COLLECTION
 import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
@@ -17,11 +18,23 @@ private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).get
 private val linkToHouses = linkTo(HousesController::class.java)
 
 data class RoutinesResponse (
-        val routines: List<RoutinePreview>
+        val routines: List<RoutinePreviewMessage>
 ) : RepresentationalResponse(
         linkToRoutines.withSelfRel(),
         linkToHouses.withRel(ABOUT)
 )
+
+data class RoutinePreviewMessage (
+        val id: String,
+        val name: String,
+        val enabled: Boolean
+) : RepresentationalResponse(
+        linkToRoutines.slash(id).withRel(CANONICAL)
+)
+
+fun List<RoutinePreview>.asMessage() = map {
+    RoutinePreviewMessage(it.id, it.name, it.enabled)
+}
 
 data class RoutineResponse (
         val routine: RoutineMessage
