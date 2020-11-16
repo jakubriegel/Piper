@@ -1,6 +1,7 @@
 import json
 import time
 import random
+import os
 from pathlib import Path
 
 import requests
@@ -8,24 +9,24 @@ import sys
 
 
 class SampleClient:
+    username = os.environ.get('SIMULATOR_USER')
+    password = os.environ.get('SIMULATOR_PASS')
     devIds_with_types: dict = {}
     typeIds_with_actions: dict = {}
 
     def load_devices(self):
-
         self.devIds_with_types = json.load(open("devIds_with_types.json"))
         self.typeIds_with_actions = json.load(open("typeIds_with_actions.json"))
 
     def first_contact(self):
         url = "https://jrie.eu:8001/houses/schema"
-        payload = json.dumps(json.load(open("devices.json")))
+        payload = json.dumps(json.load(open("schema.json")))
         headers = {
             'Accept': 'application/json',
-            'Authorization': 'Basic aG91c2UtMi1zZXJ2ZXI6c2VjcmV0',
             'Content-Type': 'application/json'
         }
-
-        response = requests.request("PUT", url, headers=headers, data=payload, verify=False)
+        response = requests.request("PUT", url, headers=headers, data=payload, verify=False,
+                                    auth=(self.username, self.password))
         json_response = json.loads(response.text)
 
         for deviceType in json_response['deviceTypes']:
@@ -52,9 +53,9 @@ class SampleClient:
             time.sleep(random.randint(1, 300))  # change here to generate faster
         headers = {
             'Content-Type': 'text/csv',
-            'Authorization': 'Basic aG91c2UtMi1zZXJ2ZXI6c2VjcmV0'
         }
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = requests.request("POST", url, headers=headers, data=payload, verify=False,
+                                    auth=(self.username, self.password))
         print(response.text)
         print(response.status_code)
 
