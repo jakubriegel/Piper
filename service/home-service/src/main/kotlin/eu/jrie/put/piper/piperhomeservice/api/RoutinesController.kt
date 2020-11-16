@@ -7,10 +7,14 @@ import eu.jrie.put.piper.piperhomeservice.api.message.RoutineSuggestionsResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutinesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
+import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
+import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -28,11 +32,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.net.URI
+import eu.jrie.put.piper.piperhomeservice.infra.common.component1
+import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 
 @RestController
 @RequestMapping("routines")
 class RoutinesController(
-        private val service: RoutinesService
+        private val service: RoutinesService,
+        private val housesService: HousesService
 ) {
     @GetMapping(produces = [APPLICATION_JSON_VALUE])
     fun getRoutines(
@@ -42,7 +49,7 @@ class RoutinesController(
         return service.routinesForHouse(houseId)
                 .asFlux()
                 .collectList()
-                .map { RoutinesResponse(it) }
+                .map { RoutinesResponse(it.asMessage()) }
     }
 
     @GetMapping("{id}", produces = [APPLICATION_JSON_VALUE])
@@ -51,7 +58,8 @@ class RoutinesController(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         return service.routineById(id, auth.asUser())
-                .map { RoutineResponse(it.asMessage()) }
+                .zipWith(getDevicesFromUser(auth.asUser()))
+                .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
                 .defaultIfEmpty(notFound().build())
@@ -64,9 +72,11 @@ class RoutinesController(
     ): Mono<ResponseEntity<ApiResponse>> {
         val houseId = auth.asUser().house
         return routine.flatMap { service.createRoutine(it.toRoutine(houseId)) }
+                .zipWith(getDevicesFromUser(auth.asUser()))
+                .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
                 .map {
-                    created(URI.create("/routines/${it.id}"))
-                        .body(RoutineResponse(it.asMessage()) as ApiResponse)
+                    created(URI.create("/routines/${it.routine.id}"))
+                        .body(it as ApiResponse)
                     }
                 .handleErrors()
     }
@@ -79,7 +89,9 @@ class RoutinesController(
     ): Mono<ResponseEntity<ApiResponse>> {
         val user = auth.asUser()
         return routine.flatMap { service.updateRoutine(it.toRoutine(id, user.house), user) }
-                .map { ok(RoutineResponse(it.asMessage()) as ApiResponse) }
+                .zipWith(getDevicesFromUser(auth.asUser()))
+                .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
+                .map { ok(it as ApiResponse) }
                 .handleErrors()
     }
 
@@ -96,8 +108,18 @@ class RoutinesController(
         return service.getContinuationSuggestions(start, limit, auth.asUser())
                 .asFlux()
                 .collectList()
-                .map { RoutineSuggestionsResponse(start, it, limit, params) }
+                .zipWith(getDevicesFromUser(auth.asUser()))
+                .map { (suggestions, devicesRooms) -> RoutineSuggestionsResponse(start, suggestions.asMessage(devicesRooms), limit, params) }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
+    }
+
+    private fun getDevicesFromUser(user: User): Mono<Map<String, String>> {
+        return housesService.getDevices(user)
+                .map { it.id to it.roomId }
+                .asFlux()
+                .collectList()
+                .map { it.toTypedArray() }
+                .map { mapOf(*it) }
     }
 }

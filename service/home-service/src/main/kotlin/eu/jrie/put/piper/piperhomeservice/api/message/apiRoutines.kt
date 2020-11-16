@@ -49,11 +49,22 @@ data class RoutineMessage (
         val id: String,
         val name: String,
         val enabled: Boolean,
-        val events: List<RoutineEvent>,
+        val events: List<RoutineEventMessage>,
         val configuration: RoutineConfiguration
 )
 
-fun Routine.asMessage() = RoutineMessage(id, name, enabled, events, configuration ?: RoutineConfiguration())
+data class RoutineEventMessage (
+        val deviceId: String,
+        val eventId: String,
+        val roomId: String
+) : ApiMessage
+
+fun Routine.asMessage(devicesRooms: Map<String, String>)
+        = RoutineMessage(id, name, enabled, events.asMessage(devicesRooms), configuration ?: RoutineConfiguration())
+
+fun List<RoutineEvent>.asMessage(devicesRooms: Map<String, String>) = map {
+    RoutineEventMessage(it.deviceId, it.eventId, devicesRooms.getValue(it.deviceId))
+}
 
 data class RoutineRequest (
         val name: String,
@@ -71,7 +82,7 @@ data class RoutineRequest (
 
 data class RoutineSuggestionsResponse (
         val start: RoutineEvent,
-        val suggestions: List<RoutineEvent>,
+        val suggestions: List<RoutineEventMessage>,
         val n: Int,
         val params: Map<String, String?>
 ) : RepresentationalResponse(
