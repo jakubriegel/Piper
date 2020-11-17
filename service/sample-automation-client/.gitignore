@@ -1,0 +1,4 @@
+venv
+.idea
+devIds_with_types.json
+typeIds_with_actions.json
