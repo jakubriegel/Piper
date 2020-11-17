@@ -7,7 +7,7 @@ import json
 import os
 from requests import post
 from requests.auth import HTTPBasicAuth
-from logger import get_logger
+from logger import log
 
 HOME_SERVICE_AUTH = HTTPBasicAuth('model-builder', 'secret')
 
@@ -21,7 +21,7 @@ class ModelBuilder:
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
 
-        logger.info('Model builder initialized')
+        log('Model builder initialized')
 
     def __get_category(self, category_id):
         return self.categories_dict[category_id]
@@ -50,7 +50,7 @@ class ModelBuilder:
         return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
     def generate_and_save_model_from_csv(self, csv_file_path):
-        logger.info('Building files structure')
+        log('Building files structure')
         datestring = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         model_dir = 'models/' + datestring + '_model'
         os.makedirs(model_dir, exist_ok=True)
@@ -127,7 +127,7 @@ class ModelBuilder:
         example_batch_loss = self.__loss_function(target_example_batch, example_batch_predictions)
 
         model.compile(optimizer='adam', loss=self.__loss_function)
-        logger.info('Model compiling optimizer')
+        log('Model compiling optimizer')
 
         # Directory where the checkpoints will be saved
         checkpoint_dir = model_dir + '/training_checkpoints'
@@ -138,7 +138,7 @@ class ModelBuilder:
             filepath=checkpoint_prefix,
             save_weights_only=True
         )
-        logger.info('Model checkpoints created')
+        log('Model checkpoints created')
 
         EPOCHS = 10
         history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
@@ -148,18 +148,18 @@ class ModelBuilder:
         model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
         model.build(tf.TensorShape([1, None]))
 
-        logger.info(f'Model building')
+        log(f'Model building')
 
         model.save(model_dir)
-        logger.info(f'Model has been saved in ${model_dir}\${datestring}_model')
+        log(f'Model has been saved in ${model_dir}\${datestring}_model')
 
     def run_kafka_data_consumer(self):
-        logger.info('Kafka consumer is listening')
+        log('Kafka consumer is listening')
         for data_packge in self.consumer:
-            logger.info(f'Got {data_packge.value}')
+            log(f'Got {data_packge.value}')
             model_id = data_packge.value['modelId']
             file_path = data_packge.value['path']
-            logger.info(f'File submitted as training dataset: {file_path}')
+            log(f'File submitted as training dataset: {file_path}')
 
             self.generate_and_save_model_from_csv(data_packge.value['path'])
 
@@ -169,7 +169,6 @@ class ModelBuilder:
 
 
 if __name__ == '__main__':
-    logger = get_logger("model-builder-logger")
-    logger.info('Starting model-builder app')
+    log('Starting model-builder app')
     mb = ModelBuilder()
     mb.run_kafka_data_consumer()

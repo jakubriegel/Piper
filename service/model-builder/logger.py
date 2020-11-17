@@ -1,10 +1,14 @@
 import logging
+import sys
 
-def get_logger(logger_name: str):
-    logger = logging.getLogger(logger_name)
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    handler.setLevel(logging.DEBUG)
-    return logger
+root = logging.getLogger('modelBuilder')
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
+
+def log(msg):
+    logging.info(msg)
