@@ -17,7 +17,7 @@ class ModelBuilder:
         self.categories_dict = {}
         self.consumer = KafkaConsumer(
             'UserData',
-            bootstrap_servers='kafka:29092',
+            bootstrap_servers='kafka:9092',
             api_version=(2,6,0),
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
