@@ -24,8 +24,8 @@ services:
       context: ../service/model-builder
       dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
-      - training-data:/model-builder/training-data
-      - models:/model-builder/models
+      - training-data:/training-data
+      - models:/models
     ports:
     - "2121:2121"
     depends_on:

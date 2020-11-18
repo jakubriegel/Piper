@@ -49,10 +49,9 @@ class ModelBuilder:
     def __loss_function(labels, logits):
         return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
-    def generate_and_save_model_from_csv(self, csv_file_path):
+    def generate_and_save_model_from_csv(self, model_id, csv_file_path):
         log('Building files structure')
-        datestring = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        model_dir = 'models/' + datestring + '_model'
+        model_dir = '/models/' + model_id + '_model'
         os.makedirs(model_dir, exist_ok=True)
 
         header_list = ["timestamp", "sensor", "action"]
@@ -151,7 +150,7 @@ class ModelBuilder:
         log(f'Model building')
 
         model.save(model_dir)
-        log(f'Model has been saved in ${model_dir}\${datestring}_model')
+        log(f'Model has been saved in ${model_dir}\${model_id}_model')
 
     def run_kafka_data_consumer(self):
         log('Kafka consumer is listening')
@@ -161,7 +160,8 @@ class ModelBuilder:
             file_path = data_packge.value['path']
             log(f'File submitted as training dataset: {file_path}')
 
-            self.generate_and_save_model_from_csv(data_packge.value['path'])
+            # self.generate_and_save_model_from_csv(data_packge.value['path'])
+            self.generate_and_save_model_from_csv('data.csv')
 
             post(f'https://home-service:80/models/{model_id}/ready', auth=HOME_SERVICE_AUTH, verify=False)
 
