@@ -161,7 +161,7 @@ class ModelBuilder:
             log(f'File submitted as training dataset: {file_path}')
 
             # self.generate_and_save_model_from_csv(data_packge.value['path'])
-            self.generate_and_save_model_from_csv('data.csv')
+            self.generate_and_save_model_from_csv(model_id, 'data.csv')
 
             post(f'https://home-service:80/models/{model_id}/ready', auth=HOME_SERVICE_AUTH, verify=False)
 
