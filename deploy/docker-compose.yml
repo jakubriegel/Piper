@@ -10,6 +10,8 @@ services:
     volumes:
       - ../service/frontend/:/frontend/
     container_name: frontend
+    depends_on: 
+    - home-service
   intelligence-core-service:
     build:
       context: ../service/intelligence-core-service
@@ -55,14 +57,9 @@ services:
     image: kymeric/cp-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
     container_name: zookeeper
   kafka:
     image: kymeric/cp-kafka
-    ports:
-      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
