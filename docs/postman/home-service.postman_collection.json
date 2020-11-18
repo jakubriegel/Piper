@@ -171,13 +171,13 @@
 									"    let json = pm.response.json();\r",
 									"    pm.globals.set(\"routineId\", json.routines[0].id)\r",
 									"});\r",
-									"pm.test(\"HATEOAS: Contains first link\", function () {\r",
+									"pm.test(\"HATEOAS: Routines contain canonical link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.links.filter(it => it.rel == \"first\").length).to.eq(1);\r",
+									"    pm.expect(jsonData.routines[0].links.filter(it => it.rel == \"canonical\").length).to.eq(1);\r",
 									"});\r",
-									"pm.test(\"HATEOAS: Contains describes link\", function () {\r",
+									"pm.test(\"HATEOAS: Contains about link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.links.filter(it => it.rel == \"describes\").length).to.eq(1);\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"about\").length).to.eq(1);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -226,9 +226,48 @@
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
+									"pm.test(\"Contains id\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.routine.id).to.be.a('string');\r",
+									"});\r",
+									"pm.test(\"Contains name\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.routine.name).to.be.a('string');\r",
+									"});\r",
+									"pm.test(\"Contains enabled\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.routine.enabled).to.be.a('boolean');\r",
+									"});\r",
+									"pm.test(\"Contains events\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.routine.events).to.be.a('array');\r",
+									"});\r",
+									"pm.test(\"Contains configuration\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.routine.configuration).to.be.a('object');\r",
+									"});\r",
+									"pm.test(\"Events contain deviceId\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let event = jsonData.routine.events[0];\r",
+									"    pm.expect(event.deviceId).to.be.a('string');\r",
+									"});\r",
+									"pm.test(\"Events contain eventId\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let event = jsonData.routine.events[0];\r",
+									"    pm.expect(event.eventId).to.be.a('string');\r",
+									"});\r",
+									"pm.test(\"Events contain roomId\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let event = jsonData.routine.events[0];\r",
+									"    pm.expect(event.roomId).to.be.a('string');\r",
+									"});\r",
 									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
 									"    let jsonData = pm.response.json();\r",
 									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
+									"});\r",
+									"pm.test(\"HATEOAS: Contains about link\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.links.filter(it => it.rel == \"about\").length).to.eq(1);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -384,7 +423,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n        \"name\": \"COOL {{$timestamp}}\",\r\n        \"enabled\": true,\r\n        \"events\": [\r\n            {\r\n                \"deviceId\": \"kitchen_lamp_1\",\r\n                \"eventId\": \"light_on\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
+							"raw": "{\r\n        \"name\": \"COOL {{$timestamp}}\",\r\n        \"enabled\": true,\r\n        \"events\": [\r\n            {\r\n                \"deviceId\": \"{{$guid}}\",\r\n                \"eventId\": \"{{$guid}}\"\r\n            }\r\n        ],\r\n        \"configuration\": {\r\n            \"days\": [],\r\n            \"start\": null,\r\n            \"end\": null\r\n        }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -443,21 +482,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -510,7 +534,7 @@
 				"basic": [
 					{
 						"key": "username",
-						"value": "owner-1",
+						"value": "owner-2",
 						"type": "string"
 					},
 					{
@@ -725,7 +749,7 @@
 							"basic": [
 								{
 									"key": "username",
-									"value": "house-1-server",
+									"value": "house-2-server",
 									"type": "string"
 								},
 								{
@@ -796,21 +820,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -864,21 +873,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -959,21 +953,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1101,21 +1080,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1218,13 +1182,13 @@
 				"type": "basic",
 				"basic": [
 					{
-						"key": "password",
-						"value": "{{password}}",
+						"key": "username",
+						"value": "owner-2",
 						"type": "string"
 					},
 					{
-						"key": "username",
-						"value": "owner-1",
+						"key": "password",
+						"value": "{{password}}",
 						"type": "string"
 					}
 				]
@@ -1314,7 +1278,7 @@
 	],
 	"variable": [
 		{
-			"id": "4707da2f-5719-40da-b84b-4465fc011d69",
+			"id": "1e8d0ca5-0503-4c83-a20a-40d02799cd16",
 			"key": "home-service",
 			"value": "{{PROTOCOL}}{{HOST}}:8001"
 		}
