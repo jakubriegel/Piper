@@ -1,11 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="12" md="9">
-      <v-btn fab dark @click="$router.push('/routines')">
-        <v-icon> mdi-arrow-left </v-icon>
-      </v-btn>
-    </v-col>
-    <v-col cols="12" md="3">
+    <v-col cols="12">
       <v-switch
         :label="
           selectedRoutine.enabled ? 'Routine enabled' : 'Routine disabled'
@@ -42,11 +37,44 @@
             :key="index"
           >
             <v-card class="draggable-item" outlined>
-              <v-icon class="column-drag-handle"> mdi-view-headline </v-icon>
-              <v-card-text>
-                <v-text-field label="deviceId" v-model="event.deviceId" />
-                <v-text-field label="eventId" v-model="event.eventId" />
-              </v-card-text>
+              <v-row align="center">
+                <v-col cols="9" md="11">
+                  <v-card-text>
+                    <v-select
+                      label="Room"
+                      v-model="event.roomId"
+                      :items="rooms"
+                      item-text="name"
+                      item-value="roomId"
+                    />
+                    <v-select
+                      label="Device"
+                      v-model="event.deviceId"
+                      :items="devicesInRoom(event.roomId)"
+                      item-text="name"
+                      item-value="id"
+                      :disabled="!event.roomId"
+                    />
+                    <v-select
+                      label="Event"
+                      v-model="event.eventId"
+                      :items="
+                        eventsForDeviceType(
+                          deviceTypeByDeviceId(event.deviceId)
+                        )
+                      "
+                      item-text="name"
+                      item-value="id"
+                      :disabled="!event.deviceId"
+                    />
+                  </v-card-text>
+                </v-col>
+                <v-col cols="3" md="1">
+                  <v-icon class="column-drag-handle">
+                    mdi-view-headline
+                  </v-icon>
+                </v-col>
+              </v-row>
             </v-card>
             <v-hover v-slot="{ hover }">
               <div class="d-flex align-self-center justify-center flex-wrap">
@@ -80,7 +108,14 @@ export default {
   components: { Container, Draggable },
 
   computed: {
-    ...mapGetters('routines', ['selectedRoutine'])
+    ...mapGetters('routines', ['selectedRoutine']),
+    ...mapGetters('house', [
+      'rooms',
+      'devicesInRoom',
+      'eventsForDeviceType',
+      'deviceTypeByDeviceId',
+      'deviceTypesDict'
+    ])
   },
 
   methods: {

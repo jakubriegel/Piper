@@ -48,7 +48,8 @@ export default {
 
   methods: {
     ...mapActions('snackbar', ['setSnackbarActive']),
-    ...mapActions('routines', ['handleAxios'])
+    ...mapActions('routines', ['handleAxios']),
+    ...mapActions('house', ['getRooms', 'getDeviceTypes'])
   }
 };
 </script>

@@ -19,7 +19,7 @@ export const routines = {
 
     addRoutine({ dispatch, state }) {
       Axios.post(
-        'https://jrie.eu:8001/routines/',
+        utils.apiUrl + 'routines/',
         {
           name: state.selectedRoutine.name,
           enabled: state.selectedRoutine.enabled,
@@ -41,7 +41,7 @@ export const routines = {
         });
     },
     getRoutines({ dispatch, commit }) {
-      Axios.get('https://jrie.eu:8001/routines', {
+      Axios.get(utils.apiUrl + 'routines', {
         headers: {
           Accept: 'application/json'
         },
@@ -56,7 +56,7 @@ export const routines = {
     },
 
     getRoutine({ dispatch, commit }, id) {
-      Axios.get('https://jrie.eu:8001/routines/' + id, {
+      Axios.get(utils.apiUrl + 'routines/' + id, {
         headers: {
           Accept: 'application/json'
         },
@@ -72,7 +72,7 @@ export const routines = {
 
     editRoutine({ dispatch, state }, id) {
       Axios.put(
-        'https://jrie.eu:8001/routines/' + id,
+        utils.apiUrl + 'routines/' + id,
         {
           name: state.selectedRoutine.name,
           enabled: state.selectedRoutine.enabled,
