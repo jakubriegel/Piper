@@ -28,6 +28,7 @@ import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'App',
+
   components: {
     Toolbar: () => import('@/components/Toolbar.vue'),
     Drawer: () => import('@/components/Drawer.vue'),
@@ -44,6 +45,11 @@ export default {
         this.setSnackbarActive(value);
       }
     }
+  },
+
+  mounted() {
+    this.getRooms();
+    this.getDeviceTypes();
   },
 
   methods: {
