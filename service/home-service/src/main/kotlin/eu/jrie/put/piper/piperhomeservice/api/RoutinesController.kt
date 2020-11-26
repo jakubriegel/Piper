@@ -1,6 +1,7 @@
 package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.RoutineEventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutineRequest
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutineResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.RoutineSuggestionsResponse
@@ -34,6 +35,7 @@ import reactor.core.publisher.Mono
 import java.net.URI
 import eu.jrie.put.piper.piperhomeservice.infra.common.component1
 import eu.jrie.put.piper.piperhomeservice.infra.common.component2
+import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
 
 @RestController
 @RequestMapping("routines")
@@ -70,9 +72,10 @@ class RoutinesController(
             @RequestBody routine: Mono<RoutineRequest>,
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
-        val houseId = auth.asUser().house
-        return routine.flatMap { service.createRoutine(it.toRoutine(houseId)) }
-                .zipWith(getDevicesFromUser(auth.asUser()))
+        val user = auth.asUser()
+        return routine.checkDevicesRooms(user)
+                .flatMap { service.createRoutine(it.toRoutine(user.house)) }
+                .zipWith(getDevicesFromUser(user))
                 .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
                 .map {
                     created(URI.create("/routines/${it.routine.id}"))
@@ -88,7 +91,8 @@ class RoutinesController(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         val user = auth.asUser()
-        return routine.flatMap { service.updateRoutine(it.toRoutine(id, user.house), user) }
+        return routine.checkDevicesRooms(user)
+                .flatMap { service.updateRoutine(it.toRoutine(id, user.house), user) }
                 .zipWith(getDevicesFromUser(auth.asUser()))
                 .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
                 .map { ok(it as ApiResponse) }
@@ -114,6 +118,14 @@ class RoutinesController(
                 .handleErrors()
     }
 
+    private fun Mono<RoutineRequest>.checkDevicesRooms(user: User) = zipWith(getDevicesFromUser(user))
+            .map { (request, devicesRooms) ->
+                request.events.forEach {
+                    if (devicesRooms[it.deviceId] != it.roomId) throw InvalidRoutineEventException(it)
+                }
+                request
+            }
+
     private fun getDevicesFromUser(user: User): Mono<Map<String, String>> {
         return housesService.getDevices(user)
                 .map { it.id to it.roomId }
@@ -121,5 +133,11 @@ class RoutinesController(
                 .collectList()
                 .map { it.toTypedArray() }
                 .map { mapOf(*it) }
+    }
+
+    class InvalidRoutineEventException(
+            event: RoutineEventMessage
+    ) : PiperException("Provided roomId, deviceId and eventId do not match.") {
+        override val details = mapOf("givenEvent" to event)
     }
 }

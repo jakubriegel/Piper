@@ -66,17 +66,21 @@ fun List<RoutineEvent>.asMessage(devicesRooms: Map<String, String>) = map {
     RoutineEventMessage(it.deviceId, it.eventId, devicesRooms.getValue(it.deviceId))
 }
 
+fun List<RoutineEventMessage>.asEvents() = map {
+    RoutineEvent(it.deviceId, it.eventId)
+}
+
 data class RoutineRequest (
         val name: String,
         val enabled: Boolean,
-        val events: List<RoutineEvent>,
+        val events: List<RoutineEventMessage>,
         val configuration: RoutineConfiguration?
 ) : ApiRequest {
     fun toRoutine(houseId: String) = Routine(
-            name, houseId, enabled, events, configuration ?: RoutineConfiguration()
+            name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
     fun toRoutine(id: String, houseId: String) = Routine(
-            id, name, houseId, enabled, events, configuration ?: RoutineConfiguration()
+            id, name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
 }
 
