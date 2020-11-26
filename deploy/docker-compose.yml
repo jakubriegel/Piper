@@ -22,7 +22,7 @@ services:
   model-builder:
     build:
       context: ../service/model-builder
-      dockerfile: Dockerfile
+      dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
       - training-data:/training-data
       - models:/models
