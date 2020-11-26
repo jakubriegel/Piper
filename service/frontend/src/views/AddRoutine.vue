@@ -15,29 +15,37 @@
 import Routine from '@/components/Routine';
 import { mapActions } from 'vuex';
 export default {
-  name: 'EditRoutine',
+  name: 'AddRoutine',
 
   components: { Routine },
 
-  props: {
-    id: {
-      type: String,
-      required: true
-    }
-  },
-
   data: () => ({
-    loading: true
+    loading: true,
+    emptyRoutine: {
+      name: '',
+      enabled: false,
+      events: [
+        {
+          deviceId: '',
+          eventId: ''
+        }
+      ],
+      configuration: {
+        days: [],
+        start: null,
+        end: null
+      }
+    }
   }),
 
   mounted() {
-    this.getRoutine(this.id).then(() => {
-      this.loading = false;
-    });
+    this.setSelectedRoutine(this.emptyRoutine).then(
+      () => (this.loading = false)
+    );
   },
 
   methods: {
-    ...mapActions('routines', ['getRoutine'])
+    ...mapActions('routines', ['setSelectedRoutine'])
   }
 };
 </script>
