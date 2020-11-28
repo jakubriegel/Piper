@@ -10,3 +10,4 @@ spring:
 models:
   data-files-dir: /training-data
   retrain-cron: '* * 0/12 ? * *'
+  new-model-threshold: 10_000
