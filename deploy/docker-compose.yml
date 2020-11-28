@@ -15,7 +15,7 @@ services:
   intelligence-core-service:
     build:
       context: ../service/intelligence-core-service
-      dockerfile: Dockerfile
+      dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
       - models:/models
     container_name: intelligence-core-service
