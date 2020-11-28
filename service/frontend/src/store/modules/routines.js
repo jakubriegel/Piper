@@ -12,36 +12,14 @@ export const routines = {
     selectedRoutine: state => state.selectedRoutine
   },
   actions: {
-    addRoutine() {},
-    getRoutines({ commit }) {
-      Axios.get('https://jrie.eu:8001/routines', {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      }).then(res => {
-        commit('SET_ROUTINES', res.data.routines);
-      });
+    handleAxios({ dispatch }, message) {
+      dispatch('snackbar/setSnackbarActive', true, { root: true });
+      dispatch('snackbar/setSnackbarMessage', message, { root: true });
     },
 
-    getRoutine({ commit }, id) {
-      Axios.get('https://jrie.eu:8001/routines/' + id, {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('SET_SELECTED_ROUTINE', res.data.routine);
-        })
-        .catch(() => {
-          //TODO handle error
-        });
-    },
-
-    editRoutine({ state }, id) {
-      Axios.put(
-        'https://jrie.eu:8001/routines/' + id,
+    addRoutine({ dispatch, state }) {
+      Axios.post(
+        utils.apiUrl + 'routines/',
         {
           name: state.selectedRoutine.name,
           enabled: state.selectedRoutine.enabled,
@@ -58,8 +36,61 @@ export const routines = {
         .then(res => {
           console.log(res);
         })
-        .catch(() => {
-          //TODO handle error
+        .catch(e => {
+          dispatch('handleAxios', e);
+        });
+    },
+    getRoutines({ dispatch, commit }) {
+      Axios.get(utils.apiUrl + 'routines', {
+        headers: {
+          Accept: 'application/json'
+        },
+        auth: utils.authentication
+      })
+        .then(res => {
+          commit('SET_ROUTINES', res.data.routines);
+        })
+        .catch(e => {
+          dispatch('handleAxios', e);
+        });
+    },
+
+    getRoutine({ dispatch, commit }, id) {
+      Axios.get(utils.apiUrl + 'routines/' + id, {
+        headers: {
+          Accept: 'application/json'
+        },
+        auth: utils.authentication
+      })
+        .then(res => {
+          commit('SET_SELECTED_ROUTINE', res.data.routine);
+        })
+        .catch(e => {
+          dispatch('handleAxios', e);
+        });
+    },
+
+    editRoutine({ dispatch, state }, id) {
+      Axios.put(
+        utils.apiUrl + 'routines/' + id,
+        {
+          name: state.selectedRoutine.name,
+          enabled: state.selectedRoutine.enabled,
+          events: state.selectedRoutine.events,
+          configuration: state.selectedRoutine.configuration
+        },
+        {
+          headers: {
+            Accept: 'application/json'
+          },
+          auth: utils.authentication
+        }
+      )
+        .then(res => {
+          console.log(res);
+        })
+        .catch(e => {
+          dispatch('handleAxios', e);
         });
     },
 
@@ -73,9 +104,7 @@ export const routines = {
         ]);
       } else {
         let tail = [...state.selectedRoutine.events];
-        console.log(tail, index);
         let head = tail.splice(0, index + 1);
-        console.log(head);
 
         commit('ASSIGN_EVENTS_TO_ROUTINE', [
           ...head,
