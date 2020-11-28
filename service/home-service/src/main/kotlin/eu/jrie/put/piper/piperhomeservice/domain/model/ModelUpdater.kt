@@ -101,6 +101,6 @@ class ModelUpdater (
         val logger: Logger = LoggerFactory.getLogger(ModelService::class.java)
 
         const val NEW_MODEL_EVENTS_TOPIC = "UserData"
-        const val NEW_MODEL_THRESHOLD = 1
+        const val NEW_MODEL_THRESHOLD = 10_000
     }
 }
