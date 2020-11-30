@@ -38,6 +38,7 @@ import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
 import org.springframework.http.ResponseEntity.noContent
 import org.springframework.web.bind.annotation.DeleteMapping
+import reactor.core.publisher.Mono.just
 
 @RestController
 @RequestMapping("routines")
@@ -107,7 +108,7 @@ class RoutinesController(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         return service.deleteRoutine(id, auth.asUser())
-                .map { noContent().build<ApiResponse>() }
+                .then(just(noContent().build<ApiResponse>()))
                 .handleErrors()
     }
 
