@@ -21,3 +21,7 @@ interface HousesService {
     fun getEvent(eventId: String, user: User): Mono<DeviceEvent>
     fun checkIsEventOfDevice(deviceId: String, eventId: String, user: User): Mono<Void>
 }
+
+interface HousesServiceConsents {
+    fun getHousesIdsWithLearningConsent(): Flow<String>
+}
