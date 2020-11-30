@@ -1,7 +1,7 @@
 import json
 import random
 from pathlib import Path
-from time import time, sleep
+from time import time
 
 from typing import List
 
@@ -20,7 +20,7 @@ class Generator:
     rooms: List[str]
     users: List[User]
 
-    def __init__(self, users_n, path):
+    def __init__(self, users_n, path: Path):
         self.devIds_with_types = json.load(open(path / "devIds_with_types.json"))
         self.typeIds_with_actions = json.load(open(path / "typeIds_with_actions.json"))
         self.roomsIds_with_devices = json.load(open(path / "roomsIds_with_devices.json"))
@@ -77,11 +77,3 @@ class Generator:
         self.block_event(event)
         return event
 
-
-# if __name__ == '__main__':
-#     path = Path("config/")
-#     generator = Generator(2, path)
-#     print("start")
-#     while True:
-#         print(generator.generate_event())
-#         sleep(1)
