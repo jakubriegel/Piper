@@ -7,8 +7,17 @@ spring:
       database: piper
   main:
     web-application-type: reactive
+  kafka:
+    producer:
+      client-id: home-service
+      acks: all
 
 client:
   intelligence-core-service:
     host: intelligence-core-service
     port: 8004
+
+models:
+  data-files-dir: training-data
+  retrain-cron: 0/15 * * ? * *
+  new-model-threshold: 10_000

@@ -28,11 +28,11 @@ class HousesServiceImpl (
         private val roomRepository: RoomRepository,
         private val userService: UserService,
         private val authService: AuthService
-) : HousesService {
+) : HousesService, HousesServiceConsents {
     override fun getHouse(user: User) = repository.findById(user.house)
 
     override fun createHouse(): Mono<Triple<House, User, User>> {
-        return House(nextUUID, "name", Models(null, emptySet()), Consents())
+        return House(nextUUID, "name", Consents())
                 .toMono()
                 .flatMap { repository.insert(it) }
                 .zipWhen(
@@ -149,5 +149,9 @@ class HousesServiceImpl (
                     if (device.typeId != event.deviceTypeId) Mono.error(NotDeviceEventException(device, event))
                     else Mono.empty()
                 }
+    }
+
+    override fun getHousesIdsWithLearningConsent(): Flow<String> {
+        return repository.findWithLearningConsent()
     }
 }

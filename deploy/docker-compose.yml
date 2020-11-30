@@ -10,24 +10,24 @@ services:
     volumes:
       - ../service/frontend/:/frontend/
     container_name: frontend
+    depends_on: 
+    - home-service
   intelligence-core-service:
     build:
       context: ../service/intelligence-core-service
-      dockerfile: Dockerfile
+      dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
       - models:/models
     container_name: intelligence-core-service
   model-builder:
     build:
       context: ../service/model-builder
-      dockerfile: Dockerfile
+      dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
       - training-data:/training-data
       - models:/models
     ports:
     - "2121:2121"
-    volumes:
-    - ../service/model-builder:/model-builder/
     depends_on:
       - kafka
     container_name: model-builder
@@ -42,6 +42,9 @@ services:
       - "8001:80"
     depends_on:
       - routines-db
+      - kafka
+      - model-builder
+      - intelligence-core-service
     container_name: home-service
   routines-db:
     image: mongo:4.4.1
@@ -51,21 +54,16 @@ services:
       - routines-db:/data/db
     container_name: routines-db
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: kymeric/cp-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
     container_name: zookeeper
   kafka:
-    image: confluentinc/cp-kafka
-    ports:
-      - "9092:9092"
+    image: kymeric/cp-kafka
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

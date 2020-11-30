@@ -1,13 +1,13 @@
-FROM python:3.6
+FROM jasonrandrews/tensorflow-v2
 
-COPY ./requirements.txt /service/requirements.txt
+COPY ./docker/arm/requirements.txt /service/requirements.txt
 RUN pip install -r /service/requirements.txt
 
 COPY ./app /service/app
 COPY ./api.py /service/api.py
-
 COPY ./model /service/model
 
 WORKDIR /service
 
-CMD python api.py
+USER root
+CMD ["python", "-u" ,"api.py"]

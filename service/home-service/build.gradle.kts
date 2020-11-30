@@ -45,6 +45,11 @@ dependencies {
 
     // reactor
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("io.projectreactor:reactor-core:3.4.0")
+
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.projectreactor.kafka:reactor-kafka:1.3.0")
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

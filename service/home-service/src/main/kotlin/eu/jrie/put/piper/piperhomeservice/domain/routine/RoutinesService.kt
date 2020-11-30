@@ -1,6 +1,7 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
+import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
@@ -12,12 +13,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
 class RoutinesService (
         private val repository: RoutinesRepository,
         private val authService: AuthService,
         private val housesService: HousesService,
+        private val modelService: ModelService,
         private val intelligenceClient: IntelligenceCoreServiceClient
 ) {
     fun routinesForHouse(houseId: String): Flow<RoutinePreview> = repository.findRoutinesPreview(houseId)
@@ -34,8 +37,9 @@ class RoutinesService (
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
-                    .then(housesService.getHouse(user))
-                    .map { it.models.current?.id ?: throw NoModelException() }
+                    .then(modelService.getLatestModel(user))
+                    .switchIfEmpty { throw PredictionsNotAvailableException() }
+                    .map { it.id }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
 
