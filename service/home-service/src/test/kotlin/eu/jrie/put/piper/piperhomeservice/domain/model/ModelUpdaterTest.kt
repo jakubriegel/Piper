@@ -45,7 +45,8 @@ internal class ModelUpdaterTest {
             modelService,
             kafka,
             housesService,
-            pastEventService, TEMP_DIR.absolutePath, mapper
+            pastEventService, TEMP_DIR.absolutePath, mapper,
+            1
     )
 
     @Test

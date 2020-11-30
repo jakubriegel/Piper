@@ -38,7 +38,9 @@ class ModelUpdater (
         private val pastEventService: PastEventService,
         @Value("\${models.data-files-dir}")
         dataFilesDirPath: String,
-        csvMapper: CsvMapper
+        csvMapper: CsvMapper,
+        @Value("\${models.new-model-threshold}")
+        private val newModelThreshold: Int
 ) {
 
     private val dataFilesDir = File(dataFilesDirPath).also { if(!it.exists()) it.mkdir() }
@@ -58,7 +60,7 @@ class ModelUpdater (
                 }
                 .filter { (houseId, lastUpdateTime) ->
                     val n = pastEventService.countEventsAfter(lastUpdateTime, houseId)
-                    n.single() >= NEW_MODEL_THRESHOLD
+                    n.single() >= newModelThreshold
                 }
                 .map { (houseId, lastUpdateTime) -> houseId to pastEventService.getEventsSince(lastUpdateTime, houseId) }
                 .map { (houseId, dataset) ->
@@ -101,6 +103,6 @@ class ModelUpdater (
         val logger: Logger = LoggerFactory.getLogger(ModelService::class.java)
 
         const val NEW_MODEL_EVENTS_TOPIC = "UserData"
-        const val NEW_MODEL_THRESHOLD = 1
+        const val NEW_MODEL_THRESHOLD = 10_000
     }
 }

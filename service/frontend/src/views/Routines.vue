@@ -1,7 +1,13 @@
 <template>
   <v-container>
+    <v-text-field
+      clearable
+      outlined
+      v-model="search"
+      label="Search"
+    ></v-text-field>
     <v-card>
-      <v-data-table :headers="headers" :items="routines">
+      <v-data-table :search="search" :headers="headers" :items="routines">
         <template v-slot:item.enabled="{ item }">
           <v-checkbox v-model="item.enabled"></v-checkbox>
         </template>
@@ -19,6 +25,9 @@
         </template>
       </v-data-table>
     </v-card>
+    <v-btn dark class="mt-3" @click="$router.push('/routine')">
+      Add routine
+    </v-btn>
   </v-container>
 </template>
 
@@ -35,6 +44,7 @@ export default {
   },
 
   data: () => ({
+    search: '',
     headers: [
       {
         text: 'Id',

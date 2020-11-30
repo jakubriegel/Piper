@@ -4,6 +4,7 @@ import Home from '../views/Home.vue';
 import About from '../views/About.vue';
 import Routines from '@/views/Routines';
 import EditRoutine from '@/views/EditRoutine';
+import AddRoutine from '@/views/AddRoutine';
 
 Vue.use(VueRouter);
 
@@ -28,6 +29,12 @@ const routes = [
     name: 'Edit Routine',
     props: true,
     component: EditRoutine
+  },
+  {
+    path: '/routine',
+    name: 'Edit Routine',
+    props: true,
+    component: AddRoutine
   }
 ];
 
