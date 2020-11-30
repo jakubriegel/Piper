@@ -4,6 +4,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import org.testcontainers.shaded.com.google.common.io.Files
 
+internal val ROUTINE_ID = nextUUID
 internal val HOUSE_ID = nextUUID
 internal val DEVICE_ID = nextUUID
 internal val EVENT_ID = nextUUID
