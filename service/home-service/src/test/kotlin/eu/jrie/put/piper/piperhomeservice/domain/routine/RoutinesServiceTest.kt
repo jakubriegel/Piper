@@ -46,7 +46,7 @@ internal class RoutinesServiceTest {
         // and
         every { repository.findById(ROUTINE_ID) } returns just(routine)
         every { authService.checkForRoutineAccess(USER, routine) } returns routine
-        every { repository.delete(routine) } returns empty()
+        every { repository.deleteById(ROUTINE_ID) } returns empty()
 
         // when
         service.deleteRoutine(ROUTINE_ID, USER).block()
@@ -55,7 +55,7 @@ internal class RoutinesServiceTest {
         verifyOrder {
             repository.findById(ROUTINE_ID)
             authService.checkForRoutineAccess(USER, routine)
-            repository.delete(routine)
+            repository.deleteById(ROUTINE_ID)
         }
     }
 

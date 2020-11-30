@@ -108,7 +108,7 @@ class RoutinesController(
             auth: Authentication
     ): Mono<ResponseEntity<ApiResponse>> {
         return service.deleteRoutine(id, auth.asUser())
-                .then(just(noContent().build<ApiResponse>()))
+                .thenReturn(noContent().build<ApiResponse>())
                 .handleErrors()
     }
 

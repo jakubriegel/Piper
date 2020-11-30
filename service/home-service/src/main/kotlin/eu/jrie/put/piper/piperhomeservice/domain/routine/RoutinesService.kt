@@ -34,9 +34,8 @@ class RoutinesService (
             .map { it.updateWith(updated) }
             .flatMap { repository.save(it) }
 
-    fun deleteRoutine(id: String, user: User) = repository.findById(id)
-            .map { authService.checkForRoutineAccess(user, it) }
-            .map { repository.delete(it) }
+    fun deleteRoutine(id: String, user: User) = routineById(id, user)
+            .flatMap { repository.deleteById(it.id) }
 
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
