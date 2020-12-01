@@ -37,7 +37,10 @@ RUN npm run build
 FROM nginx:1.15.7 as production-stage
 
 COPY --from=install-stage /frontend/dist /usr/share/nginx/html
+
 COPY nginx/nginx.conf /etc/nginx/conf.d
+COPY nginx/piper.crt /etc/nginx/piper.crt
+COPY nginx/piper.key /etc/nginx/piper.key
 
 EXPOSE 8080
 
