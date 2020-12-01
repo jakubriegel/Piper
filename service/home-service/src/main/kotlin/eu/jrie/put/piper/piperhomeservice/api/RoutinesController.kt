@@ -36,6 +36,9 @@ import java.net.URI
 import eu.jrie.put.piper.piperhomeservice.infra.common.component1
 import eu.jrie.put.piper.piperhomeservice.infra.common.component2
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
+import org.springframework.http.ResponseEntity.noContent
+import org.springframework.web.bind.annotation.DeleteMapping
+import reactor.core.publisher.Mono.just
 
 @RestController
 @RequestMapping("routines")
@@ -96,6 +99,16 @@ class RoutinesController(
                 .zipWith(getDevicesFromUser(auth.asUser()))
                 .map { (routine, devicesRooms) -> RoutineResponse(routine.asMessage(devicesRooms)) }
                 .map { ok(it as ApiResponse) }
+                .handleErrors()
+    }
+
+    @DeleteMapping("{id}")
+    fun deleteRoutine(
+            @PathVariable id: String,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        return service.deleteRoutine(id, auth.asUser())
+                .thenReturn(noContent().build<ApiResponse>())
                 .handleErrors()
     }
 
