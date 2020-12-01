@@ -3,8 +3,9 @@ FROM python:3.9
 COPY ./requirements.txt /sample-automation-client/requirements.txt
 RUN pip install -r /sample-automation-client/requirements.txt
 
-COPY ./schema.json /sample-automation-client/schema.json
-COPY ./client.py /sample-automation-client/client.py
+COPY EventGenerator/config/schema.json /sample-automation-client/event-generator/config/schema.json
+COPY run.py /sample-automation-client/run.py
+COPY ./SampleClient.py /sample-automation-client/SampleClient.py
 
 WORKDIR /sample-automation-client
 

@@ -1,4 +1,6 @@
 venv
 .idea
-devIds_with_types.json
-typeIds_with_actions.json
+*.pyc
+EventGenerator/config/devIds_with_types.json
+EventGenerator/config/typeIds_with_actions.json
+EventGenerator/config/roomsIds_with_devices.json
