@@ -1,17 +1,5 @@
 FROM node:13.13.0 as setup-stage
 
-WORKDIR /frontend
-COPY package.json /frontend/
-
-FROM setup-stage as develop-stage
-COPY . /frontend/
-CMD ["npm", "run", "serve"]
-
-FROM setup-stage as install-stage
-WORKDIR /frontend
-RUN pwd
-RUN ls
-RUN npm install
 RUN npm install -g @vue/cli@4.5.7
 RUN npm install -g @vue/cli-service@4.5.0
 RUN npm install -g @vue/cli-plugin-babel@4.5.0
@@ -20,9 +8,30 @@ RUN npm install -g vue-cli-plugin-vuetify@2.0.7
 RUN npm install -g vue-template-compiler@2.6.11
 RUN npm install -g vuetify-loader@1.3.0
 RUN npm install -g webpack@4.43.0
-COPY . /frontend/
-RUN ls
-RUN ls /frontend/
+
+WORKDIR /frontend
+
+COPY package.json /frontend/package.json
+COPY package-lock.json /frontend/package-lock.json
+
+RUN npm install
+
+COPY .browserslistrc /frontend/.browserslistrc
+COPY .eslintrc.js /frontend/.eslintrc.js
+COPY .jshintrc /frontend/.jshintrc
+COPY babel.config.js /frontend/babel.config.js
+COPY jest.config.js /frontend/jest.config.js
+COPY vue.config.js /frontend/vue.config.js
+
+COPY public /frontend/public
+COPY src /frontend/src
+
+FROM setup-stage as develop-stage
+
+CMD ["npm", "run", "serve"]
+
+FROM setup-stage as install-stage
+
 RUN npm run build
 
 FROM nginx:1.15.7 as production-stage
