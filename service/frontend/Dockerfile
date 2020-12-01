@@ -1,14 +1,5 @@
 FROM node:13.13.0 as setup-stage
 
-RUN npm install -g @vue/cli@4.5.7
-RUN npm install -g @vue/cli-service@4.5.0
-RUN npm install -g @vue/cli-plugin-babel@4.5.0
-RUN npm install -g @vue/cli-plugin-eslint@4.5.0
-RUN npm install -g vue-cli-plugin-vuetify@2.0.7
-RUN npm install -g vue-template-compiler@2.6.11
-RUN npm install -g vuetify-loader@1.3.0
-RUN npm install -g webpack@4.43.0
-
 WORKDIR /frontend
 
 COPY package.json /frontend/package.json
