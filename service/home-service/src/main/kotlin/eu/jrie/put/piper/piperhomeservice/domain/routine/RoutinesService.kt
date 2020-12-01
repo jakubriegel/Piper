@@ -34,6 +34,9 @@ class RoutinesService (
             .map { it.updateWith(updated) }
             .flatMap { repository.save(it) }
 
+    fun deleteRoutine(id: String, user: User) = routineById(id, user)
+            .flatMap { repository.deleteById(it.id) }
+
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)

@@ -2,15 +2,19 @@ package eu.jrie.put.piper.piperhomeservice.domain.routine
 
 import eu.jrie.put.piper.piperhomeservice.DEVICE_ID
 import eu.jrie.put.piper.piperhomeservice.EVENT_ID
+import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
 import eu.jrie.put.piper.piperhomeservice.MODEL_ID
+import eu.jrie.put.piper.piperhomeservice.ROUTINE_ID
 import eu.jrie.put.piper.piperhomeservice.USER
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.model.Model
 import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
+import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asFlow
@@ -26,11 +30,34 @@ import java.time.Instant.now
 
 internal class RoutinesServiceTest {
 
+    private val repository: RoutinesRepository = mockk()
+    private val authService: AuthService = mockk()
     private val housesService: HousesService = mockk()
     private val modelService: ModelService = mockk()
     private val intelligenceClient: IntelligenceCoreServiceClient = mockk()
 
-    private val service = RoutinesService(mockk(), mockk(), housesService, modelService, intelligenceClient)
+    private val service = RoutinesService(repository, authService, housesService, modelService, intelligenceClient)
+
+    @Test
+    fun `should delete routine`() {
+        // given
+        val routine = Routine(ROUTINE_ID, "name", HOUSE_ID, true, emptyList(), null)
+
+        // and
+        every { repository.findById(ROUTINE_ID) } returns just(routine)
+        every { authService.checkForRoutineAccess(USER, routine) } returns routine
+        every { repository.deleteById(ROUTINE_ID) } returns empty()
+
+        // when
+        service.deleteRoutine(ROUTINE_ID, USER).block()
+
+        // then
+        verifyOrder {
+            repository.findById(ROUTINE_ID)
+            authService.checkForRoutineAccess(USER, routine)
+            repository.deleteById(ROUTINE_ID)
+        }
+    }
 
     @Test
     @FlowPreview

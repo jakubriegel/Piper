@@ -307,6 +307,55 @@
 					"response": []
 				},
 				{
+					"name": "remove routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e851e185-84ac-4e60-a13c-f435b2e9a42e",
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"  "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/routines/{{routineId}}",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"routines",
+								"{{routineId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "add routine",
 					"event": [
 						{
@@ -357,7 +406,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"deviceId\": \"{{deviceId}}\",\r\n      \"eventId\": \"{{deviceEventId}}\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
+							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"roomId\": \"{{roomId}}\",\r\n      \"deviceId\": \"{{deviceId}}\",\r\n      \"eventId\": \"{{deviceEventId}}\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -749,7 +798,7 @@
 							"basic": [
 								{
 									"key": "username",
-									"value": "house-2-server",
+									"value": "house-1-server",
 									"type": "string"
 								},
 								{
@@ -1006,21 +1055,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1134,21 +1168,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1278,7 +1297,7 @@
 	],
 	"variable": [
 		{
-			"id": "1e8d0ca5-0503-4c83-a20a-40d02799cd16",
+			"id": "534eb340-5376-4a99-b9cb-1f39904bc765",
 			"key": "home-service",
 			"value": "{{PROTOCOL}}{{HOST}}:8001"
 		}
