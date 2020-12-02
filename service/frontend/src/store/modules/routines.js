@@ -94,6 +94,21 @@ export const routines = {
         });
     },
 
+    deleteRoutine({ dispatch, state }, id) {
+      Axios.delete(utils.apiUrl + 'routines/' + id, {
+        headers: {
+          Accept: 'application/json'
+        },
+        auth: utils.authentication
+      })
+        .then(res => {
+          console.log(res);
+        })
+        .catch(e => {
+          dispatch('handleAxios', e);
+        });
+    },
+
     addEventToRoutine({ commit, state }, index) {
       if (!state.selectedRoutine.events) {
         commit('ASSIGN_EVENTS_TO_ROUTINE', [

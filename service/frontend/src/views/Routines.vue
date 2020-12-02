@@ -59,10 +59,10 @@ export default {
   }),
 
   methods: {
-    ...mapActions('routines', ['getRoutines']),
+    ...mapActions('routines', ['getRoutines', 'deleteRoutine']),
 
-    deleteItem(item) {
-      console.log('Delete ' + item);
+    deleteItem(id) {
+      this.deleteRoutine(id);
     }
   }
 };
