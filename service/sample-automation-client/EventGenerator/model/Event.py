@@ -1,8 +1,12 @@
 class Event:
-    def __init__(self, time, id, action):
+    def __init__(self, time, end_time, id, action):
         self.time = time
+        self.end_time = end_time
         self.id = id
         self.action = action
+
+    def end(self):
+        return self.end_time
 
     def __getitem__(self, item):
         return self.time, self.id, self.action
@@ -13,6 +17,6 @@ class Event:
     def __hash__(self):
         return hash((self.id, self.action))
 
-    def is_same(self, other: any):
+    def __eq__(self, other):
         assert type(other) is Event
         return self.id == other.id and self.action == other.action

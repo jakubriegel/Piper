@@ -55,9 +55,8 @@ class SampleClient:
     def send_data(self):
         url = "https://jrie.eu:8001/events"
         payload = ''
-        for event in range(random.randint(10, 30)):
-            payload += str(self.generator.generate_event()) + "\r\n"
-            time.sleep(random.randint(1, 1))  # change here to generate faster
+        payload += str(self.generator.generate_events(random.randint(10, 30))) + "\r\n"
+
         headers = {
             'Content-Type': 'text/csv',
         }
@@ -66,3 +65,13 @@ class SampleClient:
                                     auth=(self.username, self.password))
         print(response.text)
         print(response.status_code)
+
+    def request_routines(self):
+        url = "https://jrie.eu:8001/"
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        response = requests.request("GET", url, headers=headers, verify=False,
+                                    auth=(self.username, self.password))
+        json_response = json.loads(response.text)

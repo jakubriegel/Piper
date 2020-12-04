@@ -1,7 +1,7 @@
 import json
 import random
 from pathlib import Path
-from time import time
+from time import time, sleep
 
 from typing import List
 
@@ -27,6 +27,8 @@ class Generator:
         self.events = self.get_all_possible_events()
         self.rooms = self.get_rooms()
         self.users = self.generate_users(users_n)
+        for user in self.users:
+            user.update(int(time()))
 
     def __hash__(self):
         return hash(self.events)
@@ -39,7 +41,7 @@ class Generator:
 
     def update_blocked(self):
         for event in self.current_events:
-            if event.time < int(time()):
+            if event.end() < int(time()):
                 self.release_event(event)
 
     def get_rooms(self) -> List[str]:
@@ -55,15 +57,15 @@ class Generator:
             all_possible[room] = actions
         return all_possible
 
-    def generate(self, room: str):
+    def generate(self, room: str, start_time, end_time):
         self.update_blocked()
         events_pool = self.events[room]
         while True:
             device = random.choice(list(events_pool.keys()))
             action = random.choice(list(events_pool[device]))
-            event = Event(int(time()), device, action)
+            event = Event(start_time, end_time, device, action)
             for current_event in self.current_events:
-                if event.id == current_event.id and event.action == current_event.id:
+                if event.id == current_event.id and event.action == current_event.action:
                     continue
             return event
 
@@ -73,7 +75,25 @@ class Generator:
 
     def generate_event(self):
         user = random.choice(self.users)
-        event = self.generate(user.room)
+        user.update(int(time()))
+        event = self.generate(user.room, int(time()), user.next_event_at)
         self.block_event(event)
         return event
+
+    def generate_events(self, events_number: int):
+        events: List[Event] = []
+        for i in range(events_number):
+            events.append(self.generate_event())
+            # sleep(random.randint(1, 1))
+        events = sorted(events, key=lambda timestamp: timestamp[0])
+        string_events = []
+        for event in events:
+            string_events.append(str(event) + "\r\n")
+        return string_events
+
+
+if __name__ == '__main__':
+    generator = Generator(5, Path("config/"))
+    print(generator.generate_events(30))
+
 
