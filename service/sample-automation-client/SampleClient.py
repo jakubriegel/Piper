@@ -13,7 +13,7 @@ class SampleClient:
     path = Path("EventGenerator/config/")
     username = os.environ.get('SIMULATOR_USER')
     password = os.environ.get('SIMULATOR_PASS')
-    generator = Generator(random.randint(1, 5), path)
+    generator: Generator = None
 
     def first_contact(self):
         url = "https://jrie.eu:8001/houses/schema"
@@ -52,19 +52,24 @@ class SampleClient:
         with open(self.path / 'roomsIds_with_devices.json', 'w') as file3:
             file3.write(json.dumps(roomsIds_with_devices))
 
-    def send_data(self):
-        url = "https://jrie.eu:8001/events"
-        payload = ''
-        payload += str(self.generator.generate_events(random.randint(10, 30))) + "\r\n"
+        self.generator = Generator(random.randint(1, 5), self.path)
 
-        headers = {
-            'Content-Type': 'text/csv',
-        }
-        print(payload)
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False,
-                                    auth=(self.username, self.password))
-        print(response.text)
-        print(response.status_code)
+    def send_data(self):
+        if self.generator is not None:
+            url = "https://jrie.eu:8001/events"
+            payload = ''
+            payload += "\r\n".join(self.generator.generate_events(random.randint(10, 30)))
+
+            headers = {
+                'Content-Type': 'text/csv',
+            }
+            print(payload)
+            response = requests.request("POST", url, headers=headers, data=payload, verify=False,
+                                        auth=(self.username, self.password))
+            print(response.text)
+            print(response.status_code)
+        else:
+            self.generator = Generator(random.randint(1, 5), self.path)
 
     def request_routines(self):
         url = "https://jrie.eu:8001/"

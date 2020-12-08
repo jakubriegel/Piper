@@ -58,7 +58,7 @@ class Generator:
         return all_possible
 
     def generate(self, room: str, start_time, end_time):
-        self.update_blocked()
+
         events_pool = self.events[room]
         while True:
             device = random.choice(list(events_pool.keys()))
@@ -76,7 +76,7 @@ class Generator:
     def generate_event(self):
         user = random.choice(self.users)
         user.update(int(time()))
-        event = self.generate(user.room, int(time()), user.next_event_at)
+        event = self.generate(user.room, int(time()), int(time()))
         self.block_event(event)
         return event
 
@@ -88,12 +88,12 @@ class Generator:
         events = sorted(events, key=lambda timestamp: timestamp[0])
         string_events = []
         for event in events:
-            string_events.append(str(event) + "\r\n")
+            string_events.append(str(event))
         return string_events
 
 
 if __name__ == '__main__':
     generator = Generator(5, Path("config/"))
-    print(generator.generate_events(30))
+    print("\r\n".join(generator.generate_events(30)))
 
 
