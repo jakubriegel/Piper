@@ -13,7 +13,7 @@ export const house = {
   getters: {
     rooms: state => state.rooms,
     devices: state => state.devices,
-    deviceTypesDict: state => state.deviceTypesDict,
+    deviceTypes: state => state.deviceTypes,
     devicesInRoom: state => id => state.devices[id],
     roomName: state => id => state.roomsDict[id],
     roomIds: state => Object.keys(state.roomsDict),
