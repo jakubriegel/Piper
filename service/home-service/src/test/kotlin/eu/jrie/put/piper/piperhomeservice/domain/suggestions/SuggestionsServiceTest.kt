@@ -44,11 +44,12 @@ internal class SuggestionsServiceTest {
         val expectedMlEvent = "${DEVICE_ID}_$EVENT_ID"
         val (device1, event1) = nextUUID to nextUUID
         val (device2, event2) = nextUUID to nextUUID
-        val expectedSuggestions = listOf("${device1}_$event1", "${device2}_$event2")
+        val providedSuggestions = listOf("${start.deviceId}_${start.eventId}", "${device1}_$event1", "${device2}_$event2")
+        val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
 
         every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
         every { modelService.getLatestModel(USER) } returns Mono.just(Model(MODEL_ID, now(), now(), nextUUID))
-        every { intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N) } returns expectedSuggestions.asFlow()
+        every { intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N) } returns providedSuggestions.asFlow()
 
         // when
         val result = service.getContinuationSuggestions(start, N, USER).toList()
@@ -60,9 +61,7 @@ internal class SuggestionsServiceTest {
             intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N)
         }
 
-        val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
         assertIterableEquals(expectedResult, result)
-
     }
 
     @Test

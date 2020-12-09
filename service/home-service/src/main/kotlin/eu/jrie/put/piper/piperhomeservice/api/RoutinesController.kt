@@ -32,6 +32,7 @@ import java.net.URI
 import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
 import org.springframework.http.ResponseEntity.noContent
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
 @RequestMapping("routines")

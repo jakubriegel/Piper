@@ -7,6 +7,7 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -35,6 +36,7 @@ class SuggestionsService (
                     .map { it.asMlEvent() }
                     .flatMapConcat { intelligenceClient.getSequence(modelId, it, n) }
                     .map { parseEvent(it) }
+                    .filter { it != start }
 
     private companion object {
         const val ML_EVENT_DELIMITER = '_'
