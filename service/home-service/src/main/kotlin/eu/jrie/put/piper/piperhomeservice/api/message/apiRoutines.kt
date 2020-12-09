@@ -14,7 +14,7 @@ import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
-private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth))
+private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(null, Auth))
 private val linkToHouses = linkTo(HousesController::class.java)
 
 data class RoutinesResponse (

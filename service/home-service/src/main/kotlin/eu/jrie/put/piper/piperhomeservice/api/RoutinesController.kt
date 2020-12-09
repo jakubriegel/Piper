@@ -41,11 +41,16 @@ class RoutinesController(
 ) {
     @GetMapping(produces = [APPLICATION_JSON_VALUE])
     fun getRoutines(
+            @RequestParam(required = false) enabled: Boolean?,
             auth: Authentication
     ): Mono<RoutinesResponse> {
         val houseId = auth.asUser().house
         return service.routinesForHouse(houseId)
                 .asFlux()
+                .let { routines ->
+                    if (enabled != null) routines.filter { it.enabled }
+                    else routines
+                }
                 .collectList()
                 .map { RoutinesResponse(it.asMessage()) }
     }
