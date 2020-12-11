@@ -2,6 +2,7 @@ package eu.jrie.put.piper.piperhomeservice.domain.suggestions
 
 import eu.jrie.put.piper.piperhomeservice.DEVICE_ID
 import eu.jrie.put.piper.piperhomeservice.EVENT_ID
+import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
 import eu.jrie.put.piper.piperhomeservice.MODEL_ID
 import eu.jrie.put.piper.piperhomeservice.USER
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
@@ -25,17 +26,20 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Flux.just
 import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.Instant.now
 
 internal class SuggestionsServiceTest {
 
+    private val suggestedRoutinesRepository: SuggestedRoutinesRepository = mockk()
     private val housesService: HousesService = mockk()
     private val modelService: ModelService = mockk()
     private val intelligenceClient: IntelligenceCoreServiceClient = mockk()
 
-    private val service = SuggestionsService(mockk(), housesService, modelService, intelligenceClient)
+    private val service = SuggestionsService(suggestedRoutinesRepository, housesService, modelService, intelligenceClient)
 
 //    @Test
 //    @FlowPreview
@@ -83,6 +87,21 @@ internal class SuggestionsServiceTest {
 //        assertTrue(result.isFailure)
 //        assertTrue(result.exceptionOrNull()!! is PredictionsNotAvailableException)
 //    }
+
+    @Test
+    fun `should get suggested routines`() {
+        // given
+        val expectedEvents = listOf(RoutineEvent(nextUUID, nextUUID))
+        val expectedRoutine = SuggestedRoutine(nextUUID, HOUSE_ID, expectedEvents)
+
+        every { suggestedRoutinesRepository.findRandom(N, HOUSE_ID) } returns just(expectedRoutine)
+
+        // when
+        val result = service.getSuggestedRoutines(N, USER).collectList().block()
+
+        // then
+        assertEquals(listOf(expectedEvents), result)
+    }
 
     private companion object {
 
