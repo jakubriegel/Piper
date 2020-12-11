@@ -1,6 +1,7 @@
 package eu.jrie.put.piper.piperhomeservice.domain.suggestions
 
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
+import eu.jrie.put.piper.piperhomeservice.domain.model.Model
 import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.routine.PredictionsNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
@@ -17,6 +18,8 @@ import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.switchIfEmpty
+import java.time.Instant
+import java.time.Instant.now
 
 @Service
 class SuggestionsService (
@@ -28,7 +31,8 @@ class SuggestionsService (
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
-                    .then(modelService.getLatestModel(user))
+//                    .then(modelService.getLatestModel(user))
+                    .thenReturn(Model("mock_model", now(), now(), user.house))
                     .switchIfEmpty { throw PredictionsNotAvailableException() }
                     .map { it.id }
                     .asFlow()
