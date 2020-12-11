@@ -7,7 +7,7 @@ import org.springframework.hateoas.IanaLinkRelations.ABOUT
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
-private val linkToSuggestions = linkTo(methodOn(SuggestionsController::class.java))
+private val linkToSuggestions = linkTo(SuggestionsController::class.java)
 private val linkToHouses = linkTo(HousesController::class.java)
 
 data class ContinuationResponse (
