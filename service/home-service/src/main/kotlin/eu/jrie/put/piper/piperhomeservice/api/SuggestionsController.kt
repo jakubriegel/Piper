@@ -2,7 +2,8 @@ package eu.jrie.put.piper.piperhomeservice.api
 
 import eu.jrie.put.piper.piperhomeservice.api.infra.DevicesProvider
 import eu.jrie.put.piper.piperhomeservice.api.message.ApiResponse
-import eu.jrie.put.piper.piperhomeservice.api.message.SuggestionsResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.ContinuationResponse
+import eu.jrie.put.piper.piperhomeservice.api.message.SuggestedRoutinesResponse
 import eu.jrie.put.piper.piperhomeservice.api.message.asMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.handleErrors
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import eu.jrie.put.piper.piperhomeservice.infra.common.component1
 import eu.jrie.put.piper.piperhomeservice.infra.common.component2
+import org.springframework.http.ResponseEntity.ok
 
 @RestController
 @RequestMapping("suggestions")
@@ -29,7 +31,7 @@ class SuggestionsController (
 ) {
     @GetMapping("continuation", produces = [APPLICATION_JSON_VALUE])
     @FlowPreview
-    fun getSuggestions(
+    fun getContinuation(
             @RequestParam(required = true) deviceId: String,
             @RequestParam(required = true) eventId: String,
             @RequestParam(required = false, defaultValue = "5") limit: Int = 5,
@@ -41,8 +43,22 @@ class SuggestionsController (
                 .asFlux()
                 .collectList()
                 .zipWith(devicesProvider.getDevices(auth.asUser()))
-                .map { (suggestions, devicesRooms) -> SuggestionsResponse(start, suggestions.asMessage(devicesRooms), limit, params) }
-                .map { ResponseEntity.ok(it as ApiResponse) }
+                .map { (suggestions, devicesRooms) -> ContinuationResponse(start, suggestions.asMessage(devicesRooms), limit, params) }
+                .map { ok(it as ApiResponse) }
+                .handleErrors()
+    }
+
+    @GetMapping("routines", produces = [APPLICATION_JSON_VALUE])
+    @FlowPreview
+    fun getRoutines(
+            @RequestParam(required = false, defaultValue = "5") limit: Int = 5,
+            auth: Authentication
+    ): Mono<ResponseEntity<ApiResponse>> {
+        val params = mapOf("limit" to limit.toString())
+        return service.getSuggestedRoutines(limit, auth.asUser())
+                .collectList()
+                .map { SuggestedRoutinesResponse(it, it.size, params) }
+                .map { ok(it as ApiResponse) }
                 .handleErrors()
     }
 }

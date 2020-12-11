@@ -7,16 +7,20 @@ import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
 class SuggestionsService (
+        private val suggestedRoutinesRepository: SuggestedRoutinesRepository,
         private val housesService: HousesService,
         private val modelService: ModelService,
         private val intelligenceClient: IntelligenceCoreServiceClient
@@ -37,6 +41,11 @@ class SuggestionsService (
                     .flatMapConcat { intelligenceClient.getSequence(modelId, it, n) }
                     .map { parseEvent(it) }
 //                    .filter { it != start }
+
+    fun getSuggestedRoutines(n: Int, user: User): Flux<List<RoutineEvent>> {
+        return suggestedRoutinesRepository.findRandom(n, user.house)
+                .map { it.events }
+    }
 
     private companion object {
         const val ML_EVENT_DELIMITER = '_'
