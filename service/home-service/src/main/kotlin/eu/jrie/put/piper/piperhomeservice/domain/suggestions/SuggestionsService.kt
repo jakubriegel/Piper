@@ -36,7 +36,7 @@ class SuggestionsService (
                     .map { it.asMlEvent() }
                     .flatMapConcat { intelligenceClient.getSequence(modelId, it, n) }
                     .map { parseEvent(it) }
-                    .filter { it != start }
+//                    .filter { it != start }
 
     private companion object {
         const val ML_EVENT_DELIMITER = '_'
