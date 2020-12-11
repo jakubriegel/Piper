@@ -20,6 +20,8 @@ def handle_error(e):
             return Response(response=json.dumps('UNABLE_TO_PROCESS'), status=code, mimetype='application/json')
         elif e.code == 500:
             return Response(response=json.dumps('INTERNAL_SERVER_ERROR'), status=code, mimetype='application/json')
+        elif e.code == 204:
+            return Response(response=json.dumps('EMPTY'), status=code, mimetype='application/json')
         else:
             return Response(response=json.dumps('PAGE_NOT_FOUND'), status=code, mimetype='application/json')
 
@@ -44,13 +46,15 @@ def get_predictions():
     limit = int(request.args.get('limit'))
 
     prediction = modelServiceInstance.predict(modelId, event, limit)
-
+    if not prediction:
+        abort(204)
     response = {
         'modelId': modelId,
         'head': event,
         'sequence': prediction  # [f'{uuid4()}_{uuid4()}' for _ in range(limit)]
     }
     return Response(response=json.dumps(response), status=200, mimetype='application/json')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8004, debug=True)
