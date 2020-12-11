@@ -52,7 +52,7 @@ class SampleClient:
         with open(self.path / 'roomsIds_with_devices.json', 'w') as file3:
             file3.write(json.dumps(roomsIds_with_devices))
 
-        self.generator = Generator(random.randint(1, 5), self.path)
+        self.generator = Generator(random.randint(3, 8), self.path)
 
     def send_data(self):
         if self.generator is not None:

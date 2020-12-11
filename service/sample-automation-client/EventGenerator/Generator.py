@@ -58,16 +58,20 @@ class Generator:
         return all_possible
 
     def generate(self, room: str, start_time, end_time):
-
         events_pool = self.events[room]
         while True:
+            self.update_blocked()
             device = random.choice(list(events_pool.keys()))
             action = random.choice(list(events_pool[device]))
             event = Event(start_time, end_time, device, action)
-            for current_event in self.current_events:
-                if event.id == current_event.id and event.action == current_event.action:
-                    continue
-            return event
+            blocked = False
+            if self.current_events:
+                for current_event in self.current_events:
+                    if event.id == current_event.id and event.action == current_event.action:
+                        blocked = True
+            if blocked is False:
+                self.block_event(event)
+                return event
 
     def generate_users(self, n: int):
         current_time: int = int(time())
@@ -75,16 +79,15 @@ class Generator:
 
     def generate_event(self):
         user = random.choice(self.users)
+        # event = self.generate(user.room, int(time()), user.next_event_at)# | ^
+        event = self.generate(user.room, int(time()), int(time())+30)      # v | Switch lines for real-time generation
         user.update(int(time()))
-        event = self.generate(user.room, int(time()), int(time()))
-        self.block_event(event)
         return event
 
     def generate_events(self, events_number: int):
         events: List[Event] = []
         for i in range(events_number):
             events.append(self.generate_event())
-            # sleep(random.randint(1, 1))
         events = sorted(events, key=lambda timestamp: timestamp[0])
         string_events = []
         for event in events:
@@ -95,5 +98,3 @@ class Generator:
 if __name__ == '__main__':
     generator = Generator(5, Path("config/"))
     print("\r\n".join(generator.generate_events(30)))
-
-
