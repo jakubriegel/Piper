@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.builder
 import eu.jrie.put.piper.piperhomeservice.api.message.EventMessage
 import eu.jrie.put.piper.piperhomeservice.api.message.util.PiperMediaType.TEXT_CSV
+import eu.jrie.put.piper.piperhomeservice.domain.event.past.pastEventCsvSchema
 import org.slf4j.LoggerFactory
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
@@ -24,7 +25,7 @@ class EventMessageReader(
         mapper: CsvMapper
 ) : HttpMessageReader<EventMessage> {
 
-    private val reader = mapper.readerFor(EventMessage::class.java).with(schema)
+    private val reader = mapper.readerFor(EventMessage::class.java).with(pastEventCsvSchema)
 
     override fun getReadableMediaTypes() = listOf(TEXT_CSV)
 
@@ -52,13 +53,6 @@ class EventMessageReader(
         val logger: org.slf4j.Logger = LoggerFactory.getLogger(EventMessageReader::class.java)
 
         const val NEW_LINE = '\n'.toByte()
-
-        val schema: CsvSchema = builder()
-                .addColumn("time")
-                .addColumn("deviceId")
-                .addColumn("eventId")
-                .setLineSeparator(',')
-                .build()
 
         fun DataBuffer.asCsvChunk(lastRow: AtomicReference<List<Byte>>) = asInputStream()
                 .readAllBytes()

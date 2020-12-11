@@ -1,23 +1,27 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
+import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
 class RoutinesService (
         private val repository: RoutinesRepository,
         private val authService: AuthService,
         private val housesService: HousesService,
+        private val modelService: ModelService,
         private val intelligenceClient: IntelligenceCoreServiceClient
 ) {
     fun routinesForHouse(houseId: String): Flow<RoutinePreview> = repository.findRoutinesPreview(houseId)
@@ -31,11 +35,15 @@ class RoutinesService (
             .map { it.updateWith(updated) }
             .flatMap { repository.save(it) }
 
+    fun deleteRoutine(id: String, user: User) = routineById(id, user)
+            .flatMap { repository.deleteById(it.id) }
+
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
-                    .then(housesService.getHouse(user))
-                    .map { it.models.current?.id ?: throw NoModelException() }
+                    .then(modelService.getLatestModel(user))
+                    .switchIfEmpty { throw PredictionsNotAvailableException() }
+                    .map { it.id }
                     .asFlow()
                     .flatMapConcat { getContinuationSuggestions(start, n, it) }
 
@@ -45,6 +53,7 @@ class RoutinesService (
                 .map { it.asMlEvent() }
                 .flatMapConcat { intelligenceClient.getSequence(modelId, it, n) }
                 .map { parseEvent(it) }
+                .filter { it != start }
 
     private companion object {
         fun Routine.updateWith(updated: Routine) = Routine(

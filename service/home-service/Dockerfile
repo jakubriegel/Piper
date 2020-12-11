@@ -22,7 +22,7 @@ CMD java -jar /piper-home-service.jar
 FROM openjdk:11 as production-stage
 
 COPY --from=setup-stage /app/build/libs/piper-home-service.jar /piper-home-service.jar
-COPY /deploy/application-dev.yml application.yml
+COPY /deploy/application-prod.yml application.yml
 
 EXPOSE 80
 

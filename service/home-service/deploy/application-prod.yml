@@ -3,3 +3,11 @@ spring:
     mongodb:
       host: routines-db
       port: 27017
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+
+models:
+  data-files-dir: /training-data
+  retrain-cron: '* * 0/12 ? * *'
+  new-model-threshold: 10_000

@@ -1,8 +1,11 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row v-if="loading">
+      <v-progress-circular indeterminate color="accent" />
+    </v-row>
+    <v-row v-else>
       <v-col cols="12">
-        <Routine :id="id" />
+        <Routine />
       </v-col>
     </v-row>
   </v-container>
@@ -10,6 +13,7 @@
 
 <script>
 import Routine from '@/components/Routine';
+import { mapActions } from 'vuex';
 export default {
   name: 'EditRoutine',
 
@@ -20,6 +24,20 @@ export default {
       type: String,
       required: true
     }
+  },
+
+  data: () => ({
+    loading: true
+  }),
+
+  mounted() {
+    this.getRoutine(this.id).then(() => {
+      this.loading = false;
+    });
+  },
+
+  methods: {
+    ...mapActions('routines', ['getRoutine'])
   }
 };
 </script>

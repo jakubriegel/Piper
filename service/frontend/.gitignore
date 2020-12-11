@@ -21,3 +21,10 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# ssl
+nginx/*.pem
+nginx/*.crt
+nginx/*.p12
+nginx/*.key
+
