@@ -39,7 +39,7 @@ class SuggestedRoutinesRepositoryCustomImpl(
                 match(where("houseId").`is`(houseId)),
                 sample(n.toLong())
         ) .let {
-            template.aggregate(it, "SuggestedRoutine", SuggestedRoutine::class.java)
+            template.aggregate(it, "suggestedRoutine", SuggestedRoutine::class.java)
         }
     }
 }
