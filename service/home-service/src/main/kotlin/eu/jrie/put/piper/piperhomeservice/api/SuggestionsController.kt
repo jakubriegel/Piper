@@ -57,7 +57,11 @@ class SuggestionsController (
         val params = mapOf("limit" to limit.toString())
         return service.getSuggestedRoutines(limit, auth.asUser())
                 .collectList()
-                .map { SuggestedRoutinesResponse(it, it.size, params) }
+                .zipWith(devicesProvider.getDevices(auth.asUser()))
+                .map { (suggestions, devicesRooms) ->
+                    val msg = suggestions.map { it.asMessage(devicesRooms) }
+                    SuggestedRoutinesResponse(msg, msg.size, params)
+                }
                 .map { ok(it as ApiResponse) }
                 .handleErrors()
     }

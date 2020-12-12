@@ -21,7 +21,7 @@ data class ContinuationResponse (
 )
 
 data class SuggestedRoutinesResponse (
-        val suggestions: List<List<RoutineEvent>>,
+        val suggestions: List<List<RoutineEventMessage>>,
         val n: Int,
         val params: Map<String, String?>
 ) : RepresentationalResponse(
