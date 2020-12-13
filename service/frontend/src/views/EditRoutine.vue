@@ -4,26 +4,34 @@
       <v-progress-circular indeterminate color="accent" />
     </v-row>
     <v-row v-else>
-      <v-col cols="12">
+      <v-col cols="12" sm="6">
         <Routine />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <RoutineContinueSuggestion />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import RoutineContinueSuggestion from '@/components/RoutineContinueSuggestion';
 import Routine from '@/components/Routine';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 export default {
   name: 'EditRoutine',
 
-  components: { Routine },
+  components: { RoutineContinueSuggestion, Routine },
 
   props: {
     id: {
       type: String,
       required: true
     }
+  },
+
+  computed: {
+    ...mapGetters('routines', ['selectedRoutine'])
   },
 
   data: () => ({
