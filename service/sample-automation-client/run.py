@@ -15,6 +15,6 @@ if __name__ == '__main__':
                     'EventGenerator/config/typeIds_with_actions.json').is_file() and Path(
                     'EventGenerator/config/roomsIds_with_devices.json').is_file():
                 client.send_data()
+                client.request_routines()
             else:
                 client.first_contact()
-

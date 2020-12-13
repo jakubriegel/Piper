@@ -25,7 +25,6 @@ class SampleClient:
         response = requests.request("PUT", url, headers=headers, data=payload, verify=False,
                                     auth=(self.username, self.password))
         json_response = json.loads(response.text)
-        print(json_response)
 
         devIds_with_types: dict = {}
         typeIds_with_actions: dict = {}
@@ -59,24 +58,24 @@ class SampleClient:
             url = "https://jrie.eu:8001/events"
             payload = ''
             payload += "\r\n".join(self.generator.generate_events(random.randint(10, 30)))
-
             headers = {
                 'Content-Type': 'text/csv',
             }
-            print(payload)
             response = requests.request("POST", url, headers=headers, data=payload, verify=False,
                                         auth=(self.username, self.password))
-            print(response.text)
             print(response.status_code)
         else:
             self.generator = Generator(random.randint(1, 5), self.path)
 
     def request_routines(self):
-        url = "https://jrie.eu:8001/"
+        url = "https://jrie.eu:8001/routines"
+
+        payload = {}
         headers = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Origin': 'localhost',
+            'Authorization': 'Basic b3duZXItMjpzZWNyZXQ='
         }
-        response = requests.request("GET", url, headers=headers, verify=False,
-                                    auth=(self.username, self.password))
+
+        response = requests.request("GET", url, headers=headers, data=payload)
         json_response = json.loads(response.text)
