@@ -3,6 +3,7 @@ package eu.jrie.put.piper.piperhomeservice.domain.model
 import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
 import eu.jrie.put.piper.piperhomeservice.MODEL_ID
 import eu.jrie.put.piper.piperhomeservice.USER
+import eu.jrie.put.piper.piperhomeservice.domain.suggestions.SuggestedRoutinesCreator
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -22,8 +23,9 @@ internal class ModelServiceTest {
 
     private val modelRepository: ModelRepository = mockk()
     private val notReadyModelRepository: NotReadyModelsRepository = mockk()
+    private val suggestedRoutinesCreator: SuggestedRoutinesCreator = mockk()
 
-    private val service = ModelService(modelRepository, notReadyModelRepository)
+    private val service = ModelService(modelRepository, notReadyModelRepository, suggestedRoutinesCreator)
 
     @Test
     fun `should create new not ready model`() = runBlocking {
@@ -72,13 +74,14 @@ internal class ModelServiceTest {
     }
 
     @Test
-    fun `should move model from not ready to models`() = runBlocking {
+    fun `should activate model`() = runBlocking {
         // given
         val notReadyModel = NotReadyModel(MODEL_ID, now(), HOUSE_ID, "path")
         val model = Model(notReadyModel.id, notReadyModel.stagedAt, now(), notReadyModel.houseId)
 
         every { notReadyModelRepository.findById(MODEL_ID) } returns just(notReadyModel)
         every { modelRepository.insert(ofType(Model::class)) } returns just(model)
+        every { suggestedRoutinesCreator.createSuggestedRoutines(HOUSE_ID) } returns empty()
         every { notReadyModelRepository.deleteById(MODEL_ID) } returns empty()
 
         // when
@@ -93,6 +96,7 @@ internal class ModelServiceTest {
                 it.houseId == notReadyModel.houseId &&
                 it.createdAt.isAfter(notReadyModel.stagedAt)
             })
+            suggestedRoutinesCreator.createSuggestedRoutines(HOUSE_ID)
             notReadyModelRepository.deleteById(MODEL_ID)
         }
     }

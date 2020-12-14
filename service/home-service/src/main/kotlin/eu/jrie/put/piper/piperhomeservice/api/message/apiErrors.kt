@@ -49,7 +49,7 @@ private fun PiperException.businessError() = when (this) {
     is PiperNotFoundException -> NOT_FOUND
     is NotDeviceEventException -> BAD_REQUEST
     is ServiceNotAvailableException -> SERVICE_UNAVAILABLE
-    is RoutinesController.InvalidRoutineEventException -> BAD_REQUEST
+    is RoutinesController.Companion.InvalidRoutineEventException -> BAD_REQUEST
     else -> throw IllegalStateException("Unknown exception: $this")
 }.let { status(it).body(this.asErrorResponse()) }
 

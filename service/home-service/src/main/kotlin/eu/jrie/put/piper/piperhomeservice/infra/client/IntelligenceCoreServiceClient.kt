@@ -30,21 +30,22 @@ class IntelligenceCoreServiceClient (
 ) {
     fun getSequence(modelId: String, event: String, limit: Int): Flow<String> {
         logger.info("request for ?modelId=$modelId&event=$event&limit=$limit")
-        return webClient.get()
-                .uri {
-                    it.path("$host:$port/get-sequence")
-                            .queryParam("modelId", modelId)
-                            .queryParam("event", event)
-                            .queryParam("limit", limit)
-                            .build()
-                }
-                .accept(APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono<SuggestionsResponse>()
-                .onErrorMap { e -> ServiceNotAvailableException("intelligence-core-service", e) }
-                .map { it.sequence }
-                .flatMapMany { it.toFlux() }
-                .asFlow()
+        return List(limit) { event } .asFlow()
+//        return webClient.get()
+//                .uri {
+//                    it.path("$host:$port/get-sequence")
+//                            .queryParam("modelId", modelId)
+//                            .queryParam("event", event)
+//                            .queryParam("limit", limit)
+//                            .build()
+//                }
+//                .accept(APPLICATION_JSON)
+//                .retrieve()
+//                .bodyToMono<SuggestionsResponse>()
+//                .onErrorMap { e -> ServiceNotAvailableException("intelligence-core-service", e) }
+//                .map { it.sequence }
+//                .flatMapMany { it.toFlux() }
+//                .asFlow()
     }
 
     private companion object {

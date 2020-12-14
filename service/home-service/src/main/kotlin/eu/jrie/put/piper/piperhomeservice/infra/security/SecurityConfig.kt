@@ -28,7 +28,12 @@ class SecurityConfig {
             .authorizeExchange()
             //events endpoints
             .pathMatchers("/events").hasAnyRole(HOUSE, ADMIN)
+            // routines endpoints
+            .pathMatchers(GET, "/routines").hasAnyRole(USER, HOUSE, ADMIN)
             .pathMatchers("/routines/**").hasAnyRole(USER, ADMIN)
+            // suggestions endpoints
+            .pathMatchers(GET, "/suggestions/continuation").hasAnyRole(USER, ADMIN)
+            .pathMatchers(GET, "/suggestions/routines").hasAnyRole(USER, ADMIN)
             // houses endpoints
             .pathMatchers(POST, "/houses").hasRole(ADMIN)
             .pathMatchers(GET, "/houses").hasAnyRole(USER, ADMIN)
@@ -57,9 +62,8 @@ class SecurityConfig {
 
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/routines/**", cors)
-            registerCorsConfiguration("/houses", cors)
-            registerCorsConfiguration("/houses/rooms/**", cors)
-            registerCorsConfiguration("/houses/devices/**", cors)
+            registerCorsConfiguration("/suggestions/**", cors)
+            registerCorsConfiguration("/houses/**", cors)
         }
     }
 
