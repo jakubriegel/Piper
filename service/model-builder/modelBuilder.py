@@ -52,7 +52,7 @@ class ModelBuilder:
 
     def generate_and_save_model_from_csv(self, model_id, csv_file_path):
         log('Building files structure')
-        model_dir = MODELS_BASE_PATH + "/" + model_id + '_model'
+        model_dir = MODELS_BASE_PATH + '/' + model_id + '_model'
         os.makedirs(model_dir, exist_ok=True)
 
         header_list = ["timestamp", "sensor", "action"]
