@@ -12,3 +12,4 @@ root.addHandler(handler)
 
 def log(msg):
     logging.info(msg)
+    print(msg)
