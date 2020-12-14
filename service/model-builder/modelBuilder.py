@@ -101,7 +101,7 @@ class ModelBuilder:
         # so it doesn't attempt to shuffle the entire sequence in memory. Instead,
         # it maintains a buffer in which it shuffles elements).
         if dataset_length > 1000000:
-            BUFFER_SIZE = 100000
+            BUFFER_SIZE = 1000000
         elif dataset_length < 7000:
             raise ValueError(
                 "Not enough amount records to train model. Minimum amount is 7000. Recommended amount is 10 000."
