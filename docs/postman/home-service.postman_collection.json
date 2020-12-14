@@ -210,6 +210,13 @@
 							],
 							"path": [
 								"routines"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -487,91 +494,6 @@
 							"path": [
 								"routines",
 								"{{routineId}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "suggestions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "6dac448b-d02f-48cb-804a-58d40baa5f7c",
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"let query = {};\r",
-									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
-									"pm.test(\"Contains start event\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    console.log(query)\r",
-									"    pm.expect(query['deviceId']).to.not.eq(undefined);\r",
-									"    pm.expect(query['eventId']).to.not.eq(undefined);\r",
-									"    pm.expect(jsonData.start.deviceId).to.eq(query['deviceId']);\r",
-									"    pm.expect(jsonData.start.eventId).to.eq(query['eventId']);\r",
-									"});\r",
-									"pm.test(\"Contains suggestions\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
-									"});\r",
-									"pm.test(\"Contains limit\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
-									"});\r",
-									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Origin",
-								"value": "localhost",
-								"type": "text"
-							},
-							{
-								"key": "",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{home-service}}/routines/suggestions?deviceId={{deviceId}}&eventId={{deviceEventId}}&limit=3",
-							"host": [
-								"{{home-service}}"
-							],
-							"path": [
-								"routines",
-								"suggestions"
-							],
-							"query": [
-								{
-									"key": "deviceId",
-									"value": "{{deviceId}}"
-								},
-								{
-									"key": "eventId",
-									"value": "{{deviceEventId}}"
-								},
-								{
-									"key": "limit",
-									"value": "3"
-								}
 							]
 						}
 					},
@@ -936,7 +858,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{home-service}}/houses/devices?roomId={{roomId}}",
+							"raw": "{{home-service}}/houses/devices",
 							"host": [
 								"{{home-service}}"
 							],
@@ -948,7 +870,8 @@
 								{
 									"key": "roomId",
 									"value": "{{roomId}}",
-									"description": "not required"
+									"description": "not required",
+									"disabled": true
 								}
 							]
 						}
@@ -1202,7 +1125,7 @@
 				"basic": [
 					{
 						"key": "username",
-						"value": "owner-2",
+						"value": "owner-1",
 						"type": "string"
 					},
 					{
@@ -1256,6 +1179,280 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Suggestions",
+			"item": [
+				{
+					"name": "suggestions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6dac448b-d02f-48cb-804a-58d40baa5f7c",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let query = {};\r",
+									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
+									"pm.test(\"Contains start event\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    console.log(query)\r",
+									"    pm.expect(query['deviceId']).to.not.eq(undefined);\r",
+									"    pm.expect(query['eventId']).to.not.eq(undefined);\r",
+									"    pm.expect(jsonData.start.deviceId).to.eq(query['deviceId']);\r",
+									"    pm.expect(jsonData.start.eventId).to.eq(query['eventId']);\r",
+									"});\r",
+									"pm.test(\"Contains suggestions\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									"pm.test(\"Contains limit\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Origin",
+								"value": "localhost",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/suggestions/continuation?deviceId={{deviceId}}&eventId={{deviceEventId}}&limit=3",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"suggestions",
+								"continuation"
+							],
+							"query": [
+								{
+									"key": "deviceId",
+									"value": "{{deviceId}}"
+								},
+								{
+									"key": "eventId",
+									"value": "{{deviceEventId}}"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sugeested routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1aa02e26-3875-4bfc-8449-0c982f6e2e72",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let query = {};\r",
+									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
+									"pm.test(\"Contains suggestions\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									"pm.test(\"Contains limit\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							},
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/suggestions/routines?limit=2",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"suggestions",
+								"routines"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "owner-1",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{password}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4782a966-3040-4efe-ad4f-7bf7c1ab5a84",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d05f42ad-7d77-4da0-a47d-59bd24d80990",
+						"type": "text/javascript",
+						"exec": [
+							"// CORS",
+							"pm.test(\"CORS: Access-Control-Allow-Origin is present\", () => {",
+							"    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+							"});",
+							"pm.test(\"CORS: Access-Control-Allow-Origin equals *\", () => {",
+							"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.equal(\"*\");",
+							"});",
+							"",
+							"// HATEOAS",
+							"pm.test(\"HATEOAS: Contains links\", function () {",
+							"    let jsonData = pm.response.json();",
+							"    pm.expect(jsonData.links.length > 1).to.eq(true);",
+							"});",
+							"pm.test(\"HATEOAS: Contains self link\", function () {",
+							"    let jsonData = pm.response.json();",
+							"    pm.expect(jsonData.links[0].rel).to.eq(\"self\");",
+							"});",
+							"",
+							"// general",
+							"pm.test(\"REST: Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Models",
+			"item": [
+				{
+					"name": "activate model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{home-service}}/models/{{modelId}}/ready",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"models",
+								"{{modelId}}",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "model-builder",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{password}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a029f40d-bc75-4e9c-a363-a1ac82c452c0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "599d6d81-8a5e-457b-89e0-557b1def719b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"auth": {
@@ -1297,7 +1494,7 @@
 	],
 	"variable": [
 		{
-			"id": "534eb340-5376-4a99-b9cb-1f39904bc765",
+			"id": "4891065c-6749-4f16-b4ea-b984f6fcac87",
 			"key": "home-service",
 			"value": "{{PROTOCOL}}{{HOST}}:8001"
 		}

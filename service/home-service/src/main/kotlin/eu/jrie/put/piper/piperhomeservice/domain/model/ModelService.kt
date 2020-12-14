@@ -1,5 +1,6 @@
         package eu.jrie.put.piper.piperhomeservice.domain.model
 
+import eu.jrie.put.piper.piperhomeservice.domain.suggestions.SuggestedRoutinesCreator
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.Logger
@@ -15,7 +16,8 @@ import java.time.Instant.now
         @Service
 class ModelService (
         private val modelRepository: ModelRepository,
-        private val notReadyModelsRepository: NotReadyModelsRepository
+        private val notReadyModelsRepository: NotReadyModelsRepository,
+        private val suggestedRoutinesCreator: SuggestedRoutinesCreator
 ) {
 
     suspend fun addNewModel(model: NotReadyModel) {
@@ -46,7 +48,8 @@ class ModelService (
                 .switchIfEmpty { throw ModelNotFoundException(modelId) }
                 .map { Model(modelId, it.stagedAt, now(), it.houseId) }
                 .flatMap { modelRepository.insert(it) }
-                .flatMap { notReadyModelsRepository.deleteById(it.id) }
+                .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
+                .then(notReadyModelsRepository.deleteById(modelId))
     }
 
     private companion object {
