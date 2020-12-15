@@ -20,6 +20,15 @@
           :event="event"
         />
       </v-col>
+      <v-col cols="12">
+        <v-btn
+          color="accent"
+          @click="applySuggestion(suggestion)"
+          :disabled="!suggestion"
+        >
+          Apply suggestion
+        </v-btn>
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -28,14 +37,14 @@
 import RoutineContinueSuggestionItem from '@/components/RoutineContinueSuggestionItem';
 import Axios from 'axios';
 import utils from '@/commons/utils';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'RoutineContinueSuggestion',
   components: { RoutineContinueSuggestionItem },
 
   data: () => ({
-    suggestion: null,
+    suggestion: [],
     loading: true
   }),
 
@@ -48,6 +57,7 @@ export default {
   },
 
   methods: {
+    ...mapActions('routines', ['applySuggestion']),
     async getSuggestion() {
       let params = {
         deviceId: this.selectedRoutine.events[

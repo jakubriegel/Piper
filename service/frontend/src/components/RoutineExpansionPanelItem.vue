@@ -1,10 +1,16 @@
 <template>
   <div v-if="$vuetify.breakpoint.smAndDown">
-    <v-card>
+    <v-card class="pa-4">
       <v-card-text>
-        {{ roomName(event.roomId) }}
-        {{ getDeviceName(event.roomId, event.deviceId) }}
-        {{ getEventName(event.deviceId, event.eventId) }}
+        <p class="mb-0">
+          {{ roomName(event.roomId) }}
+        </p>
+        <p class="mb-0">
+          {{ getDeviceName(event.roomId, event.deviceId) }}
+        </p>
+        <p class="mb-0">
+          {{ getEventName(event.deviceId, event.eventId) }}
+        </p>
       </v-card-text>
     </v-card>
     <v-flex v-if="!isLastItem" class="d-flex justify-center">
@@ -14,11 +20,17 @@
     </v-flex>
   </div>
   <v-row v-else>
-    <v-card>
+    <v-card class="pa-4">
       <v-card-text>
-        {{ roomName(event.roomId) }}
-        {{ getDeviceName(event.roomId, event.deviceId) }}
-        {{ getEventName(event.deviceId, event.eventId) }}
+        <p class="mb-0">
+          {{ roomName(event.roomId) }}
+        </p>
+        <p class="mb-0">
+          {{ getDeviceName(event.roomId, event.deviceId) }}
+        </p>
+        <p class="mb-0">
+          {{ getEventName(event.deviceId, event.eventId) }}
+        </p>
       </v-card-text>
     </v-card>
     <v-flex v-if="!isLastItem" class="d-flex">

@@ -32,7 +32,7 @@ const routes = [
   },
   {
     path: '/routine',
-    name: 'Edit Routine',
+    name: 'Add Routine',
     props: true,
     component: AddRoutine
   }

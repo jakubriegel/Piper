@@ -113,6 +113,7 @@ export const routines = {
       if (!state.selectedRoutine.events) {
         commit('ASSIGN_EVENTS_TO_ROUTINE', [
           {
+            roomId: '',
             deviceId: '',
             eventId: ''
           }
@@ -132,6 +133,10 @@ export const routines = {
       }
     },
 
+    applySuggestion({ commit }, suggestion) {
+      commit('APPLY_SUGGESTION', suggestion);
+    },
+
     setSelectedRoutine({ commit }, routine) {
       commit('SET_SELECTED_ROUTINE', routine);
     },
@@ -143,6 +148,12 @@ export const routines = {
   mutations: {
     SET_ROUTINES(state, routines) {
       state.routines = routines;
+    },
+    APPLY_SUGGESTION(state, suggestion) {
+      state.selectedRoutine.events = [
+        ...state.selectedRoutine.events,
+        ...suggestion
+      ];
     },
     SET_SELECTED_ROUTINE(state, routine) {
       state.selectedRoutine = routine;

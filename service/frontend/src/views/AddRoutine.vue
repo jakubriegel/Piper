@@ -19,6 +19,13 @@ export default {
 
   components: { Routine },
 
+  props: {
+    routineToAdd: {
+      required: false,
+      default: {}
+    }
+  },
+
   data: () => ({
     loading: true,
     emptyRoutine: {
@@ -39,9 +46,15 @@ export default {
   }),
 
   mounted() {
-    this.setSelectedRoutine(this.emptyRoutine).then(
-      () => (this.loading = false)
-    );
+    if (!this.routineToAdd) {
+      this.setSelectedRoutine(this.emptyRoutine).then(
+        () => (this.loading = false)
+      );
+    } else {
+      this.setSelectedRoutine(this.routineToAdd).then(
+        () => (this.loading = false)
+      );
+    }
   },
 
   methods: {
