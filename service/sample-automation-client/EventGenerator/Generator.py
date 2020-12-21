@@ -1,4 +1,5 @@
 import json
+import os
 import random
 from pathlib import Path
 from time import time, sleep
@@ -10,6 +11,7 @@ from EventGenerator.model.Event import Event
 
 
 class Generator:
+    mode: []
     devIds_with_types: dict
     typeIds_with_actions: dict
     roomsIds_with_devices: dict
@@ -21,6 +23,7 @@ class Generator:
     users: List[User]
 
     def __init__(self, users_n, path: Path):
+        self.mode = os.environ.get('SIMULATOR_MODE')
         self.devIds_with_types = json.load(open(path / "devIds_with_types.json"))
         self.typeIds_with_actions = json.load(open(path / "typeIds_with_actions.json"))
         self.roomsIds_with_devices = json.load(open(path / "roomsIds_with_devices.json"))
@@ -79,8 +82,10 @@ class Generator:
 
     def generate_event(self):
         user = random.choice(self.users)
-        # event = self.generate(user.room, int(time()), user.next_event_at)# | ^
-        event = self.generate(user.room, int(time()), int(time())+30)      # v | Switch lines for real-time generation
+        if self.mode == "fast":
+            event = self.generate(user.room, int(time()), int(time()) + 30)
+        else:
+            event = self.generate(user.room, int(time()), user.next_event_at)
         user.update(int(time()))
         return event
 
@@ -94,7 +99,3 @@ class Generator:
             string_events.append(str(event))
         return string_events
 
-
-if __name__ == '__main__':
-    generator = Generator(5, Path("config/"))
-    print("\r\n".join(generator.generate_events(30)))

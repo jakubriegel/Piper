@@ -11,9 +11,11 @@ from EventGenerator.Generator import Generator
 
 class SampleClient:
     path = Path("EventGenerator/config/")
+
     username = os.environ.get('SIMULATOR_USER')
     password = os.environ.get('SIMULATOR_PASS')
     generator: Generator = None
+    routines: dict
 
     def first_contact(self):
         url = "https://jrie.eu:8001/houses/schema"
@@ -61,6 +63,7 @@ class SampleClient:
             headers = {
                 'Content-Type': 'text/csv',
             }
+            print(payload)
             response = requests.request("POST", url, headers=headers, data=payload, verify=False,
                                         auth=(self.username, self.password))
             print(response.status_code)
@@ -78,4 +81,4 @@ class SampleClient:
         }
 
         response = requests.request("GET", url, headers=headers, data=payload)
-        json_response = json.loads(response.text)
+        self.routines = json.loads(response.text)
