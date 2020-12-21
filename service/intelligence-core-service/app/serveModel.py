@@ -4,7 +4,7 @@ import tensorflow as tf
 import json
 import os
 
-MODELS_DIR = './models'
+MODELS_DIR = '/models'
 CATEGORY_DICT_FILENAME = 'category_dict.json'
 # change it to '/models' on Docker and 'models' for local development (make copy model to models folder and
 # change it's name f.eg. to 123_model where 123 is modelId)
