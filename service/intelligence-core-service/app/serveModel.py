@@ -36,10 +36,10 @@ class ServeModel:
             )
         elif postfix:
             self.categories_dicts[model_id] = load_dict(f'{MODELS_DIR}/{model_id}_model/category_dict.json')
-            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}_model', compile=True)
+            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}_model', compile=True) # TODO: raise error when empty model folder
         else:
             self.categories_dicts[model_id] = load_dict(f'{MODELS_DIR}/{model_id}/category_dict.json')
-            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}', compile=True)
+            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}', compile=True) # TODO: raise error when empty model folder
 
         log(f'Model with id: {model_id} loaded into memory.')
 
