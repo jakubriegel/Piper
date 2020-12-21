@@ -1,6 +1,6 @@
 from kafka import KafkaConsumer
 from pathlib import Path
-from requests import post, exceptions
+from requests import post, exceptions, put
 from requests.auth import HTTPBasicAuth
 from logger import log
 import tensorflow as tf
@@ -9,7 +9,7 @@ import json
 import os
 
 HOME_SERVICE_AUTH = HTTPBasicAuth('model-builder', 'secret')
-MODELS_BASE_PATH = '/models'
+MODELS_BASE_PATH = '/models'  # './models' for local development
 
 
 class ModelBuilder:
@@ -174,10 +174,17 @@ class ModelBuilder:
             try:
                 self.generate_and_save_model_from_csv(model_id, data_packge.value['path'])
                 post(f'https://home-service:80/models/{model_id}/ready', auth=HOME_SERVICE_AUTH, verify=False)
+                log(f"Request with {model_id} sent to home-service.")
             except ValueError as value_error:
                 log(f"ValueError when building with id: {model_id}: {value_error}")
             except exceptions.ConnectionError:
                 log(f"Request to home-service failed, now home-service don't know about model with id: {model_id}")
+
+            try:
+                put('http://intelligence-core-service:8004/load-model?', params={'modelId': model_id})
+                log(f"Model {model_id} has been loaded asynchronously into intelligence-core-service.")
+            except exceptions.ConnectionError:
+                log(f"Can't async load model {model_id} into intelligence-core-service service is not available.")
 
 
 if __name__ == '__main__':

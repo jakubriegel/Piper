@@ -1,7 +1,5 @@
 from flask import Flask, request, Response
 import json
-# from uuid import uuid4
-# from time import sleep
 
 from app.modelService import ModelService
 
@@ -32,6 +30,18 @@ def get_predictions():
         'sequence': prediction  # [f'{uuid4()}_{uuid4()}' for _ in range(limit)]
     }
     return Response(response=json.dumps(response), status=200, mimetype='application/json')
+
+
+@app.route('/load-model', methods=['PUT'])
+def load_model():
+    modelId = request.args.get('modelId')
+
+    try:
+        modelServiceInstance.load_model(modelId)
+    except ValueError as value_error:
+        return Response(response=json.dumps({'message': str(value_error)}), status=404)
+
+    return Response(response=json.dumps({'modelId': modelId}), status=200, mimetype='application/json')
 
 
 if __name__ == '__main__':
