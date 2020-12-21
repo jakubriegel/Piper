@@ -4,7 +4,7 @@ import tensorflow as tf
 import json
 import os
 
-MODELS_DIR = '/models'
+MODELS_DIR = './models'
 CATEGORY_DICT_FILENAME = 'category_dict.json'
 # change it to '/models' on Docker and 'models' for local development (make copy model to models folder and
 # change it's name f.eg. to 123_model where 123 is modelId)
@@ -27,24 +27,24 @@ class ServeModel:
 
     def load_model(self, model_id: str) -> None:
         log(f'Loading model with id: {model_id}')
-        if model_id + '_model' in self.loaded_models:
+        if model_id in self.loaded_models:
             log(f'Model {model_id} already loaded.')
             return None
 
         filesystem_models_list = [dir_obj.name for dir_obj in os.scandir(MODELS_DIR)]
-        if not (model_id + '_model' in filesystem_models_list or model_id in filesystem_models_list):
+        if model_id + '_model' not in filesystem_models_list:
             raise ValueError(
                 "Model with given id doesn't exist!"
             )
         else:
-            model_path = f'{MODELS_DIR}/{model_id}_model/'
+            model_path = f'{MODELS_DIR}/{model_id}_model'
             model_files = [dir_obj.name for dir_obj in os.scandir(model_path)]
             if not (CATEGORY_DICT_FILENAME in model_files and 'saved_model.pb' in model_files):
                 raise ValueError(
                     f'Model files not found! {CATEGORY_DICT_FILENAME} or saved_model.pb is missing in {model_path}'
                 )
 
-            self.categories_dicts[model_id] = load_dict(model_path + CATEGORY_DICT_FILENAME)
+            self.categories_dicts[model_id] = load_dict(model_path + '/' + CATEGORY_DICT_FILENAME)
             self.loaded_models[model_id] = tf.keras.models.load_model(model_path, compile=True)
             log(f'Model with id: {model_id} loaded into memory.')
 
