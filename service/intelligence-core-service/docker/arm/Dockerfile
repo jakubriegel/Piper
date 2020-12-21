@@ -9,5 +9,9 @@ COPY ./model /service/model
 
 WORKDIR /service
 
+ARG FLASK_ENV="production"
+ENV FLASK_ENV="${FLASK_ENV}" \
+    PYTHONUNBUFFERED="true"
+
 USER root
 CMD ["python", "-u" ,"api.py"]

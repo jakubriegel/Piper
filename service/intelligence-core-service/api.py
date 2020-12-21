@@ -22,7 +22,10 @@ def get_predictions():
     event = request.args.get('event')
     limit = int(request.args.get('limit'))
 
-    prediction = modelServiceInstance.predict(modelId, event, limit)
+    try:
+        prediction = modelServiceInstance.predict(modelId, event, limit)
+    except ValueError as value_error:
+        return Response(response=json.dumps({'message': str(value_error)}), status=400)
 
     response = {
         'modelId': modelId,

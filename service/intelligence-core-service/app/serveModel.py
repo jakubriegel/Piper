@@ -5,6 +5,7 @@ import json
 import os
 
 MODELS_DIR = '/models'
+CATEGORY_DICT_FILENAME = 'category_dict.json'
 # change it to '/models' on Docker and 'models' for local development (make copy model to models folder and
 # change it's name f.eg. to 123_model where 123 is modelId)
 
@@ -13,17 +14,18 @@ class ServeModel:
     def __init__(self):
         self.loaded_models = {}
         self.categories_dicts = {}
-        self.model = None
-
         self.__scan_models_directory(MODELS_DIR)
 
     def __scan_models_directory(self, path: str) -> None:
         models_list = os.scandir(path=path)
         for model in models_list:
             if model.is_dir():
-                self.load_model(model_id=model.name, postfix=False)
+                try:
+                    self.load_model(model_id=str(model.name)[:-6])
+                except ValueError as value_error:
+                    log(f'Can\'t load model {model.name}: {value_error}')
 
-    def load_model(self, model_id: str, postfix=True) -> None:
+    def load_model(self, model_id: str) -> None:
         log(f'Loading model with id: {model_id}')
         if model_id + '_model' in self.loaded_models:
             log(f'Model {model_id} already loaded.')
@@ -34,30 +36,32 @@ class ServeModel:
             raise ValueError(
                 "Model with given id doesn't exist!"
             )
-        elif postfix:
-            self.categories_dicts[model_id] = load_dict(f'{MODELS_DIR}/{model_id}_model/category_dict.json')
-            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}_model', compile=True) # TODO: raise error when empty model folder
         else:
-            self.categories_dicts[model_id] = load_dict(f'{MODELS_DIR}/{model_id}/category_dict.json')
-            self.loaded_models[model_id] = tf.keras.models.load_model(f'{MODELS_DIR}/{model_id}', compile=True) # TODO: raise error when empty model folder
+            model_path = f'{MODELS_DIR}/{model_id}_model/'
+            model_files = [dir_obj.name for dir_obj in os.scandir(model_path)]
+            if not (CATEGORY_DICT_FILENAME in model_files and 'saved_model.pb' in model_files):
+                raise ValueError(
+                    f'Model files not found! {CATEGORY_DICT_FILENAME} or saved_model.pb is missing in {model_path}'
+                )
 
-        log(f'Model with id: {model_id} loaded into memory.')
+            self.categories_dicts[model_id] = load_dict(model_path + CATEGORY_DICT_FILENAME)
+            self.loaded_models[model_id] = tf.keras.models.load_model(model_path, compile=True)
+            log(f'Model with id: {model_id} loaded into memory.')
 
-    def get_category_by_id(self, category_id: int):
-        return self.categories_dicts[self.model_id][str(category_id)]
+    def get_category_by_id(self, category_id: int, model_id: str):
+        return self.categories_dicts[model_id][str(category_id)]
 
-    def get_category_by_name(self, category_name: str) -> int:
-        key_list = list(self.categories_dicts[self.model_id].keys())
-        val_list = list(self.categories_dicts[self.model_id].values())
+    def get_category_by_name(self, category_name: str, model_id: str) -> int:
+        key_list = list(self.categories_dicts[model_id].keys())
+        val_list = list(self.categories_dicts[model_id].values())
         return int(key_list[val_list.index(category_name)])
 
     def generate_sequences(self, model_id: str, initial_event_name: str, num_generate: int = 10) -> List[str]:
-        self.model_id = model_id + '_model'
         self.load_model(model_id)
-        tmp_model_ref = self.loaded_models[self.model_id]
+        tmp_model_ref = self.loaded_models[model_id]
         print(f'Making prediction using model: {model_id}, start event: {initial_event_name} and n={num_generate}')
 
-        start_sequence_event_id = self.get_category_by_name(initial_event_name)
+        start_sequence_event_id = self.get_category_by_name(initial_event_name, model_id)
 
         # Converting our start frame to vector of numbers (vectorization)
         input_eval = [start_sequence_event_id]
@@ -86,9 +90,9 @@ class ServeModel:
             # along with the previous hidden state
             input_eval = tf.expand_dims([predicted_id], 0)
 
-            generated_sequences.append(self.get_category_by_id(predicted_id))
+            generated_sequences.append(self.get_category_by_id(predicted_id, model_id))
 
-        generated_sequences.insert(0, self.get_category_by_id(start_sequence_event_id))
+        generated_sequences.insert(0, self.get_category_by_id(start_sequence_event_id, model_id))
         return generated_sequences
 
 
