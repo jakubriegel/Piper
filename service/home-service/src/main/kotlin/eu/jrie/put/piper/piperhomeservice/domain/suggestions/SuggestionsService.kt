@@ -33,8 +33,7 @@ class SuggestionsService (
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
-//                    .then(modelService.getLatestModel(user))
-                    .thenReturn(Model("mock_model", now(), now(), user.house))
+                    .then(modelService.getLatestModel(user))
                     .switchIfEmpty { throw PredictionsNotAvailableException() }
                     .map { it.id }
                     .asFlow()
@@ -46,7 +45,7 @@ class SuggestionsService (
                     .map { it.asMlEvent() }
                     .flatMapConcat { intelligenceClient.getSequence(modelId, it, n) }
                     .map { parseEvent(it) }
-//                    .filter { it != start }
+                    .filter { it != start }
 
     fun getSuggestedRoutines(n: Int, user: User): Flux<List<RoutineEvent>> {
         return suggestedRoutinesRepository.findRandom(n, user.house)

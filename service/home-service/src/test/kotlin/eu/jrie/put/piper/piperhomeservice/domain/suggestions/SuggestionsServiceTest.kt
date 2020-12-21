@@ -41,52 +41,52 @@ internal class SuggestionsServiceTest {
 
     private val service = SuggestionsService(suggestedRoutinesRepository, housesService, modelService, intelligenceClient)
 
-//    @Test
-//    @FlowPreview
-//    fun `should get continuation suggestions for selected event`() = runBlocking {
-//        // given
-//        val expectedMlEvent = "${DEVICE_ID}_$EVENT_ID"
-//        val (device1, event1) = nextUUID to nextUUID
-//        val (device2, event2) = nextUUID to nextUUID
-//        val providedSuggestions = listOf("${start.deviceId}_${start.eventId}", "${device1}_$event1", "${device2}_$event2")
-//        val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
-//
-//        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
-//        every { modelService.getLatestModel(USER) } returns Mono.just(Model(MODEL_ID, now(), now(), nextUUID))
-//        every { intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N) } returns providedSuggestions.asFlow()
-//
-//        // when
-//        val result = service.getContinuationSuggestions(start, N, USER).toList()
-//
-//        // then
-//        verifyOrder {
-//            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
-//            modelService.getLatestModel(USER)
-//            intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N)
-//        }
-//
-//        assertIterableEquals(expectedResult, result)
-//    }
+    @Test
+    @FlowPreview
+    fun `should get continuation suggestions for selected event`() = runBlocking {
+        // given
+        val expectedMlEvent = "${DEVICE_ID}_$EVENT_ID"
+        val (device1, event1) = nextUUID to nextUUID
+        val (device2, event2) = nextUUID to nextUUID
+        val providedSuggestions = listOf("${start.deviceId}_${start.eventId}", "${device1}_$event1", "${device2}_$event2")
+        val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
 
-//    @Test
-//    @FlowPreview
-//    fun `should throw PredictionsNotAvailableException when house has no model`() = runBlocking {
-//        // given
-//        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
-//        every { modelService.getLatestModel(USER) } returns Mono.empty()
-//
-//        // when
-//        val result = runCatching { service.getContinuationSuggestions(start, N, USER).single() }
-//
-//        // then
-//        verifyOrder {
-//            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
-//            modelService.getLatestModel(USER)
-//        }
-//
-//        assertTrue(result.isFailure)
-//        assertTrue(result.exceptionOrNull()!! is PredictionsNotAvailableException)
-//    }
+        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
+        every { modelService.getLatestModel(USER) } returns Mono.just(Model(MODEL_ID, now(), now(), nextUUID))
+        every { intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N) } returns providedSuggestions.asFlow()
+
+        // when
+        val result = service.getContinuationSuggestions(start, N, USER).toList()
+
+        // then
+        verifyOrder {
+            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
+            modelService.getLatestModel(USER)
+            intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N)
+        }
+
+        assertIterableEquals(expectedResult, result)
+    }
+
+    @Test
+    @FlowPreview
+    fun `should throw PredictionsNotAvailableException when house has no model`() = runBlocking {
+        // given
+        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
+        every { modelService.getLatestModel(USER) } returns Mono.empty()
+
+        // when
+        val result = runCatching { service.getContinuationSuggestions(start, N, USER).single() }
+
+        // then
+        verifyOrder {
+            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
+            modelService.getLatestModel(USER)
+        }
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull()!! is PredictionsNotAvailableException)
+    }
 
     @Test
     fun `should get suggested routines`() {
@@ -104,9 +104,7 @@ internal class SuggestionsServiceTest {
     }
 
     private companion object {
-
         const val N = 5
-
         val start = RoutineEvent(DEVICE_ID, EVENT_ID)
     }
 }
