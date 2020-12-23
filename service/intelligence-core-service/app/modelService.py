@@ -7,3 +7,6 @@ class ModelService:
 
     def predict(self, model_id, event, limit):
         return self.serveModel.generate_sequences(model_id=model_id, initial_event_name=event, num_generate=limit)
+
+    def load_model(self, model_id):
+        return self.serveModel.load_model(model_id)

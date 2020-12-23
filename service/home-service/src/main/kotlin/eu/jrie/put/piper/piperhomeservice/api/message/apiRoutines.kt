@@ -14,7 +14,7 @@ import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
-private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth))
+private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(null, Auth))
 private val linkToHouses = linkTo(HousesController::class.java)
 
 data class RoutinesResponse (
@@ -83,13 +83,3 @@ data class RoutineRequest (
             id, name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
 }
-
-data class RoutineSuggestionsResponse (
-        val start: RoutineEvent,
-        val suggestions: List<RoutineEventMessage>,
-        val n: Int,
-        val params: Map<String, String?>
-) : RepresentationalResponse(
-        linkToRoutines.slash("suggestions").withQuery(params).withSelfRel(),
-        linkToRoutines.withRel(COLLECTION)
-)

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
 
 @Service
 class ModelUpdater (
@@ -55,7 +56,7 @@ class ModelUpdater (
                 .flatMapConcat { houseId ->
                     modelService.getLatestModel(houseId)
                             .map { houseId to it.createdAt }
-                            .defaultIfEmpty(houseId to Instant.now().minus(30, ChronoUnit.DAYS))
+                            .defaultIfEmpty(houseId to Instant.now().minus(30, DAYS))
                             .asFlow()
                 }
                 .filter { (houseId, lastUpdateTime) ->
@@ -103,6 +104,5 @@ class ModelUpdater (
         val logger: Logger = LoggerFactory.getLogger(ModelService::class.java)
 
         const val NEW_MODEL_EVENTS_TOPIC = "UserData"
-        const val NEW_MODEL_THRESHOLD = 10_000
     }
 }

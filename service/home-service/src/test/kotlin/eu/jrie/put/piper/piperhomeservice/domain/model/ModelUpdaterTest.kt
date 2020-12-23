@@ -199,7 +199,7 @@ internal class ModelUpdaterTest {
 
         fun MockKMatcherScope.nowMinus30Days() = match<Instant> {
             val time = now().minus(30, DAYS)
-            it.isBefore(time)
+            it.isBefore(time) || it == time
         }
     }
 }

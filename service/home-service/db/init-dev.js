@@ -160,15 +160,6 @@ routine.insert({
 const pastEvent = db.getCollection('pastEvent')
 pastEvent.remove({})
 
-for (let i = 0; i < 10000; i++) {
-    pastEvent.insert({
-        'houseId': house1Id,
-        'deviceId': uuid(),
-        'eventId': uuid(),
-        'time': now()
-    })
-}
-
 const deviceEvent = db.getCollection('deviceEvent')
 deviceEvent.remove({})
 
@@ -183,17 +174,3 @@ device.remove({})
 
 const model = db.getCollection('model')
 model.remove({})
-
-model.insert({
-    '_id': uuid(),
-    'stagedAt': now(),
-    'createdAt': now(),
-    'houseId': house1Id
-})
-
-model.insert({
-    '_id': uuid(),
-    'stagedAt': now(),
-    'createdAt': now(),
-    'houseId': house2Id
-})
