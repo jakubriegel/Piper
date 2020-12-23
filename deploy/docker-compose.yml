@@ -10,7 +10,7 @@ services:
     volumes:
       - ../service/frontend/:/frontend/
     container_name: frontend
-    depends_on: 
+    depends_on:
     - home-service
   intelligence-core-service:
     build:
@@ -18,6 +18,8 @@ services:
       dockerfile: docker/${ARCHITECTURE}/Dockerfile
     volumes:
       - models:/models
+    ports:
+      - "8004:8004"
     container_name: intelligence-core-service
   model-builder:
     build:
