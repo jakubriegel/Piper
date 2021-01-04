@@ -8,6 +8,7 @@
         <v-progress-linear></v-progress-linear>
       </v-col>
       <v-card-text v-else>
+        <ErrorHandler v-if="error" text="Sorry, could not load suggestions" />
         <div v-for="(events, index) in suggestions" :key="index">
           <v-divider />
           <div class="d-md-flex justify-center align-center">
@@ -35,13 +36,15 @@
 import Axios from 'axios';
 import utils from '@/commons/utils';
 import SuggestionExpansionPanel from '@/components/SuggestionExpansionPanel';
+import ErrorHandler from '@/components/ErrorHandler';
 
 export default {
   name: 'SuggestionTable',
-  components: { SuggestionExpansionPanel },
+  components: { SuggestionExpansionPanel, ErrorHandler },
   data: () => ({
     suggestions: [],
     loading: true,
+    error: false,
     headers: [
       { text: 'Suggested event chain', sortable: false, value: 'events' },
       { text: '', sortable: false, value: 'add' }
@@ -59,10 +62,15 @@ export default {
           Accept: 'application/json'
         },
         auth: utils.authentication
-      }).then(res => {
-        this.suggestions = res.data.suggestions;
-        this.loading = false;
-      });
+      })
+        .then(res => {
+          this.suggestions = res.data.suggestions;
+          this.loading = false;
+        })
+        .catch(e => {
+          this.error = true;
+          this.loading = false;
+        });
     },
 
     wrapEvents(events) {

@@ -22,39 +22,35 @@ export default {
   props: {
     routineToAdd: {
       required: false,
-      default: {}
+      default: () => {
+        return {
+          name: '',
+          enabled: false,
+          events: [
+            {
+              roomId: '',
+              deviceId: '',
+              eventId: ''
+            }
+          ],
+          configuration: {
+            days: [],
+            start: null,
+            end: null
+          }
+        };
+      }
     }
   },
 
   data: () => ({
-    loading: true,
-    emptyRoutine: {
-      name: '',
-      enabled: false,
-      events: [
-        {
-          deviceId: '',
-          eventId: ''
-        }
-      ],
-      configuration: {
-        days: [],
-        start: null,
-        end: null
-      }
-    }
+    loading: true
   }),
 
   mounted() {
-    if (!this.routineToAdd) {
-      this.setSelectedRoutine(this.emptyRoutine).then(
-        () => (this.loading = false)
-      );
-    } else {
-      this.setSelectedRoutine(this.routineToAdd).then(
-        () => (this.loading = false)
-      );
-    }
+    this.setSelectedRoutine(this.routineToAdd).then(
+      () => (this.loading = false)
+    );
   },
 
   methods: {

@@ -8,6 +8,9 @@
         <v-progress-linear indeterminate color="accent" />
       </v-col>
     </v-row>
+    <v-row v-else-if="error">
+      <ErrorHandler v-if="error" text="Sorry, could not load suggestions" />
+    </v-row>
     <v-row v-else>
       <v-col>
         <h1>
@@ -38,21 +41,23 @@ import RoutineContinueSuggestionItem from '@/components/RoutineContinueSuggestio
 import Axios from 'axios';
 import utils from '@/commons/utils';
 import { mapGetters, mapActions } from 'vuex';
+import ErrorHandler from '@/components/ErrorHandler';
 
 export default {
   name: 'RoutineContinueSuggestion',
-  components: { RoutineContinueSuggestionItem },
+  components: { ErrorHandler, RoutineContinueSuggestionItem },
 
   data: () => ({
     suggestion: [],
-    loading: true
+    loading: true,
+    error: false
   }),
 
   computed: {
     ...mapGetters('routines', ['selectedRoutine'])
   },
 
-  created() {
+  mounted() {
     this.getSuggestion();
   },
 
@@ -74,11 +79,16 @@ export default {
           Accept: 'application/json'
         },
         auth: utils.authentication
-      }).then(res => {
-        this.suggestion = res.data.suggestions;
-        console.log(res.data);
-        this.loading = false;
-      });
+      })
+        .then(res => {
+          this.suggestion = res.data.suggestions;
+          console.log(res.data);
+          this.loading = false;
+        })
+        .catch(e => {
+          this.error = true;
+          this.loading = false;
+        });
     }
   }
 };

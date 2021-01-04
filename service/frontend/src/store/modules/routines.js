@@ -55,8 +55,8 @@ export const routines = {
         });
     },
 
-    getRoutine({ dispatch, commit }, id) {
-      Axios.get(utils.apiUrl + 'routines/' + id, {
+    async getRoutine({ dispatch, commit }, id) {
+      await Axios.get(utils.apiUrl + 'routines/' + id, {
         headers: {
           Accept: 'application/json'
         },
