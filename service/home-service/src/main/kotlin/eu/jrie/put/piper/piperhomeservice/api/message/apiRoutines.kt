@@ -83,13 +83,3 @@ data class RoutineRequest (
             id, name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
 }
-
-data class RoutineSuggestionsResponse (
-        val start: RoutineEvent,
-        val suggestions: List<RoutineEventMessage>,
-        val n: Int,
-        val params: Map<String, String?>
-) : RepresentationalResponse(
-        linkToRoutines.slash("suggestions").withQuery(params).withSelfRel(),
-        linkToRoutines.withRel(COLLECTION)
-)
