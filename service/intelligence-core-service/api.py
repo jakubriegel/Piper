@@ -36,7 +36,7 @@ def get_predictions():
     try:
         prediction = modelServiceInstance.predict(modelId, event, limit)
     except ValueError as value_error:
-        return abort(400, str(value_error))
+        abort(400, str(value_error))
 
     response = {
         'modelId': modelId,
@@ -53,7 +53,7 @@ def load_model():
     try:
         modelServiceInstance.load_model(modelId)
     except ValueError as value_error:
-        return abort(404, str(value_error))
+        abort(404, str(value_error))
 
     return Response(response=json.dumps({'modelId': modelId}), status=200, mimetype='application/json')
 
