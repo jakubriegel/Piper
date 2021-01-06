@@ -16,7 +16,8 @@
       <v-row>
         <v-col cols="12" md="9" class="px-5">
           <v-card-text class="white--text pt-0 text-left">
-            Diploma Project Description
+            Engineering Diploma Thesis Project for Poznan University of
+            Technology
           </v-card-text>
           <v-card-text class="white--text pt-0 text-left">
             Made with 💖 using
@@ -41,12 +42,27 @@
         <strong>
           &copy;
           <a
-            href="mailto:wojciech.kasperski97@gmail.com"
+            href="mailto:wojciech.kasperski@student.put.poznan.pl"
             class="font-weight-light white--text"
           >
             Wojciech Kasperski
           </a>
-          , Jakub Riegel, Rafał Ewiak, Michał Kalinowski
+          ,
+          <a
+            href="mailto:jakub.riegel@student.put.poznan.pl"
+            class="font-weight-light white--text"
+            >Jakub Riegel</a
+          >,
+          <a
+            href="mailto:rafal.ewiak@student.put.poznan.pl"
+            class="font-weight-light white--text"
+            >Rafał Ewiak</a
+          >,
+          <a
+            href="mailto:michal.kalinowski@student.put.poznan.pl"
+            class="font-weight-light white--text"
+            >Michał Kalinowski</a
+          >
         </strong>
       </v-card-text>
     </v-card>
