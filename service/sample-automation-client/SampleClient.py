@@ -11,9 +11,11 @@ from EventGenerator.Generator import Generator
 
 class SampleClient:
     path = Path("EventGenerator/config/")
+
     username = os.environ.get('SIMULATOR_USER')
     password = os.environ.get('SIMULATOR_PASS')
-    generator = Generator(random.randint(1, 5), path)
+    generator: Generator = None
+    routines: dict
 
     def first_contact(self):
         url = "https://jrie.eu:8001/houses/schema"
@@ -25,7 +27,6 @@ class SampleClient:
         response = requests.request("PUT", url, headers=headers, data=payload, verify=False,
                                     auth=(self.username, self.password))
         json_response = json.loads(response.text)
-        print(json_response)
 
         devIds_with_types: dict = {}
         typeIds_with_actions: dict = {}
@@ -52,17 +53,32 @@ class SampleClient:
         with open(self.path / 'roomsIds_with_devices.json', 'w') as file3:
             file3.write(json.dumps(roomsIds_with_devices))
 
+        self.generator = Generator(random.randint(3, 8), self.path)
+
     def send_data(self):
-        url = "https://jrie.eu:8001/events"
-        payload = ''
-        for event in range(random.randint(10, 30)):
-            payload += str(self.generator.generate_event()) + "\r\n"
-            time.sleep(random.randint(1, 1))  # change here to generate faster
+        if self.generator is not None:
+            url = "https://jrie.eu:8001/events"
+            payload = ''
+            payload += "\r\n".join(self.generator.generate_events(random.randint(10, 30)))
+            headers = {
+                'Content-Type': 'text/csv',
+            }
+            print(payload)
+            response = requests.request("POST", url, headers=headers, data=payload, verify=False,
+                                        auth=(self.username, self.password))
+            print(response.status_code)
+        else:
+            self.generator = Generator(random.randint(1, 5), self.path)
+
+    def request_routines(self):
+        url = "https://jrie.eu:8001/routines"
+
+        payload = {}
         headers = {
-            'Content-Type': 'text/csv',
+            'Accept': 'application/json',
+            'Origin': 'localhost',
+            'Authorization': 'Basic b3duZXItMjpzZWNyZXQ='
         }
-        print(payload)
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False,
-                                    auth=(self.username, self.password))
-        print(response.text)
-        print(response.status_code)
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+        self.routines = json.loads(response.text)
