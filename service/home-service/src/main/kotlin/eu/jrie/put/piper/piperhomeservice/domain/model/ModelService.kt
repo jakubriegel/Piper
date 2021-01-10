@@ -13,7 +13,7 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
 
-        @Service
+@Service
 class ModelService (
         private val modelRepository: ModelRepository,
         private val notReadyModelsRepository: NotReadyModelsRepository,
