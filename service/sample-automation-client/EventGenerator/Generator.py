@@ -1,7 +1,8 @@
 import json
+import os
 import random
 from pathlib import Path
-from time import time
+from time import time, sleep
 
 from typing import List
 
@@ -10,6 +11,7 @@ from EventGenerator.model.Event import Event
 
 
 class Generator:
+    mode: []
     devIds_with_types: dict
     typeIds_with_actions: dict
     roomsIds_with_devices: dict
@@ -21,12 +23,15 @@ class Generator:
     users: List[User]
 
     def __init__(self, users_n, path: Path):
+        self.mode = os.environ.get('SIMULATOR_MODE')
         self.devIds_with_types = json.load(open(path / "devIds_with_types.json"))
         self.typeIds_with_actions = json.load(open(path / "typeIds_with_actions.json"))
         self.roomsIds_with_devices = json.load(open(path / "roomsIds_with_devices.json"))
         self.events = self.get_all_possible_events()
         self.rooms = self.get_rooms()
         self.users = self.generate_users(users_n)
+        for user in self.users:
+            user.update(int(time()))
 
     def __hash__(self):
         return hash(self.events)
@@ -39,7 +44,7 @@ class Generator:
 
     def update_blocked(self):
         for event in self.current_events:
-            if event.time < int(time()):
+            if event.end() < int(time()):
                 self.release_event(event)
 
     def get_rooms(self) -> List[str]:
@@ -55,17 +60,21 @@ class Generator:
             all_possible[room] = actions
         return all_possible
 
-    def generate(self, room: str):
-        self.update_blocked()
+    def generate(self, room: str, start_time, end_time):
         events_pool = self.events[room]
         while True:
+            self.update_blocked()
             device = random.choice(list(events_pool.keys()))
             action = random.choice(list(events_pool[device]))
-            event = Event(int(time()), device, action)
-            for current_event in self.current_events:
-                if event.id == current_event.id and event.action == current_event.id:
-                    continue
-            return event
+            event = Event(start_time, end_time, device, action)
+            blocked = False
+            if self.current_events:
+                for current_event in self.current_events:
+                    if event.id == current_event.id and event.action == current_event.action:
+                        blocked = True
+            if blocked is False:
+                self.block_event(event)
+                return event
 
     def generate_users(self, n: int):
         current_time: int = int(time())
@@ -73,7 +82,20 @@ class Generator:
 
     def generate_event(self):
         user = random.choice(self.users)
-        event = self.generate(user.room)
-        self.block_event(event)
+        if self.mode == "fast":
+            event = self.generate(user.room, int(time()), int(time()) + 30)
+        else:
+            event = self.generate(user.room, int(time()), user.next_event_at)
+        user.update(int(time()))
         return event
+
+    def generate_events(self, events_number: int):
+        events: List[Event] = []
+        for i in range(events_number):
+            events.append(self.generate_event())
+        events = sorted(events, key=lambda timestamp: timestamp[0])
+        string_events = []
+        for event in events:
+            string_events.append(str(event))
+        return string_events
 
