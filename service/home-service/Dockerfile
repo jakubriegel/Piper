@@ -1,4 +1,4 @@
-FROM gradle:6.6.1-jdk11 as setup-stage
+FROM gradle:6.7.1-jdk11 as setup-stage
 
 WORKDIR /app
 
