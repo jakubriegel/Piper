@@ -4,7 +4,9 @@ on: [push]
 
 jobs:
   build-containers:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    env:
+       DOCKER_TARGET_PLATFORM: linux/arm64
     
     steps:
       - uses: actions/checkout@v2
