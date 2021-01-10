@@ -13,26 +13,26 @@ import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.domain.user.asUser
 import eu.jrie.put.piper.piperhomeservice.infra.common.component1
 import eu.jrie.put.piper.piperhomeservice.infra.common.component2
+import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.created
+import org.springframework.http.ResponseEntity.noContent
 import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import java.net.URI
-import eu.jrie.put.piper.piperhomeservice.infra.exception.PiperException
-import org.springframework.http.ResponseEntity.noContent
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.RequestParam
 
 @RestController
 @RequestMapping("routines")
@@ -109,6 +109,24 @@ class RoutinesController(
         return service.deleteRoutine(id, auth.asUser())
                 .thenReturn(noContent().build<ApiResponse>())
                 .handleErrors()
+    }
+
+    @PutMapping("{id}/enable")
+    fun enableRoutine(
+        @PathVariable id: String,
+        auth: Authentication
+    ): Mono<ResponseEntity<Unit>> {
+        return service.enableRoutine(id, auth.asUser())
+            .map { ok().build() }
+    }
+
+    @PutMapping("{id}/disable")
+    fun disableRoutine(
+        @PathVariable id: String,
+        auth: Authentication
+    ): Mono<ResponseEntity<Unit>> {
+        return service.disableRoutine(id, auth.asUser())
+            .map { ok().build() }
     }
 
     private fun Mono<RoutineRequest>.checkDevicesRooms(user: User) = zipWith(devicesProvider.getDevices(user))
