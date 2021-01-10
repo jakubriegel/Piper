@@ -1,4 +1,4 @@
-FROM gradle:6.6.1-jdk11 as setup-stage
+FROM gradle:6.7.1-jdk11 as setup-stage
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ CMD java -jar /piper-home-service.jar
 FROM openjdk:11 as production-stage
 
 COPY --from=setup-stage /app/build/libs/piper-home-service.jar /piper-home-service.jar
-COPY /deploy/application-dev.yml application.yml
+COPY /deploy/application-prod.yml application.yml
 
 EXPOSE 80
 

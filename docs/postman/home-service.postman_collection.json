@@ -14,7 +14,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "49df4c8e-d3f5-495a-b199-3c7ea97f3d97",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -84,7 +83,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2459cec4-6669-4943-ba38-9c140f4d95d1",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -150,8 +148,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Routines",
@@ -162,7 +159,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4173ae52-eddc-4048-b470-939cf37fcae0",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -210,6 +206,13 @@
 							],
 							"path": [
 								"routines"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -221,7 +224,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "95460379-3f6d-4589-abd4-c10754e1812c",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -307,12 +309,59 @@
 					"response": []
 				},
 				{
+					"name": "remove routine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"  "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/routines/{{routineId}}",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"routines",
+								"{{routineId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "add routine",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "304d1165-a1da-4dc5-b086-4fc83aaf93b6",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {\r",
 									"    pm.response.to.have.status(201);\r",
@@ -357,7 +406,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"deviceId\": \"{{deviceId}}\",\r\n      \"eventId\": \"{{deviceEventId}}\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
+							"raw": "{\r\n  \"name\": \"custom {{$timestamp}}\",\r\n  \"enabled\": null,\r\n  \"events\": [\r\n    {\r\n      \"roomId\": \"{{roomId}}\",\r\n      \"deviceId\": \"{{deviceId}}\",\r\n      \"eventId\": \"{{deviceEventId}}\"\r\n    }\r\n  ],\r\n  \"configuration\": {\r\n    \"days\": [],\r\n    \"start\": null,\r\n    \"end\": null\r\n  }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -382,7 +431,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2d70cec4-7cb9-4540-915b-48045b8893d3",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -444,85 +492,88 @@
 					"response": []
 				},
 				{
-					"name": "suggestions",
+					"name": "enable",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "6dac448b-d02f-48cb-804a-58d40baa5f7c",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
-									"let query = {};\r",
-									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
-									"pm.test(\"Contains start event\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    console.log(query)\r",
-									"    pm.expect(query['deviceId']).to.not.eq(undefined);\r",
-									"    pm.expect(query['eventId']).to.not.eq(undefined);\r",
-									"    pm.expect(jsonData.start.deviceId).to.eq(query['deviceId']);\r",
-									"    pm.expect(jsonData.start.eventId).to.eq(query['eventId']);\r",
-									"});\r",
-									"pm.test(\"Contains suggestions\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
-									"});\r",
-									"pm.test(\"Contains limit\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
-									"});\r",
-									"pm.test(\"HATEOAS: Contains collection link\", function () {\r",
-									"    let jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.links.filter(it => it.rel == \"collection\").length).to.eq(1);\r",
-									"});"
+									""
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
 					"request": {
-						"method": "GET",
+						"method": "PUT",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Origin",
-								"value": "localhost",
-								"type": "text"
-							},
-							{
-								"key": "",
-								"value": "",
 								"type": "text",
-								"disabled": true
+								"value": "localhost"
 							}
 						],
 						"url": {
-							"raw": "{{home-service}}/routines/suggestions?deviceId={{deviceId}}&eventId={{deviceEventId}}&limit=3",
+							"raw": "{{home-service}}/routines/{{routineId}}/enable",
 							"host": [
 								"{{home-service}}"
 							],
 							"path": [
 								"routines",
-								"suggestions"
+								"{{routineId}}",
+								"enable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/routines/{{routineId}}/disable",
+							"host": [
+								"{{home-service}}"
 							],
-							"query": [
-								{
-									"key": "deviceId",
-									"value": "{{deviceId}}"
-								},
-								{
-									"key": "eventId",
-									"value": "{{deviceEventId}}"
-								},
-								{
-									"key": "limit",
-									"value": "3"
-								}
+							"path": [
+								"routines",
+								"{{routineId}}",
+								"disable"
 							]
 						}
 					},
@@ -534,7 +585,7 @@
 				"basic": [
 					{
 						"key": "username",
-						"value": "owner-2",
+						"value": "owner-1",
 						"type": "string"
 					},
 					{
@@ -548,7 +599,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "0424f3db-19f2-46d7-b5a4-9520039a2c2f",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -558,7 +608,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "743d38aa-53e9-41cb-99f9-01c67416b742",
 						"type": "text/javascript",
 						"exec": [
 							"// CORS",
@@ -586,8 +635,7 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "House",
@@ -598,7 +646,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "c7a80e46-19fa-4c9c-b3a8-0c838abd5139",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -667,7 +714,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3bb87e73-e8f1-4f21-9671-1d16b14ad006",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {\r",
 									"    pm.response.to.have.status(201);\r",
@@ -728,7 +774,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e2f3489c-0d4f-43c1-a2d3-c25b04d7cf18",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -749,7 +794,7 @@
 							"basic": [
 								{
 									"key": "username",
-									"value": "house-2-server",
+									"value": "house-1-server",
 									"type": "string"
 								},
 								{
@@ -800,7 +845,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "dec81f7f-c8df-4227-b8e2-bd07c73929c6",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -852,7 +896,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "f7f912a2-7c8f-42da-8d3f-772dfa925542",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -887,7 +930,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{home-service}}/houses/devices?roomId={{roomId}}",
+							"raw": "{{home-service}}/houses/devices",
 							"host": [
 								"{{home-service}}"
 							],
@@ -899,7 +942,8 @@
 								{
 									"key": "roomId",
 									"value": "{{roomId}}",
-									"description": "not required"
+									"description": "not required",
+									"disabled": true
 								}
 							]
 						}
@@ -912,7 +956,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "66085529-1186-4d2b-8574-de7a5d833dc2",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -986,7 +1029,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "402713b2-4a87-43ad-aee0-f8e43e95b8d4",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -1006,21 +1048,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1054,7 +1081,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ee23b88a-cf24-43ed-a91c-c8504dac2b7d",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -1114,7 +1140,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "feb127ec-e480-4e48-ad81-439b05c5a7c5",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
@@ -1134,21 +1159,6 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "owner-1",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -1183,7 +1193,7 @@
 				"basic": [
 					{
 						"key": "username",
-						"value": "owner-2",
+						"value": "owner-1",
 						"type": "string"
 					},
 					{
@@ -1197,7 +1207,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "a68a1ad1-f280-4b6a-b929-e0562ebe6b66",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -1207,7 +1216,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "f4b24cf5-3eae-4a7b-bf70-33b0ff2cab88",
 						"type": "text/javascript",
 						"exec": [
 							"// CORS",
@@ -1235,8 +1243,273 @@
 						]
 					}
 				}
+			]
+		},
+		{
+			"name": "Suggestions",
+			"item": [
+				{
+					"name": "suggestions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let query = {};\r",
+									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
+									"pm.test(\"Contains start event\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    console.log(query)\r",
+									"    pm.expect(query['deviceId']).to.not.eq(undefined);\r",
+									"    pm.expect(query['eventId']).to.not.eq(undefined);\r",
+									"    pm.expect(jsonData.start.deviceId).to.eq(query['deviceId']);\r",
+									"    pm.expect(jsonData.start.eventId).to.eq(query['eventId']);\r",
+									"});\r",
+									"pm.test(\"Contains suggestions\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									"pm.test(\"Contains limit\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Origin",
+								"value": "localhost",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/suggestions/continuation?deviceId={{deviceId}}&eventId={{deviceEventId}}&limit=3",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"suggestions",
+								"continuation"
+							],
+							"query": [
+								{
+									"key": "deviceId",
+									"value": "{{deviceId}}"
+								},
+								{
+									"key": "eventId",
+									"value": "{{deviceEventId}}"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sugeested routines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let query = {};\r",
+									"pm.request.url.query.all().forEach(p => { query[p.key] = p.value});\r",
+									"pm.test(\"Contains suggestions\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.suggestions.length).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									"pm.test(\"Contains limit\", function () {\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.n).to.eq(parseInt(query['limit']));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"type": "text",
+								"value": "localhost"
+							},
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{home-service}}/suggestions/routines?limit=2",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"suggestions",
+								"routines"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
 			],
-			"protocolProfileBehavior": {}
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "owner-1",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{password}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// CORS",
+							"pm.test(\"CORS: Access-Control-Allow-Origin is present\", () => {",
+							"    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+							"});",
+							"pm.test(\"CORS: Access-Control-Allow-Origin equals *\", () => {",
+							"    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.equal(\"*\");",
+							"});",
+							"",
+							"// HATEOAS",
+							"pm.test(\"HATEOAS: Contains links\", function () {",
+							"    let jsonData = pm.response.json();",
+							"    pm.expect(jsonData.links.length > 1).to.eq(true);",
+							"});",
+							"pm.test(\"HATEOAS: Contains self link\", function () {",
+							"    let jsonData = pm.response.json();",
+							"    pm.expect(jsonData.links[0].rel).to.eq(\"self\");",
+							"});",
+							"",
+							"// general",
+							"pm.test(\"REST: Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Models",
+			"item": [
+				{
+					"name": "activate model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{home-service}}/models/{{modelId}}/ready",
+							"host": [
+								"{{home-service}}"
+							],
+							"path": [
+								"models",
+								"{{modelId}}",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "model-builder",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{password}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
 		}
 	],
 	"auth": {
@@ -1258,7 +1531,6 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "c75d70d6-3c90-4490-abce-743a94c7bf67",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1268,7 +1540,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "64222fb3-a752-4f97-bc7c-8ae1da6b4414",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1278,10 +1549,8 @@
 	],
 	"variable": [
 		{
-			"id": "1e8d0ca5-0503-4c83-a20a-40d02799cd16",
 			"key": "home-service",
 			"value": "{{PROTOCOL}}{{HOST}}:8001"
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

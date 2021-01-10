@@ -1,10 +1,15 @@
 from kafka import KafkaConsumer
 from pathlib import Path
+from requests import post, exceptions, put
+from requests.auth import HTTPBasicAuth
+from logger import log
 import tensorflow as tf
 import pandas as pd
-import datetime
 import json
 import os
+
+HOME_SERVICE_AUTH = HTTPBasicAuth('model-builder', 'secret')
+MODELS_BASE_PATH = '/models'  # './models' for local development
 
 
 class ModelBuilder:
@@ -12,10 +17,12 @@ class ModelBuilder:
         self.categories_dict = {}
         self.consumer = KafkaConsumer(
             'UserData',
-            bootstrap_servers='kafka:29092',
-            api_version=(2,6,0),
+            bootstrap_servers='kafka:9092',
+            api_version=(0, 10, 0),
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
+
+        log('Model builder initialized')
 
     def __get_category(self, category_id):
         return self.categories_dict[category_id]
@@ -43,9 +50,9 @@ class ModelBuilder:
     def __loss_function(labels, logits):
         return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
-    def generate_and_save_model_from_csv(self, csv_file_path):
-        datestring = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        model_dir = 'models/' + datestring + '_model'
+    def generate_and_save_model_from_csv(self, model_id, csv_file_path):
+        log('Building files structure')
+        model_dir = MODELS_BASE_PATH + '/' + model_id + '_model'
         os.makedirs(model_dir, exist_ok=True)
 
         header_list = ["timestamp", "sensor", "action"]
@@ -56,7 +63,7 @@ class ModelBuilder:
         sensors_df['sensors_with_action_code'] = pd.Categorical(sensors_df['sensors_with_action'])
         categories = pd.Categorical(sensors_df['sensors_with_action_code'])
         CATEGORIES_AMOUNT = len(categories.categories.values)
-        print('There is', CATEGORIES_AMOUNT, 'unique categories')
+        log(f'There is {CATEGORIES_AMOUNT} unique categories')
 
         self.categories_dict = dict(enumerate(sensors_df['sensors_with_action_code'].cat.categories))
 
@@ -65,7 +72,10 @@ class ModelBuilder:
 
         sensors_df['sensors_with_action_code'] = sensors_df.sensors_with_action_code.cat.codes
 
-        Y_data = sensors_df.iloc[1:10000]
+        dataset_length = len(sensors_df)
+        log(f'Event records amount {dataset_length}')
+
+        Y_data = sensors_df.iloc[1:dataset_length]
         Y_data = pd.concat([Y_data, sensors_df.iloc[0:1]], ignore_index=True)
         Y_data = Y_data.reset_index(drop=True)
 
@@ -90,7 +100,14 @@ class ModelBuilder:
         # (TF data is designed to work with possibly infinite sequences,
         # so it doesn't attempt to shuffle the entire sequence in memory. Instead,
         # it maintains a buffer in which it shuffles elements).
-        BUFFER_SIZE = 10000
+        if dataset_length > 1000000:
+            BUFFER_SIZE = 1000000
+        elif dataset_length < 7000:
+            raise ValueError(
+                "Not enough amount records to train model. Minimum amount is 7000. Recommended amount is 10 000."
+            )
+        else:
+            BUFFER_SIZE = dataset_length
 
         dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
 
@@ -120,6 +137,7 @@ class ModelBuilder:
         example_batch_loss = self.__loss_function(target_example_batch, example_batch_predictions)
 
         model.compile(optimizer='adam', loss=self.__loss_function)
+        log('Model compiling optimizer')
 
         # Directory where the checkpoints will be saved
         checkpoint_dir = model_dir + '/training_checkpoints'
@@ -130,6 +148,7 @@ class ModelBuilder:
             filepath=checkpoint_prefix,
             save_weights_only=True
         )
+        log('Model checkpoints created')
 
         EPOCHS = 10
         history = model.fit(dataset, epochs=EPOCHS, callbacks=[checkpoint_callback])
@@ -139,14 +158,36 @@ class ModelBuilder:
         model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
         model.build(tf.TensorShape([1, None]))
 
+        log(f'Model building')
+
         model.save(model_dir)
+        log(f'Model has been saved in ${model_dir}\${model_id}_model')
 
     def run_kafka_data_consumer(self):
+        log('Kafka consumer is listening')
         for data_packge in self.consumer:
-            print("File submitted as training dataset:  {}", data_packge.value['path'])
-            self.generate_and_save_model_from_csv(data_packge.value['path'])
+            log(f'Got {data_packge.value}')
+            model_id = data_packge.value['modelId']
+            file_path = data_packge.value['path']
+            log(f'File submitted as training dataset: {file_path}')
+
+            try:
+                self.generate_and_save_model_from_csv(model_id, data_packge.value['path'])
+                post(f'https://home-service:80/models/{model_id}/ready', auth=HOME_SERVICE_AUTH, verify=False)
+                log(f"Request with {model_id} sent to home-service.")
+            except ValueError as value_error:
+                log(f"ValueError when building with id: {model_id}: {value_error}")
+            except exceptions.ConnectionError:
+                log(f"Request to home-service failed, now home-service don't know about model with id: {model_id}")
+
+            try:
+                put('http://intelligence-core-service:8004/load-model?', params={'modelId': model_id})
+                log(f"Model {model_id} has been loaded asynchronously into intelligence-core-service.")
+            except exceptions.ConnectionError:
+                log(f"Can't async load model {model_id} into intelligence-core-service service is not available.")
 
 
 if __name__ == '__main__':
+    log('Starting model-builder app')
     mb = ModelBuilder()
     mb.run_kafka_data_consumer()

@@ -14,7 +14,7 @@ import org.springframework.hateoas.IanaLinkRelations.EDIT
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
-private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(Auth))
+private val linkToRoutines = linkTo(methodOn(RoutinesController::class.java).getRoutines(null, Auth))
 private val linkToHouses = linkTo(HousesController::class.java)
 
 data class RoutinesResponse (
@@ -66,26 +66,20 @@ fun List<RoutineEvent>.asMessage(devicesRooms: Map<String, String>) = map {
     RoutineEventMessage(it.deviceId, it.eventId, devicesRooms.getValue(it.deviceId))
 }
 
+fun List<RoutineEventMessage>.asEvents() = map {
+    RoutineEvent(it.deviceId, it.eventId)
+}
+
 data class RoutineRequest (
         val name: String,
         val enabled: Boolean,
-        val events: List<RoutineEvent>,
+        val events: List<RoutineEventMessage>,
         val configuration: RoutineConfiguration?
 ) : ApiRequest {
     fun toRoutine(houseId: String) = Routine(
-            name, houseId, enabled, events, configuration ?: RoutineConfiguration()
+            name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
     fun toRoutine(id: String, houseId: String) = Routine(
-            id, name, houseId, enabled, events, configuration ?: RoutineConfiguration()
+            id, name, houseId, enabled, events.asEvents(), configuration ?: RoutineConfiguration()
     )
 }
-
-data class RoutineSuggestionsResponse (
-        val start: RoutineEvent,
-        val suggestions: List<RoutineEventMessage>,
-        val n: Int,
-        val params: Map<String, String?>
-) : RepresentationalResponse(
-        linkToRoutines.slash("suggestions").withQuery(params).withSelfRel(),
-        linkToRoutines.withRel(COLLECTION)
-)

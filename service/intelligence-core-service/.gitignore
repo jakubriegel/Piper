@@ -2,3 +2,6 @@ __pycache__/*
 */__pycache__/*
 env/*
 venv/*
+models
+model
+.idea/*

@@ -91,6 +91,7 @@ export const routines = {
         })
         .catch(e => {
           dispatch('handleAxios', e);
+
         });
     },
 

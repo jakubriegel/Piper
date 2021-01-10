@@ -9,5 +9,10 @@
       "name": "client.intelligence-core-service.port",
       "type": "java.lang.String",
       "description": "Client port."
+    },
+    {
+      "name": "models.retrain-cron",
+      "type": "java.lang.String",
+      "description": "Interval of new models creation."
     }
   ] }

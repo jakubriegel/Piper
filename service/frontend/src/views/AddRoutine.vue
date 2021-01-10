@@ -19,6 +19,7 @@ export default {
 
   components: { Routine },
 
+
   props: {
     routineToAdd: {
       required: false,
@@ -49,6 +50,7 @@ export default {
 
   mounted() {
     this.setSelectedRoutine(this.routineToAdd).then(
+
       () => (this.loading = false)
     );
   },

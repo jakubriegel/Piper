@@ -1,89 +1,85 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
-import eu.jrie.put.piper.piperhomeservice.domain.house.Consents
-import eu.jrie.put.piper.piperhomeservice.domain.house.House
-import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
-import eu.jrie.put.piper.piperhomeservice.domain.house.Model
-import eu.jrie.put.piper.piperhomeservice.domain.house.Models
-import eu.jrie.put.piper.piperhomeservice.domain.user.User
-import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
-import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
+import eu.jrie.put.piper.piperhomeservice.HOUSE_ID
+import eu.jrie.put.piper.piperhomeservice.ROUTINE_ID
+import eu.jrie.put.piper.piperhomeservice.USER
+import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyOrder
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import reactor.core.publisher.Mono
-import java.time.Instant.now
+import reactor.core.publisher.Mono.empty
+import reactor.core.publisher.Mono.just
 
 internal class RoutinesServiceTest {
 
-    private val housesService: HousesService = mockk()
-    private val intelligenceClient: IntelligenceCoreServiceClient = mockk()
+    private val repository: RoutinesRepository = mockk()
+    private val authService: AuthService = mockk()
 
-    private val service = RoutinesService(mockk(), mockk(), housesService, intelligenceClient)
+    private val service = RoutinesService(repository, authService)
 
     @Test
-    @FlowPreview
-    fun `should get continuation suggestions for selected event`() = runBlocking {
+    fun `should delete routine`() {
         // given
-        val modelId = nextUUID
+        val routine = Routine(ROUTINE_ID, "name", HOUSE_ID, true, emptyList(), null)
 
-        val expectedMlEvent = "${DEVICE_ID}_$EVENT_ID"
-        val (device1, event1) = nextUUID to nextUUID
-        val (device2, event2) = nextUUID to nextUUID
-        val expectedSuggestions = listOf("${device1}_$event1", "${device2}_$event2")
-
-        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns Mono.empty()
-        every { housesService.getHouse(user) } returns Mono.just(House(nextUUID, "", Models(Model(modelId, now()), emptySet()), Consents()))
-        every { intelligenceClient.getSequence(modelId, expectedMlEvent, N) } returns expectedSuggestions.asFlow()
+        // and
+        every { repository.findById(ROUTINE_ID) } returns just(routine)
+        every { authService.checkForRoutineAccess(USER, routine) } returns routine
+        every { repository.deleteById(ROUTINE_ID) } returns empty()
 
         // when
-        val result = service.getContinuationSuggestions(start, N, user).toList()
+        service.deleteRoutine(ROUTINE_ID, USER).block()
 
         // then
         verifyOrder {
-            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user)
-            housesService.getHouse(user)
-            intelligenceClient.getSequence(modelId, expectedMlEvent, N)
+            repository.findById(ROUTINE_ID)
+            authService.checkForRoutineAccess(USER, routine)
+            repository.deleteById(ROUTINE_ID)
         }
-
-        val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
-        assertIterableEquals(expectedResult, result)
-
     }
 
     @Test
-    @FlowPreview
-    fun `should throw NoModelException when house has no model`() = runBlocking {
+    fun `should enable routine`() {
         // given
-        every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user) } returns Mono.empty()
-        every { housesService.getHouse(user) } returns Mono.just(House(nextUUID, "", Models(null, emptySet()), Consents()))
+        val routine = Routine(ROUTINE_ID, "name", HOUSE_ID, false, emptyList(), null)
+        val enabled = Routine(ROUTINE_ID, "name", HOUSE_ID, true, emptyList(), null)
+
+        // and
+        every { repository.findById(ROUTINE_ID) } returns just(routine)
+        every { authService.checkForRoutineAccess(USER, routine) } returns routine
+        every { repository.save(enabled) } returns empty()
 
         // when
-        val result = runCatching { service.getContinuationSuggestions(start, N, user).single() }
+        service.enableRoutine(ROUTINE_ID, USER).block()
 
         // then
         verifyOrder {
-            housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, user)
-            housesService.getHouse(user)
+            repository.findById(ROUTINE_ID)
+            authService.checkForRoutineAccess(USER, routine)
+            repository.save(enabled)
         }
-
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()!! is NoModelException)
     }
 
-    private companion object {
-        val DEVICE_ID = nextUUID
-        val EVENT_ID = nextUUID
-        const val N = 5
+    @Test
+    fun `should disable routine`() {
+        // given
+        val routine = Routine(ROUTINE_ID, "name", HOUSE_ID, true, emptyList(), null)
+        val disabled = Routine(ROUTINE_ID, "name", HOUSE_ID, false, emptyList(), null)
 
-        val start = RoutineEvent(DEVICE_ID, EVENT_ID)
-        val user = User("id", "login", "secret", "house-id", emptySet())
+        // and
+        every { repository.findById(ROUTINE_ID) } returns just(routine)
+        every { authService.checkForRoutineAccess(USER, routine) } returns routine
+        every { repository.save(disabled) } returns empty()
+
+        // when
+        service.disableRoutine(ROUTINE_ID, USER).block()
+
+        // then
+        verifyOrder {
+            repository.findById(ROUTINE_ID)
+            authService.checkForRoutineAccess(USER, routine)
+            repository.save(disabled)
+        }
     }
 }

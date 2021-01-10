@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "2.3.4.RELEASE"
+    id("org.springframework.boot") version "2.3.7.RELEASE"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
-    kotlin("jvm") version "1.4.10"
-    kotlin("plugin.spring") version "1.4.10"
+    kotlin("jvm") version "1.4.21"
+    kotlin("plugin.spring") version "1.4.21"
 }
 
 group = "eu.jrie.put.piper"
@@ -15,8 +15,6 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 repositories {
     mavenCentral()
 }
-
-extra["testcontainersVersion"] = "1.14.3"
 
 dependencies {
     // kotlin
@@ -45,21 +43,18 @@ dependencies {
 
     // reactor
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("io.projectreactor:reactor-core:3.4.0")
+
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.projectreactor.kafka:reactor-kafka:1.3.0")
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:mongodb")
-    testImplementation("io.mockk:mockk:1.10.2")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}")
-    }
+    testImplementation("io.mockk:mockk:1.10.4")
 }
 
 tasks.withType<Test> {

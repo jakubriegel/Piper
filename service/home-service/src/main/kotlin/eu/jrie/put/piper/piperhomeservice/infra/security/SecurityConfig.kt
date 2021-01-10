@@ -2,6 +2,7 @@ package eu.jrie.put.piper.piperhomeservice.infra.security
 
 import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.ADMIN
 import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.HOUSE
+import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.MODEL_BUILDER
 import eu.jrie.put.piper.piperhomeservice.infra.security.SecurityConfig.UserRole.USER
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,14 +26,23 @@ class SecurityConfig {
     fun configure(http: ServerHttpSecurity): SecurityWebFilterChain = http
             .csrf().disable()
             .authorizeExchange()
+            //events endpoints
             .pathMatchers("/events").hasAnyRole(HOUSE, ADMIN)
+            // routines endpoints
+            .pathMatchers(GET, "/routines").hasAnyRole(USER, HOUSE, ADMIN)
             .pathMatchers("/routines/**").hasAnyRole(USER, ADMIN)
+            // suggestions endpoints
+            .pathMatchers(GET, "/suggestions/continuation").hasAnyRole(USER, ADMIN)
+            .pathMatchers(GET, "/suggestions/routines").hasAnyRole(USER, ADMIN)
+            // houses endpoints
             .pathMatchers(POST, "/houses").hasRole(ADMIN)
             .pathMatchers(GET, "/houses").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/rooms/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/devices/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/devices/types/**").hasAnyRole(USER, ADMIN)
             .pathMatchers("/houses/schema").hasAnyRole(HOUSE, ADMIN)
+            // model endpoints
+            .pathMatchers("/models/**").hasRole(MODEL_BUILDER)
             .anyExchange().hasAnyRole(ADMIN).and()
             .cors().and()
             .httpBasic().and()
@@ -52,9 +62,8 @@ class SecurityConfig {
 
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/routines/**", cors)
-            registerCorsConfiguration("/houses", cors)
-            registerCorsConfiguration("/houses/rooms/**", cors)
-            registerCorsConfiguration("/houses/devices/**", cors)
+            registerCorsConfiguration("/suggestions/**", cors)
+            registerCorsConfiguration("/houses/**", cors)
         }
     }
 
@@ -62,6 +71,7 @@ class SecurityConfig {
         const val HOUSE = "HOUSE"
         const val USER = "USER"
         const val ADMIN = "ADMIN"
+        const val MODEL_BUILDER = "MODEL_BUILDER"
     }
 
 }
