@@ -3,18 +3,47 @@ name: containers-ci
 on: [push]
 
 jobs:
-  build-containers:
-    runs-on: ubuntu-latest
-    env:
-       DOCKER_TARGET_PLATFORM: linux/arm64
+# uncomment when Action will support arm64
+#   build-all:
+#     runs-on: ubuntu-latest
     
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Mock SSL certificates
+#         run: |
+#           touch service/home-service/piper.p12
+#           touch service/frontend/nginx/piper.pem
+#           touch service/frontend/nginx/piper.key
+#       - name: Build containers
+#         working-directory: ./deploy
+#         run: docker-compose build
+    
+  build-home-service:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Mock SSL certificates
+      - name: Mock SSL certificate
+        run: touch service/home-service/piper.p12
+      - name: Build container
+        working-directory: ./deploy
+        run: docker-compose build home-service
+  
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Mock SSL certificate
         run: |
-          touch service/home-service/piper.p12
           touch service/frontend/nginx/piper.pem
           touch service/frontend/nginx/piper.key
-      - name: Build containers
+      - name: Build container
         working-directory: ./deploy
-        run: docker-compose build
+        run: docker-compose build frontend
+    
+  build-sample-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build container
+        working-directory: ./service/sample-automation-client
+        run: docker build -t sample-automation-client .
