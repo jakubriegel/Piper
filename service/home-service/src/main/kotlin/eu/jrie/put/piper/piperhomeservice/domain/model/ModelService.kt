@@ -51,7 +51,8 @@ class ModelService (
                 .map { Model(modelId, it.stagedAt, now(), it.houseId) }
                 .flatMap { modelRepository.insert(it) }
                 .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
-                .then(notReadyModelsRepository.deleteById(modelId))
+                .flatMap { notReadyModelsRepository.deleteById(modelId) }
+                .then(empty())
     }
 
     private companion object {
