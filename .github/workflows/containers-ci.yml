@@ -14,4 +14,5 @@ jobs:
           touch service/frontend/nginx/piper.pem
           touch service/frontend/nginx/piper.key
       - name: Build containers
+        working-directory: ./deploy
         run: docker-compose build
