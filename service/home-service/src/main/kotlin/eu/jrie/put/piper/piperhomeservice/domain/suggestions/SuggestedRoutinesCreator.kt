@@ -49,7 +49,7 @@ class SuggestedRoutinesCreator (
             .map { logger.info("Created routine $it"); it }
             .flatMap { repository.insert(it) }
             .collectList()
-            .then(empty())
+            .flatMap { empty() }
     }
 
     private companion object {

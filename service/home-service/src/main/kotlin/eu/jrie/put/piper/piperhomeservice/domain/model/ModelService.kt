@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.error
+import reactor.core.publisher.Mono.zip
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
 
-@Service
+        @Service
 @FlowPreview
 class ModelService (
         private val modelRepository: ModelRepository,
@@ -46,13 +47,17 @@ class ModelService (
 
     fun setModelReady(modelId: String): Mono<Void> {
         return notReadyModelsRepository.findById(modelId)
-                .also { logger.info("Enabling model: $modelId") }
-                .switchIfEmpty { throw ModelNotFoundException(modelId) }
-                .map { Model(modelId, it.stagedAt, now(), it.houseId) }
-                .flatMap { modelRepository.insert(it) }
-                .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
-                .flatMap { notReadyModelsRepository.deleteById(modelId) }
-                .then(empty())
+            .also { logger.info("Enabling model: $modelId") }
+            .switchIfEmpty { throw ModelNotFoundException(modelId) }
+            .map { Model(modelId, it.stagedAt, now(), it.houseId) }
+            .flatMap { modelRepository.insert(it) }
+            .flatMap {
+                zip(
+                    suggestedRoutinesCreator.createSuggestedRoutines(it.houseId),
+                    notReadyModelsRepository.deleteById(it.id)
+                )
+            }
+            .then()
     }
 
     private companion object {
