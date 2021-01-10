@@ -1,20 +1,10 @@
 package eu.jrie.put.piper.piperhomeservice.domain.routine
 
-import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
-import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
 import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
-import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.reactive.asFlow
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
 class RoutinesService (
@@ -34,6 +24,15 @@ class RoutinesService (
 
     fun deleteRoutine(id: String, user: User) = routineById(id, user)
             .flatMap { repository.deleteById(it.id) }
+
+    fun enableRoutine(id: String, user: User) = switchRoutine(true, id, user)
+
+    fun disableRoutine(id: String, user: User) = switchRoutine(false, id, user)
+
+    private fun switchRoutine(enabled: Boolean, id: String, user: User) = routineById(id, user)
+        .map { Routine(id, it.name, it.houseId, enabled, it.events, it.configuration) }
+        .flatMap { updateRoutine(it, user) }
+        .then()
 
     private companion object {
         fun Routine.updateWith(updated: Routine) = Routine(
