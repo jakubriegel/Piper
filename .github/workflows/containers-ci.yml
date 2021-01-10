@@ -1,0 +1,17 @@
+name: containers-ci
+
+on: [push]
+
+jobs:
+  build-containers:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Mock SSL certificates
+        run: |
+          touch service/home-service/piper.p12
+          touch service/frontend/nginx/piper.pem
+          touch service/frontend/nginx/piper.key
+      - name: Build containers
+        run: docker-compose build
