@@ -1,4 +1,5 @@
 from flask import Flask, request, Response
+from werkzeug.exceptions import HTTPException, abort
 import json
 
 from app.modelService import ModelService
@@ -8,12 +9,22 @@ app = Flask(__name__)
 modelServiceInstance = ModelService()
 
 
+@app.errorhandler(Exception)
+def handle_error(e):
+    if isinstance(e, HTTPException):
+        code = e.code
+        if code == 422 or code == 404 or code == 400:
+            return Response(response=json.dumps({'message': e.description}), status=code, mimetype='application/json')
+        else:
+            return Response(response=json.dumps('INTERNAL_SERVER_ERROR'), status=code, mimetype='application/json')
+
+
 @app.route('/status', methods=['GET'])
 def get_status():
     try:
         return Response(response=json.dumps('active'), status=200, mimetype='application/json')
     except:
-        return Response(status=500)
+        abort(500)
 
 
 @app.route('/get-sequence', methods=['GET'])
@@ -25,7 +36,7 @@ def get_predictions():
     try:
         prediction = modelServiceInstance.predict(modelId, event, limit)
     except ValueError as value_error:
-        return Response(response=json.dumps({'message': str(value_error)}), status=400)
+        abort(400, str(value_error))
 
     response = {
         'modelId': modelId,
@@ -42,7 +53,7 @@ def load_model():
     try:
         modelServiceInstance.load_model(modelId)
     except ValueError as value_error:
-        return Response(response=json.dumps({'message': str(value_error)}), status=404)
+        abort(404, str(value_error))
 
     return Response(response=json.dumps({'modelId': modelId}), status=200, mimetype='application/json')
 
