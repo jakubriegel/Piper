@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.error
-import reactor.core.publisher.Mono.zip
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
@@ -51,13 +50,8 @@ class ModelService (
             .switchIfEmpty { throw ModelNotFoundException(modelId) }
             .map { Model(modelId, it.stagedAt, now(), it.houseId) }
             .flatMap { modelRepository.insert(it) }
-            .flatMap {
-                zip(
-                    suggestedRoutinesCreator.createSuggestedRoutines(it.houseId),
-                    notReadyModelsRepository.deleteById(it.id)
-                )
-            }
-            .then()
+            .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
+            .then(notReadyModelsRepository.deleteById(modelId))
     }
 
     private companion object {

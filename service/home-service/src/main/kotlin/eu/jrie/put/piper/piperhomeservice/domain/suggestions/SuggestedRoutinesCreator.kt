@@ -39,7 +39,7 @@ class SuggestedRoutinesCreator (
             .map { (devices, types) -> devices to mapOf(*types.toTypedArray()) }
             .flatMapMany { (devices, events) -> List(15) { randomEvent(devices, events) }.toFlux() }
             .distinct()
-            .flatMap { head ->
+            .concatMap { head ->
                 val n = (2..5).random()
                 logger.info("Getting suggestions for $head $n $houseId")
                 suggestionsService.getContinuationSuggestions(head, n, user)
