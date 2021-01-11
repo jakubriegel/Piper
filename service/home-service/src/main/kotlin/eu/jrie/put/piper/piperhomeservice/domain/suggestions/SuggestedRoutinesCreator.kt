@@ -41,6 +41,7 @@ class SuggestedRoutinesCreator (
             .distinct()
             .flatMap { head ->
                 val n = (2..5).random()
+                logger.info("Getting suggestions for $head $n $houseId")
                 suggestionsService.getContinuationSuggestions(head, n, user)
                     .asFlux().collectList()
                     .onErrorResume { empty() }
