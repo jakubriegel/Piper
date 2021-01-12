@@ -21,7 +21,10 @@
             @item-expanded="loadExpandedRoutine"
           >
             <template v-slot:item.enabled="{ item }">
-              <v-checkbox v-model="item.enabled"></v-checkbox>
+              <v-switch
+                v-model="item.enabled"
+                @change="enableRoutine(item.id, item.enabled)"
+              ></v-switch>
             </template>
             <template v-slot:item.actions="{ item }">
               <v-icon
@@ -62,6 +65,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import RoutineExpansionPanel from '@/components/RoutineExpansionPanel';
 import SuggestionTable from '@/components/SuggestionTable';
+import Axios from 'axios';
+import utils from '@/commons/utils';
 export default {
   name: 'Routines',
   components: { SuggestionTable, RoutineExpansionPanel },
@@ -107,6 +112,36 @@ export default {
 
     setExpandableLoading(value) {
       this.loading = value;
+    },
+
+    enableRoutine(id, enabled) {
+      if (enabled) {
+        Axios.put(
+          utils.apiUrl + 'routines/' + id + '/enable',
+          {},
+          {
+            headers: {
+              Accept: 'application/json'
+            },
+            auth: utils.authentication
+          }
+        ).then(res => {
+          console.log('enabled');
+        });
+      } else {
+        Axios.put(
+          utils.apiUrl + 'routines/' + id + '/disable',
+          {},
+          {
+            headers: {
+              Accept: 'application/json'
+            },
+            auth: utils.authentication
+          }
+        ).then(res => {
+          console.log('disabled');
+        });
+      }
     }
   }
 };
