@@ -38,10 +38,9 @@
 
 <script>
 import RoutineContinueSuggestionItem from '@/components/RoutineContinueSuggestionItem';
-import Axios from 'axios';
-import utils from '@/commons/utils';
 import { mapGetters, mapActions } from 'vuex';
 import ErrorHandler from '@/components/ErrorHandler';
+import { axiosInstance } from '@/config/axiosInstance';
 
 export default {
   name: 'RoutineContinueSuggestion',
@@ -73,13 +72,10 @@ export default {
         ].eventId,
         limit: 4
       };
-      await Axios.get(utils.apiUrl + 'suggestions/continuation', {
-        params: params,
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
+      await axiosInstance
+        .get('suggestions/continuation', {
+          params: params
+        })
         .then(res => {
           this.suggestion = res.data.suggestions;
           console.log(res.data);

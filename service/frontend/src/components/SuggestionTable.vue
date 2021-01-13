@@ -33,10 +33,9 @@
 </template>
 
 <script>
-import Axios from 'axios';
-import utils from '@/commons/utils';
 import SuggestionExpansionPanel from '@/components/SuggestionExpansionPanel';
 import ErrorHandler from '@/components/ErrorHandler';
+import { axiosInstance } from '@/config/axiosInstance';
 
 export default {
   name: 'SuggestionTable',
@@ -57,12 +56,8 @@ export default {
 
   methods: {
     getSuggestions() {
-      Axios.get(utils.apiUrl + 'suggestions/routines', {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
+      axiosInstance
+        .get('suggestions/routines')
         .then(res => {
           this.suggestions = res.data.suggestions;
           this.loading = false;

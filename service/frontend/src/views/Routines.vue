@@ -65,8 +65,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import RoutineExpansionPanel from '@/components/RoutineExpansionPanel';
 import SuggestionTable from '@/components/SuggestionTable';
-import Axios from 'axios';
-import utils from '@/commons/utils';
+import { axiosInstance } from '@/config/axiosInstance';
 export default {
   name: 'Routines',
   components: { SuggestionTable, RoutineExpansionPanel },
@@ -100,7 +99,7 @@ export default {
     ...mapActions('routines', ['getRoutine', 'getRoutines', 'deleteRoutine']),
 
     deleteItem(id) {
-      this.deleteRoutine(id);
+      this.deleteRoutine(id).then(this.getRoutines());
     },
 
     loadExpandedRoutine({ item, value }) {
@@ -116,29 +115,11 @@ export default {
 
     enableRoutine(id, enabled) {
       if (enabled) {
-        Axios.put(
-          utils.apiUrl + 'routines/' + id + '/enable',
-          {},
-          {
-            headers: {
-              Accept: 'application/json'
-            },
-            auth: utils.authentication
-          }
-        ).then(res => {
+        axiosInstance.put('routines/' + id + '/enable').then(res => {
           console.log('enabled');
         });
       } else {
-        Axios.put(
-          utils.apiUrl + 'routines/' + id + '/disable',
-          {},
-          {
-            headers: {
-              Accept: 'application/json'
-            },
-            auth: utils.authentication
-          }
-        ).then(res => {
+        axiosInstance.put('routines/' + id + '/disable').then(res => {
           console.log('disabled');
         });
       }

@@ -1,5 +1,4 @@
-import Axios from 'axios';
-import utils from '@/commons/utils';
+import { axiosInstance } from '@/config/axiosInstance';
 
 export const house = {
   namespaced: true,
@@ -25,61 +24,29 @@ export const house = {
   },
 
   actions: {
-    handleAxios({ dispatch }, message) {
-      dispatch('snackbar/setSnackbarActive', true, { root: true });
-      dispatch('snackbar/setSnackbarMessage', message, { root: true });
-    },
-
     getRooms({ commit, dispatch }) {
-      Axios.get(utils.apiUrl + 'houses/rooms', {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('SET_ROOMS', res.data.rooms);
-          commit('SET_ROOMS_DICT', res.data.rooms);
-          for (let room of res.data.rooms) {
-            dispatch('getDevices', room);
-          }
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
-        });
+      axiosInstance.get('houses/rooms').then(res => {
+        commit('SET_ROOMS', res.data.rooms);
+        commit('SET_ROOMS_DICT', res.data.rooms);
+        for (let room of res.data.rooms) {
+          dispatch('getDevices', room);
+        }
+      });
     },
 
-    getDevices({ commit, dispatch }, room) {
-      Axios.get(utils.apiUrl + 'houses/devices?roomId=' + room.id, {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('ADD_DEVICES_PER_ROOM', {
-            roomId: room.id,
-            devicesInRoom: res.data.devices
-          });
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
+    getDevices({ commit }, room) {
+      axiosInstance.get('houses/devices?roomId=' + room.id).then(res => {
+        commit('ADD_DEVICES_PER_ROOM', {
+          roomId: room.id,
+          devicesInRoom: res.data.devices
         });
+      });
     },
 
-    getDeviceTypes({ commit, dispatch }) {
-      Axios.get(utils.apiUrl + 'houses/devices/types', {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('SET_DEVICE_TYPES', res.data.types);
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
-        });
+    getDeviceTypes({ commit }) {
+      axiosInstance.get('houses/devices/types').then(res => {
+        commit('SET_DEVICE_TYPES', res.data.types);
+      });
     }
   },
   mutations: {
