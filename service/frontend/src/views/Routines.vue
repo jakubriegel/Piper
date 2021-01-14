@@ -1,40 +1,74 @@
 <template>
   <v-container>
-    <v-text-field
-      clearable
-      outlined
-      v-model="search"
-      label="Search"
-    ></v-text-field>
-    <v-card>
-      <v-data-table :search="search" :headers="headers" :items="routines">
-        <template v-slot:item.enabled="{ item }">
-          <v-checkbox v-model="item.enabled"></v-checkbox>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-icon
-            small
-            class="mr-2"
-            @click="$router.push('/routine/' + item.id)"
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          clearable
+          outlined
+          v-model="search"
+          label="Search"
+        ></v-text-field>
+        <v-card>
+          <v-data-table
+            :search="search"
+            :headers="headers"
+            :items="routines"
+            :single-expand="true"
+            :expanded="expanded"
+            item-key="id"
+            show-expand
+            class="elevation-1"
+            @item-expanded="loadExpandedRoutine"
           >
-            mdi-pencil
-          </v-icon>
-          <v-icon small @click="deleteItem(item.id)">
-            mdi-delete
-          </v-icon>
-        </template>
-      </v-data-table>
-    </v-card>
-    <v-btn dark class="mt-3" @click="$router.push('/routine')">
-      Add routine
-    </v-btn>
+            <template v-slot:item.enabled="{ item }">
+              <v-switch
+                v-model="item.enabled"
+                @change="enableRoutine(item.id, item.enabled)"
+              ></v-switch>
+            </template>
+            <template v-slot:item.actions="{ item }">
+              <v-icon
+                small
+                class="mr-2"
+                @click="$router.push('/routine/' + item.id)"
+              >
+                mdi-pencil
+              </v-icon>
+              <v-icon small @click="deleteItem(item.id)">
+                mdi-delete
+              </v-icon>
+            </template>
+            <template v-slot:expanded-item="{ headers }">
+              <td :colspan="headers.length">
+                <RoutineExpansionPanel
+                  :loading="loading"
+                  @loadingComplete="setExpandableLoading(false)"
+                />
+              </td>
+            </template>
+          </v-data-table>
+        </v-card>
+        <v-btn dark class="mt-3" @click="$router.push('/routine')">
+          Add new routine
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <SuggestionTable />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import RoutineExpansionPanel from '@/components/RoutineExpansionPanel';
+import SuggestionTable from '@/components/SuggestionTable';
+import { axiosInstance } from '@/config/axiosInstance';
 export default {
   name: 'Routines',
+  components: { SuggestionTable, RoutineExpansionPanel },
   computed: {
     ...mapGetters('routines', ['routines'])
   },
@@ -45,6 +79,8 @@ export default {
 
   data: () => ({
     search: '',
+    loading: true,
+    expanded: [],
     headers: [
       {
         text: 'Id',
@@ -54,18 +90,40 @@ export default {
       },
       { text: 'Name', value: 'name' },
       { text: 'Enabled', value: 'enabled' },
-      { text: 'Actions', value: 'actions' }
+      { text: 'Actions', value: 'actions' },
+      { text: '', value: 'data-table-expand' }
     ]
   }),
 
   methods: {
-    ...mapActions('routines', ['getRoutines']),
+    ...mapActions('routines', ['getRoutine', 'getRoutines', 'deleteRoutine']),
 
-    deleteItem(item) {
-      console.log('Delete ' + item);
+    deleteItem(id) {
+      this.deleteRoutine(id).then(this.getRoutines());
+    },
+
+    loadExpandedRoutine({ item, value }) {
+      if (value) {
+        this.getRoutine(item.id);
+        this.setExpandableLoading(true);
+      }
+    },
+
+    setExpandableLoading(value) {
+      this.loading = value;
+    },
+
+    enableRoutine(id, enabled) {
+      if (enabled) {
+        axiosInstance.put('routines/' + id + '/enable').then(res => {
+          console.log('enabled');
+        });
+      } else {
+        axiosInstance.put('routines/' + id + '/disable').then(res => {
+          console.log('disabled');
+        });
+      }
     }
   }
 };
 </script>
-
-<style lang="sass" scoped></style>

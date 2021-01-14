@@ -1,5 +1,4 @@
-import Axios from 'axios';
-import utils from '../../commons/utils';
+import { axiosInstance } from '@/config/axiosInstance';
 
 export const routines = {
   namespaced: true,
@@ -12,92 +11,54 @@ export const routines = {
     selectedRoutine: state => state.selectedRoutine
   },
   actions: {
-    handleAxios({ dispatch }, message) {
-      dispatch('snackbar/setSnackbarActive', true, { root: true });
-      dispatch('snackbar/setSnackbarMessage', message, { root: true });
-    },
-
-    addRoutine({ dispatch, state }) {
-      Axios.post(
-        utils.apiUrl + 'routines/',
-        {
+    addRoutine({ state }) {
+      axiosInstance
+        .post('routines/', {
           name: state.selectedRoutine.name,
           enabled: state.selectedRoutine.enabled,
           events: state.selectedRoutine.events,
           configuration: state.selectedRoutine.configuration
-        },
-        {
-          headers: {
-            Accept: 'application/json'
-          },
-          auth: utils.authentication
-        }
-      )
+        })
         .then(res => {
           console.log(res);
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
         });
     },
-    getRoutines({ dispatch, commit }) {
-      Axios.get(utils.apiUrl + 'routines', {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('SET_ROUTINES', res.data.routines);
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
-        });
+    getRoutines({ commit }) {
+      axiosInstance.get('routines').then(res => {
+        commit('SET_ROUTINES', res.data.routines);
+      });
     },
 
-    getRoutine({ dispatch, commit }, id) {
-      Axios.get(utils.apiUrl + 'routines/' + id, {
-        headers: {
-          Accept: 'application/json'
-        },
-        auth: utils.authentication
-      })
-        .then(res => {
-          commit('SET_SELECTED_ROUTINE', res.data.routine);
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
-        });
+    async getRoutine({ dispatch, commit }, id) {
+      await axiosInstance.get('routines/' + id).then(res => {
+        commit('SET_SELECTED_ROUTINE', res.data.routine);
+      });
     },
 
-    editRoutine({ dispatch, state }, id) {
-      Axios.put(
-        utils.apiUrl + 'routines/' + id,
-        {
+    editRoutine({ state }, id) {
+      axiosInstance
+        .put('routines/' + id, {
           name: state.selectedRoutine.name,
           enabled: state.selectedRoutine.enabled,
           events: state.selectedRoutine.events,
           configuration: state.selectedRoutine.configuration
-        },
-        {
-          headers: {
-            Accept: 'application/json'
-          },
-          auth: utils.authentication
-        }
-      )
+        })
         .then(res => {
           console.log(res);
-        })
-        .catch(e => {
-          dispatch('handleAxios', e);
         });
+    },
+
+    deleteRoutine({ state }, id) {
+      axiosInstance.delete('routines/' + id).then(res => {
+        console.log(res);
+      });
     },
 
     addEventToRoutine({ commit, state }, index) {
       if (!state.selectedRoutine.events) {
         commit('ASSIGN_EVENTS_TO_ROUTINE', [
           {
+            roomId: '',
             deviceId: '',
             eventId: ''
           }
@@ -117,6 +78,10 @@ export const routines = {
       }
     },
 
+    applySuggestion({ commit }, suggestion) {
+      commit('APPLY_SUGGESTION', suggestion);
+    },
+
     setSelectedRoutine({ commit }, routine) {
       commit('SET_SELECTED_ROUTINE', routine);
     },
@@ -128,6 +93,12 @@ export const routines = {
   mutations: {
     SET_ROUTINES(state, routines) {
       state.routines = routines;
+    },
+    APPLY_SUGGESTION(state, suggestion) {
+      state.selectedRoutine.events = [
+        ...state.selectedRoutine.events,
+        ...suggestion
+      ];
     },
     SET_SELECTED_ROUTINE(state, routine) {
       state.selectedRoutine = routine;
