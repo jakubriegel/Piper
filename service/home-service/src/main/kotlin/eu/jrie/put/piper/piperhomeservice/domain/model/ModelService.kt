@@ -2,6 +2,7 @@
 
 import eu.jrie.put.piper.piperhomeservice.domain.suggestions.SuggestedRoutinesCreator
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ import reactor.kotlin.core.publisher.toMono
 import java.time.Instant.now
 
         @Service
+@FlowPreview
 class ModelService (
         private val modelRepository: ModelRepository,
         private val notReadyModelsRepository: NotReadyModelsRepository,
@@ -44,12 +46,12 @@ class ModelService (
 
     fun setModelReady(modelId: String): Mono<Void> {
         return notReadyModelsRepository.findById(modelId)
-                .also { logger.info("Enabling model: $modelId") }
-                .switchIfEmpty { throw ModelNotFoundException(modelId) }
-                .map { Model(modelId, it.stagedAt, now(), it.houseId) }
-                .flatMap { modelRepository.insert(it) }
-                .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
-                .then(notReadyModelsRepository.deleteById(modelId))
+            .also { logger.info("Enabling model: $modelId") }
+            .switchIfEmpty { throw ModelNotFoundException(modelId) }
+            .map { Model(modelId, it.stagedAt, now(), it.houseId) }
+            .flatMap { modelRepository.insert(it) }
+            .flatMap { suggestedRoutinesCreator.createSuggestedRoutines(it.houseId) }
+            .then(notReadyModelsRepository.deleteById(modelId))
     }
 
     private companion object {
