@@ -98,8 +98,9 @@ export default {
   methods: {
     ...mapActions('routines', ['getRoutine', 'getRoutines', 'deleteRoutine']),
 
-    deleteItem(id) {
-      this.deleteRoutine(id).then(this.getRoutines());
+    async deleteItem(id) {
+      await this.deleteRoutine(id);
+      this.getRoutines();
     },
 
     loadExpandedRoutine({ item, value }) {
