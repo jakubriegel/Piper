@@ -116,8 +116,7 @@ export default {
       'rooms',
       'devicesInRoom',
       'eventsForDeviceType',
-      'deviceTypeByDeviceId',
-      'deviceTypesDict'
+      'deviceTypeByDeviceId'
     ])
   },
 

@@ -19,27 +19,36 @@ export default {
 
   components: { Routine },
 
-  data: () => ({
-    loading: true,
-    emptyRoutine: {
-      name: '',
-      enabled: false,
-      events: [
-        {
-          deviceId: '',
-          eventId: ''
-        }
-      ],
-      configuration: {
-        days: [],
-        start: null,
-        end: null
+  props: {
+    routineToAdd: {
+      required: false,
+      default: () => {
+        return {
+          name: '',
+          enabled: false,
+          events: [
+            {
+              roomId: '',
+              deviceId: '',
+              eventId: ''
+            }
+          ],
+          configuration: {
+            days: [],
+            start: null,
+            end: null
+          }
+        };
       }
     }
+  },
+
+  data: () => ({
+    loading: true
   }),
 
   mounted() {
-    this.setSelectedRoutine(this.emptyRoutine).then(
+    this.setSelectedRoutine(this.routineToAdd).then(
       () => (this.loading = false)
     );
   },
@@ -49,5 +58,3 @@ export default {
   }
 };
 </script>
-
-<style scoped></style>

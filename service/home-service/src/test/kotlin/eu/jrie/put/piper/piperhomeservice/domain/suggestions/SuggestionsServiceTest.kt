@@ -7,13 +7,9 @@ import eu.jrie.put.piper.piperhomeservice.MODEL_ID
 import eu.jrie.put.piper.piperhomeservice.USER
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
 import eu.jrie.put.piper.piperhomeservice.domain.model.Model
-import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
+import eu.jrie.put.piper.piperhomeservice.domain.model.ModelRepository
 import eu.jrie.put.piper.piperhomeservice.domain.routine.PredictionsNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
-import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesRepository
-import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesService
-import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutinesServiceTest
-import eu.jrie.put.piper.piperhomeservice.domain.user.AuthService
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import eu.jrie.put.piper.piperhomeservice.infra.common.nextUUID
 import io.mockk.every
@@ -24,22 +20,22 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Flux.just
 import reactor.core.publisher.Mono
-import java.time.Instant
 import java.time.Instant.now
 
 internal class SuggestionsServiceTest {
 
     private val suggestedRoutinesRepository: SuggestedRoutinesRepository = mockk()
     private val housesService: HousesService = mockk()
-    private val modelService: ModelService = mockk()
+    private val modelRepository: ModelRepository = mockk()
     private val intelligenceClient: IntelligenceCoreServiceClient = mockk()
 
-    private val service = SuggestionsService(suggestedRoutinesRepository, housesService, modelService, intelligenceClient)
+    private val service = SuggestionsService(suggestedRoutinesRepository, housesService, modelRepository, intelligenceClient)
 
     @Test
     @FlowPreview
@@ -52,7 +48,7 @@ internal class SuggestionsServiceTest {
         val expectedResult = listOf(RoutineEvent(device1, event1), RoutineEvent(device2, event2))
 
         every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
-        every { modelService.getLatestModel(USER) } returns Mono.just(Model(MODEL_ID, now(), now(), nextUUID))
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns Mono.just(Model(MODEL_ID, now(), now(), nextUUID))
         every { intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N) } returns providedSuggestions.asFlow()
 
         // when
@@ -61,7 +57,7 @@ internal class SuggestionsServiceTest {
         // then
         verifyOrder {
             housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
-            modelService.getLatestModel(USER)
+            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
             intelligenceClient.getSequence(MODEL_ID, expectedMlEvent, N)
         }
 
@@ -73,7 +69,7 @@ internal class SuggestionsServiceTest {
     fun `should throw PredictionsNotAvailableException when house has no model`() = runBlocking {
         // given
         every { housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER) } returns Mono.empty()
-        every { modelService.getLatestModel(USER) } returns Mono.empty()
+        every { modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID) } returns Mono.empty()
 
         // when
         val result = runCatching { service.getContinuationSuggestions(start, N, USER).single() }
@@ -81,7 +77,7 @@ internal class SuggestionsServiceTest {
         // then
         verifyOrder {
             housesService.checkIsEventOfDevice(DEVICE_ID, EVENT_ID, USER)
-            modelService.getLatestModel(USER)
+            modelRepository.findTopByHouseIdOrderByCreatedAt(HOUSE_ID)
         }
 
         assertTrue(result.isFailure)
