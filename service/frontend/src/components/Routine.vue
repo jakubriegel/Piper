@@ -1,6 +1,9 @@
 <template>
   <v-row>
     <v-col cols="12">
+      <h1>Routine customization: {{ selectedRoutine.name }}</h1>
+    </v-col>
+    <v-col cols="12">
       <v-switch
         :label="
           selectedRoutine.enabled ? 'Routine enabled' : 'Routine disabled'
