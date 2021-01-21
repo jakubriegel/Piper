@@ -32,12 +32,7 @@
 
         <v-row justify="center">
           <v-col cols="6" sm="4" md="3" v-for="(next, i) in techLogos" :key="i">
-            <v-img
-              :src="next.src"
-              :alt="next.text"
-              max-width="200px"
-              max-height="100px"
-            />
+            <v-img :src="next.src" :alt="next.text" />
           </v-col>
         </v-row>
       </v-col>
