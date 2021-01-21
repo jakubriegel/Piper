@@ -5,6 +5,9 @@
     <v-main>
       <router-view />
     </v-main>
+    <v-parallax src="tech.jpg" height="150" class="white--text text-center">
+      <h2>Make your house smarter!</h2>
+    </v-parallax>
     <Footer />
   </v-app>
 </template>
