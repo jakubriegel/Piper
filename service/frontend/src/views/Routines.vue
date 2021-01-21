@@ -55,7 +55,7 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <SuggestionTable />
+        <SuggestionTable :house-loaded="houseLoaded" />
       </v-col>
     </v-row>
   </v-container>
@@ -73,13 +73,17 @@ export default {
     ...mapGetters('routines', ['routines'])
   },
 
-  mounted() {
+  async mounted() {
+    await this.getRooms();
+    await this.getDeviceTypes();
+    this.houseLoaded = true;
     this.getRoutines();
   },
 
   data: () => ({
     search: '',
     loading: true,
+    houseLoaded: false,
     expanded: [],
     headers: [
       {
@@ -96,6 +100,7 @@ export default {
   }),
 
   methods: {
+    ...mapActions('house', ['getRooms', 'getDeviceTypes']),
     ...mapActions('routines', ['getRoutine', 'getRoutines', 'deleteRoutine']),
 
     async deleteItem(id) {
