@@ -48,8 +48,8 @@ export const routines = {
         });
     },
 
-    deleteRoutine({ state }, id) {
-      axiosInstance.delete('routines/' + id).then(res => {
+    async deleteRoutine({ state }, id) {
+      await axiosInstance.delete('routines/' + id).then(res => {
         console.log(res);
       });
     },

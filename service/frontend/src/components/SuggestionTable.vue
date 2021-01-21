@@ -7,7 +7,7 @@
       <v-col v-if="loading" cols="12">
         <v-progress-linear></v-progress-linear>
       </v-col>
-      <v-card-text v-else>
+      <v-card-text v-else-if="houseLoaded">
         <ErrorHandler v-if="error" text="Sorry, could not load suggestions" />
         <div v-for="(events, index) in suggestions" :key="index">
           <v-divider />
@@ -39,7 +39,16 @@ import { axiosInstance } from '@/config/axiosInstance';
 
 export default {
   name: 'SuggestionTable',
+
   components: { SuggestionExpansionPanel, ErrorHandler },
+
+  props: {
+    houseLoaded: {
+      type: Boolean,
+      required: true
+    }
+  },
+
   data: () => ({
     suggestions: [],
     loading: true,
