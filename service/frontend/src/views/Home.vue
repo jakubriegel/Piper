@@ -27,19 +27,18 @@
 
       <v-col class="mb-5" cols="12">
         <h2 class="headline font-weight-bold mb-3">
-          How it works?
+          Used technologies
         </h2>
 
         <v-row justify="center">
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
+          <v-col cols="6" sm="4" md="3" v-for="(next, i) in techLogos" :key="i">
+            <v-img
+              :src="next.src"
+              :alt="next.text"
+              max-width="200px"
+              max-height="100px"
+            />
+          </v-col>
         </v-row>
       </v-col>
 
@@ -122,18 +121,38 @@ export default {
         href: 'https://medium.com/vuetify'
       }
     ],
-    whatsNext: [
+    techLogos: [
       {
-        text: 'Explore components',
-        href: 'https://vuetifyjs.com/components/api-explorer'
+        text: 'Tensor Flow',
+        src: '/tech-logos/tensorflow-logo.png'
       },
       {
-        text: 'Select a layout',
-        href: 'https://vuetifyjs.com/getting-started/pre-made-layouts'
+        text: 'Spring',
+        src: '/tech-logos/spring-logo.png'
       },
       {
-        text: 'Frequently Asked Questions',
-        href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions'
+        text: 'Vue',
+        src: '/tech-logos/vue-logo-clean.png'
+      },
+      {
+        text: 'Vuetify',
+        src: '/tech-logos/vuetify-logo.png'
+      },
+      {
+        text: 'MongoDB',
+        src: '/tech-logos/MongoDB-logo.png'
+      },
+      {
+        text: 'Kotlin',
+        src: '/tech-logos/Kotlin-logo.png'
+      },
+      {
+        text: 'Flask',
+        src: '/tech-logos/flask-logo.png'
+      },
+      {
+        text: 'Raspberry',
+        src: '/tech-logos/raspberry-logo.png'
       }
     ]
   })
