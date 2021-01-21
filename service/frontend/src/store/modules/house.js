@@ -24,8 +24,8 @@ export const house = {
   },
 
   actions: {
-    getRooms({ commit, dispatch }) {
-      axiosInstance.get('houses/rooms').then(res => {
+    async getRooms({ commit, dispatch }) {
+      await axiosInstance.get('houses/rooms').then(res => {
         commit('SET_ROOMS', res.data.rooms);
         commit('SET_ROOMS_DICT', res.data.rooms);
         for (let room of res.data.rooms) {
@@ -43,8 +43,8 @@ export const house = {
       });
     },
 
-    getDeviceTypes({ commit }) {
-      axiosInstance.get('houses/devices/types').then(res => {
+    async getDeviceTypes({ commit }) {
+      await axiosInstance.get('houses/devices/types').then(res => {
         commit('SET_DEVICE_TYPES', res.data.types);
       });
     }
