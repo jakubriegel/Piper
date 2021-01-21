@@ -1,39 +1,32 @@
 package eu.jrie.put.piper.piperhomeservice.domain.suggestions
 
 import eu.jrie.put.piper.piperhomeservice.domain.house.HousesService
-import eu.jrie.put.piper.piperhomeservice.domain.model.Model
-import eu.jrie.put.piper.piperhomeservice.domain.model.ModelService
+import eu.jrie.put.piper.piperhomeservice.domain.model.ModelRepository
 import eu.jrie.put.piper.piperhomeservice.domain.routine.PredictionsNotAvailableException
 import eu.jrie.put.piper.piperhomeservice.domain.routine.RoutineEvent
 import eu.jrie.put.piper.piperhomeservice.domain.user.User
 import eu.jrie.put.piper.piperhomeservice.infra.client.IntelligenceCoreServiceClient
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.switchIfEmpty
-import java.time.Instant
-import java.time.Instant.now
 
 @Service
 class SuggestionsService (
-        private val suggestedRoutinesRepository: SuggestedRoutinesRepository,
-        private val housesService: HousesService,
-        private val modelService: ModelService,
-        private val intelligenceClient: IntelligenceCoreServiceClient
+    private val suggestedRoutinesRepository: SuggestedRoutinesRepository,
+    private val housesService: HousesService,
+    private val modelRepository: ModelRepository,
+    private val intelligenceClient: IntelligenceCoreServiceClient
 ) {
     @FlowPreview
     fun getContinuationSuggestions(start: RoutineEvent, n: Int, user: User) =
             housesService.checkIsEventOfDevice(start.deviceId, start.eventId, user)
-                    .then(modelService.getLatestModel(user))
+                    .then(modelRepository.findTopByHouseIdOrderByCreatedAt(user.house))
                     .switchIfEmpty { throw PredictionsNotAvailableException() }
                     .map { it.id }
                     .asFlow()

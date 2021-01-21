@@ -8,6 +8,7 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono.just
 import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant.now
 
+@FlowPreview
 internal class ModelServiceTest {
 
     private val modelRepository: ModelRepository = mockk()
